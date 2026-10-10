@@ -8,7 +8,7 @@ app.
 | --- | --- | --- | --- | --- | --- |
 | SwiftData | 17+ | 14+ | 10+ | 17+ | Local models compile on all four targets; TV currently uses local storage only. |
 | Swift Charts | 16+ | 13+ | 9+ | 16+ | The TV category and history charts compile; rendered layout is pending runtime validation. |
-| CloudKit private database | Supported | Supported | Supported | Supported | Requires the CloudKit capability and an iCloud account. Not configured or used. |
+| CloudKit private database | Supported | Supported | Supported | Supported | SwiftData sync needs iCloud/CloudKit and Background Modes with Remote notifications. Not configured or used. |
 | App Intents | 16+ | 13+ | 9+ | 16+ | Penny intent currently builds only for iOS and macOS. |
 | App Shortcuts | Supported | Supported | Supported | Not supported | Keep shortcuts off tvOS; do not promise direct Penny Siri requests on Apple TV. |
 | WatchConnectivity | iOS side | — | watch side | Not available | Snapshot and entry protocols compile; paired-device transfer still needs hardware proof. |
@@ -24,5 +24,6 @@ seeded dashboard and remote focus navigation still need runtime validation.
 - [SwiftData model configuration](https://developer.apple.com/documentation/swiftdata/modelconfiguration)
 - [Swift Charts](https://developer.apple.com/documentation/charts)
 - [CloudKit private database](https://developer.apple.com/documentation/cloudkit/ckcontainer/privateclouddatabase)
+- [SwiftData sync requirements](https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices)
 - [App Shortcuts platform support](https://developer.apple.com/design/human-interface-guidelines/app-shortcuts)
 - [WatchConnectivity](https://developer.apple.com/documentation/watchconnectivity)
