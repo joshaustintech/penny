@@ -140,6 +140,16 @@ struct ContentView: View {
       .navigationTitle("Penny")
       .tint(.accentColor)
       .task { loadBudget() }
+      #if os(macOS)
+        .focusedSceneValue(
+          \.pennyCommandActions,
+          PennyCommandActions(
+            canAddEntry: currentBudget != nil,
+            canExport: currentBudget != nil,
+            addEntry: { entryPresentation = .new },
+            exportMarkdown: { prepareExport(asCSV: false) },
+            exportCSV: { prepareExport(asCSV: true) }))
+      #endif
       .onChange(of: selectedMonth) { _, _ in incomeText = "" }
       .onReceive(NotificationCenter.default.publisher(for: .cloudBudgetDidChange)) { _ in
         loadBudget()
@@ -168,7 +178,7 @@ struct ContentView: View {
             }
             .frame(minWidth: 48, minHeight: 48)
             .contentShape(Rectangle())
-            #if os(macOS) || os(iOS)
+            #if os(iOS)
               .keyboardShortcut("n", modifiers: .command)
             #endif
             .accessibilityIdentifier("addEntryButton")

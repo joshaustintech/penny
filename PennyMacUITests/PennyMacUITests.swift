@@ -2,6 +2,21 @@ import XCTest
 
 @MainActor
 final class PennyMacUITests: XCTestCase {
+  func testFileMenuAddsEntry() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    let income = app.textFields["incomeField"]
+    XCTAssertTrue(income.waitForExistence(timeout: 10))
+    income.click()
+    income.typeText("5000")
+    app.buttons["createBudgetButton"].click()
+
+    app.menuBars.menuBarItems["File"].click()
+    app.menuItems["Add Entry"].click()
+    XCTAssertTrue(app.navigationBars["Add entry"].waitForExistence(timeout: 5))
+  }
+
   func testTransactionHistoryUsesNativeTableAndContextMenu() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]

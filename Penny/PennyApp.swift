@@ -66,6 +66,11 @@ struct PennyApp: App {
     }
     .modelContainer(container)
     #if os(macOS)
+      .commands {
+        PennyMenuCommands()
+      }
+    #endif
+    #if os(macOS)
       Settings { PennySettingsView() }
     #endif
   }
@@ -81,6 +86,45 @@ struct PennyApp: App {
     }
   }
 }
+
+#if os(macOS)
+  struct PennyCommandActions {
+    let canAddEntry: Bool
+    let canExport: Bool
+    let addEntry: () -> Void
+    let exportMarkdown: () -> Void
+    let exportCSV: () -> Void
+  }
+
+  private struct PennyCommandActionsKey: FocusedValueKey {
+    typealias Value = PennyCommandActions
+  }
+
+  extension FocusedValues {
+    var pennyCommandActions: PennyCommandActions? {
+      get { self[PennyCommandActionsKey.self] }
+      set { self[PennyCommandActionsKey.self] = newValue }
+    }
+  }
+
+  private struct PennyMenuCommands: Commands {
+    @FocusedValue(\.pennyCommandActions) private var actions
+
+    var body: some Commands {
+      CommandGroup(after: .newItem) {
+        Button("Add Entry") { actions?.addEntry() }
+          .keyboardShortcut("n", modifiers: .command)
+          .disabled(actions?.canAddEntry != true)
+      }
+      CommandGroup(after: .saveItem) {
+        Button("Export Markdown Report") { actions?.exportMarkdown() }
+          .disabled(actions?.canExport != true)
+        Button("Export CSV Transactions") { actions?.exportCSV() }
+          .disabled(actions?.canExport != true)
+      }
+    }
+  }
+#endif
 
 #if os(iOS)
   extension Notification.Name {
