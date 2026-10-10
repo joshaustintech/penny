@@ -23,6 +23,18 @@ public struct MonthlyReport: Equatable, Sendable {
 }
 
 public enum BudgetReporting {
+  public static func overallSpent(from report: MonthlyReport) throws -> Money {
+    var total: Int64 = 0
+    for category in report.categories {
+      let (sum, overflow) = total.addingReportingOverflow(category.spent.minorUnits)
+      guard !overflow else { throw BudgetError.overflow }
+      total = sum
+    }
+    return Money(
+      minorUnits: total, currency: report.income.currency,
+      fractionDigits: report.income.fractionDigits)
+  }
+
   public static func overallRemaining(from report: MonthlyReport) throws -> Money {
     var total: Int64 = 0
     for category in report.categories {

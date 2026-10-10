@@ -8,35 +8,61 @@ struct RemainingBudgetIntent: AppIntent {
     "Reports how much remains in this month's Penny budget.")
 
   func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let report = try CurrentMonthReport.load() else {
+      return .result(
+        value: CurrentMonthReport.noBudget,
+        dialog: IntentDialog(stringLiteral: CurrentMonthReport.noBudget))
+    }
+    let amount = CurrentMonthReport.amount(try BudgetReporting.overallRemaining(from: report))
+    let answer = "You have \(amount) left in Penny this month."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
+struct SpentBudgetIntent: AppIntent {
+  static let title: LocalizedStringResource = "Get monthly spending"
+  static let description = IntentDescription("Reports spending recorded in Penny this month.")
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let report = try CurrentMonthReport.load() else {
+      return .result(
+        value: CurrentMonthReport.noBudget,
+        dialog: IntentDialog(stringLiteral: CurrentMonthReport.noBudget))
+    }
+    let amount = CurrentMonthReport.amount(try BudgetReporting.overallSpent(from: report))
+    let answer = "You've spent \(amount) in Penny this month."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
+private enum CurrentMonthReport {
+  static let noBudget = "No Penny budget is set up for this month."
+
+  static func load() throws -> MonthlyReport? {
     let components = Calendar.current.dateComponents([.year, .month], from: .now)
     let container = try ModelContainer(for: BudgetMonth.self, LedgerEntry.self)
     let context = ModelContext(container)
-    let months = try context.fetch(FetchDescriptor<BudgetMonth>())
     guard
-      let month = months.first(where: { $0.year == components.year && $0.month == components.month }
-      )
-    else {
-      return .result(
-        value: "No Penny budget is set up for this month.",
-        dialog: "No Penny budget is set up for this month.")
-    }
-
+      let month = try context.fetch(FetchDescriptor<BudgetMonth>()).first(where: {
+        $0.year == components.year && $0.month == components.month
+      })
+    else { return nil }
     let entries = try context.fetch(FetchDescriptor<LedgerEntry>()).filter {
       $0.dateComponents?.year == month.year && $0.dateComponents?.month == month.month
     }
     let formatter = NumberFormatter()
     formatter.numberStyle = .currency
     formatter.currencyCode = month.currencyCode
-    let digits = formatter.maximumFractionDigits
     let report = try BudgetReporting.make(
-      entries: entries, currencyCode: month.currencyCode, fractionDigits: digits,
+      entries: entries, currencyCode: month.currencyCode,
+      fractionDigits: formatter.maximumFractionDigits,
       mode: BudgetMode(rawValue: month.mode) ?? .balanced)
-    let remaining = try BudgetReporting.overallRemaining(from: report)
-    let scale = Decimal(sign: .plus, exponent: digits, significand: 1)
-    let amount = (Decimal(remaining.minorUnits) / scale)
-      .formatted(.currency(code: month.currencyCode))
-    let answer = "You have \(amount) left in Penny this month."
-    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+    return report
+  }
+
+  static func amount(_ money: Money) -> String {
+    let scale = Decimal(sign: .plus, exponent: money.fractionDigits, significand: 1)
+    return (Decimal(money.minorUnits) / scale).formatted(.currency(code: money.currency))
   }
 }
 
@@ -46,5 +72,9 @@ struct PennyShortcuts: AppShortcutsProvider {
       intent: RemainingBudgetIntent(),
       phrases: ["How much money do I have left in \(.applicationName) this month?"],
       shortTitle: "Remaining budget", systemImageName: "chart.pie")
+    AppShortcut(
+      intent: SpentBudgetIntent(),
+      phrases: ["How much have I spent in \(.applicationName) this month?"],
+      shortTitle: "Monthly spending", systemImageName: "dollarsign.circle")
   }
 }
