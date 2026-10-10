@@ -81,7 +81,8 @@ struct WatchContentView: View {
     let snapshot: WatchBudgetSnapshot
     let onSend: (WatchSpendingRequest) -> Void
     @Environment(\.dismiss) private var dismiss
-    @State private var amount = ""
+    @State private var amount =
+      ProcessInfo.processInfo.arguments.contains("--ui-testing-send-entry") ? "1.23" : ""
     @State private var category = "needs"
     @State private var note = ""
 

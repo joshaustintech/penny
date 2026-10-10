@@ -16,4 +16,19 @@ final class PennyWatchUITests: XCTestCase {
     XCTAssertTrue(app.buttons["Send to iPhone"].exists)
     XCTAssertFalse(app.buttons["Send to iPhone"].isEnabled)
   }
+
+  func testQueuesSpendingToPairedIPhone() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--ui-testing-send-entry"]
+    app.launch()
+
+    XCTAssertTrue(app.staticTexts["Left in plan"].waitForExistence(timeout: 10))
+    app.buttons["Add spending"].tap()
+    let send = app.buttons["Send to iPhone"]
+    XCTAssertTrue(send.waitForExistence(timeout: 5))
+    XCTAssertTrue(send.isEnabled)
+    send.tap()
+
+    XCTAssertTrue(app.staticTexts["Queued for iPhone"].waitForExistence(timeout: 10))
+  }
 }
