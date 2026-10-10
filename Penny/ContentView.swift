@@ -10,6 +10,7 @@ struct ContentView: View {
   @State private var selectedMonth = Date.now
   @State private var saveError: String?
   @State private var showingEntry = false
+  @State private var showingModeChange = false
   @State private var selectedEntry: LedgerEntry?
   @State private var pendingDelete: LedgerEntry?
 
@@ -152,6 +153,18 @@ struct ContentView: View {
         .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
       Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
         .foregroundStyle(.secondary)
+      Button("Change budget style", systemImage: "slider.horizontal.3") {
+        showingModeChange = true
+      }
+      .confirmationDialog(
+        "Change this month's budget?", isPresented: $showingModeChange, titleVisibility: .visible
+      ) {
+        if mode != .balanced { Button("Balanced") { changeMode(.balanced) } }
+        if mode != .housingFirst { Button("Housing First") { changeMode(.housingFirst) } }
+        Button("Cancel", role: .cancel) {}
+      } message: {
+        Text("Category allocations will change. Recorded transactions stay the same.")
+      }
       Text("Your monthly budget")
         .font(.title2.bold())
       ForEach(report?.categories ?? [], id: \.category) { item in
@@ -259,6 +272,16 @@ struct ContentView: View {
     do {
       try BudgetStore(context: context).delete(pendingDelete)
       self.pendingDelete = nil
+      loadBudget()
+    } catch {
+      saveError = error.localizedDescription
+    }
+  }
+
+  private func changeMode(_ mode: BudgetMode) {
+    guard let currentBudget else { return }
+    do {
+      try BudgetStore(context: context).changeMode(of: currentBudget, to: mode)
       loadBudget()
     } catch {
       saveError = error.localizedDescription

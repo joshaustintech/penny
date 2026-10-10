@@ -93,4 +93,24 @@ struct PersistenceTests {
     #expect(try store.entries().first?.amountMinor == 250)
     #expect(try store.entries().first?.id == entry.id)
   }
+
+  @MainActor @Test func changingModePreservesRecordedEntryCategory() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try ModelContainer(for: schema, configurations: [configuration])
+    let store = BudgetStore(context: ModelContext(container))
+    let month = BudgetMonth(year: 2026, month: 10, mode: "balanced", currencyCode: "USD")
+    let income = LedgerEntry(
+      amountMinor: 500_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "income", category: "income")
+    let rent = LedgerEntry(
+      amountMinor: 100_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "spending", category: "housing")
+    try store.createBudget(month, income: income)
+    try store.save(rent)
+
+    try store.changeMode(of: month, to: .housingFirst)
+    #expect(month.mode == "housingFirst")
+    #expect(try store.entries().first(where: { $0.id == rent.id })?.category == "housing")
+  }
 }

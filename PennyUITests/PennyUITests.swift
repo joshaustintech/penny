@@ -24,6 +24,12 @@ final class PennyUITests: XCTestCase {
     XCTAssertFalse(app.staticTexts["Groceries"].exists)
     app.buttons["Next month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
+    app.buttons["Change budget style"].tap()
+    app.buttons["Housing First"].tap()
+    XCTAssertTrue(app.staticTexts["Housing"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Groceries"].exists)
+    app.buttons["Change budget style"].tap()
+    app.buttons["Balanced"].tap()
 
     app.terminate()
     app.launch()

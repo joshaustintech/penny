@@ -131,6 +131,20 @@ public struct BudgetStore {
     }
   }
 
+  public func changeMode(of month: BudgetMonth, to mode: BudgetMode) throws {
+    guard try months().contains(where: { $0.id == month.id }) else {
+      throw StoreError.missingBudget
+    }
+    month.mode = mode.rawValue
+    month.updatedAt = .now
+    do {
+      try context.save()
+    } catch {
+      context.rollback()
+      throw error
+    }
+  }
+
   private func validate(_ entry: LedgerEntry) throws {
     guard let kind = TransactionKind(rawValue: entry.kind),
       let category = BudgetCategory(rawValue: entry.category),
@@ -169,4 +183,5 @@ public enum StoreError: Error, Equatable {
   case duplicateIdentifier
   case invalidEntry
   case missingEntry
+  case missingBudget
 }
