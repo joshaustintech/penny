@@ -3,7 +3,7 @@ import SwiftUI
 
 @main
 struct PennyTVApp: App {
-  private let container: ModelContainer
+  private let container: ModelContainer?
   private let seedTestBudgetForUITests: Bool
 
   init() {
@@ -12,7 +12,10 @@ struct PennyTVApp: App {
     let uiTesting = arguments.contains("--ui-testing")
       || ProcessInfo.processInfo.environment["PENNY_UI_TESTING"] == "1"
     seedTestBudgetForUITests = uiTesting
-    if uiTesting {
+    if uiTesting && arguments.contains("--ui-testing-storage-error") {
+      UserDefaults.standard.set(false, forKey: "privateCloudSyncEnabled")
+      container = nil
+    } else if uiTesting {
       UserDefaults.standard.set(false, forKey: "privateCloudSyncEnabled")
       let url = FileManager.default.temporaryDirectory.appendingPathComponent(
         "penny-tv-ui-tests.store")
@@ -26,7 +29,7 @@ struct PennyTVApp: App {
         let configuration = ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [configuration])
       } catch {
-        fatalError("Penny TV could not open the test store: \(error)")
+        container = nil
       }
     } else {
       do {
@@ -35,15 +38,22 @@ struct PennyTVApp: App {
             ModelConfiguration(schema: schema, cloudKitDatabase: .none)
           ])
       } catch {
-        fatalError("Penny TV could not open local storage: \(error)")
+        container = nil
       }
     }
   }
 
   var body: some Scene {
     WindowGroup {
-      TVContentView(seedTestBudgetForUITests: seedTestBudgetForUITests)
+      if let container {
+        TVContentView(seedTestBudgetForUITests: seedTestBudgetForUITests)
+          .modelContainer(container)
+      } else {
+        ContentUnavailableView(
+          "Budget Data Unavailable",
+          systemImage: "externaldrive.badge.exclamationmark",
+          description: Text("Penny couldn't open your saved budgets. Restart the app to try again."))
+      }
     }
-    .modelContainer(container)
   }
 }

@@ -6,12 +6,14 @@ import SwiftUI
 struct PennyApp: App {
   @Environment(\.scenePhase) private var scenePhase
   @AppStorage("appearance") private var appearance = "system"
-  private let container: ModelContainer
+  private let container: ModelContainer?
 
   init() {
     let arguments = ProcessInfo.processInfo.arguments
     let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
-    if arguments.contains("--ui-testing") {
+    if arguments.contains("--ui-testing-storage-error"), arguments.contains("--ui-testing") {
+      container = nil
+    } else if arguments.contains("--ui-testing") {
       let url = FileManager.default.temporaryDirectory.appendingPathComponent(
         "penny-ui-tests.store")
       if arguments.contains("--reset-store") {
@@ -29,25 +31,26 @@ struct PennyApp: App {
       do {
         container = try ModelContainer(for: schema, configurations: [configuration])
       } catch {
-        fatalError("Penny could not open the test store: \(error)")
+        container = nil
       }
     } else {
       do {
         let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [configuration])
       } catch {
-        fatalError("Penny could not open local storage: \(error)")
+        container = nil
       }
     }
     #if os(iOS)
-      let container = self.container
-      WatchBudgetSync.shared.start { request in
-        do {
-          _ = try BudgetStore(context: ModelContext(container)).recordWatchSpending(request)
-          NotificationCenter.default.post(name: .watchBudgetChanged, object: nil)
-          return true
-        } catch {
-          return false
+      if let container {
+        WatchBudgetSync.shared.start { request in
+          do {
+            _ = try BudgetStore(context: ModelContext(container)).recordWatchSpending(request)
+            NotificationCenter.default.post(name: .watchBudgetChanged, object: nil)
+            return true
+          } catch {
+            return false
+          }
         }
       }
     #endif
@@ -55,27 +58,38 @@ struct PennyApp: App {
 
   var body: some Scene {
     WindowGroup {
-      ContentView()
-        .preferredColorScheme(
-          appearance == "light" ? .light : appearance == "dark" ? .dark : nil
-        )
-        .task { await refreshCloudSyncIfEnabled() }
-        .onChange(of: scenePhase) { _, phase in
-          if phase == .active { Task { await refreshCloudSyncIfEnabled() } }
+      if let container {
+        ContentView()
+          .preferredColorScheme(
+            appearance == "light" ? .light : appearance == "dark" ? .dark : nil
+          )
+          .modelContainer(container)
+          .task { await refreshCloudSyncIfEnabled() }
+          .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await refreshCloudSyncIfEnabled() } }
+          }
+      } else {
+        StorageUnavailableView()
         }
     }
-    .modelContainer(container)
     #if os(macOS)
       .commands {
         PennyMenuCommands()
       }
     #endif
     #if os(macOS)
-      Settings { PennySettingsView() }
+      Settings {
+        if let container {
+          PennySettingsView().modelContainer(container)
+        } else {
+          StorageUnavailableView()
+        }
+      }
     #endif
   }
 
   @MainActor private func refreshCloudSyncIfEnabled() async {
+    guard let container else { return }
     guard UserDefaults.standard.bool(forKey: "privateCloudSyncEnabled") else { return }
     do {
       try await PrivateCloudSync.shared.refresh(context: container.mainContext)
@@ -84,6 +98,15 @@ struct PennyApp: App {
       UserDefaults.standard.set(
         PrivateCloudSync.recoveryGuidance, forKey: "privateCloudSyncError")
     }
+  }
+}
+
+private struct StorageUnavailableView: View {
+  var body: some View {
+    ContentUnavailableView(
+      "Budget Data Unavailable",
+      systemImage: "externaldrive.badge.exclamationmark",
+      description: Text("Penny couldn't open your saved budgets. Restart the app to try again."))
   }
 }
 
