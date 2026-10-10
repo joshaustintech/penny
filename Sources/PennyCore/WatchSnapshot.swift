@@ -54,3 +54,26 @@ public struct WatchBudgetSnapshot: Codable, Equatable, Sendable {
     }.suffix(5).reversed()
   }
 }
+
+public struct WatchSpendingRequest: Codable, Equatable, Sendable {
+  public let id: UUID
+  public let year: Int
+  public let month: Int
+  public let amountMinor: Int64
+  public let fractionDigits: Int
+  public let category: String
+  public let note: String?
+
+  public init(
+    id: UUID = UUID(), year: Int, month: Int, amountMinor: Int64, fractionDigits: Int,
+    category: String, note: String?
+  ) {
+    self.id = id
+    self.year = year
+    self.month = month
+    self.amountMinor = amountMinor
+    self.fractionDigits = fractionDigits
+    self.category = category
+    self.note = note
+  }
+}

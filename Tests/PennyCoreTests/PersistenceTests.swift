@@ -33,6 +33,55 @@ struct PersistenceTests {
     #expect(try store.entries().map(\.amountMinor) == [500_000])
   }
 
+  @MainActor @Test func recordsWatchSpendingOnceInItsCurrentBudget() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try ModelContainer(for: schema, configurations: [configuration])
+    let store = BudgetStore(context: ModelContext(container))
+    let date = try #require(
+      Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: 10)))
+    let month = BudgetMonth(year: 2026, month: 10, mode: "balanced", currencyCode: "USD")
+    let income = LedgerEntry(
+      amountMinor: 500_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "income", category: "income", occurredAt: date)
+    try store.createBudget(month, income: income)
+    let request = WatchSpendingRequest(
+      year: 2026, month: 10, amountMinor: 1_250, fractionDigits: 2,
+      category: "needs", note: "Lunch")
+
+    #expect(try store.recordWatchSpending(request, at: date))
+    #expect(try !store.recordWatchSpending(request, at: date))
+    let saved = try #require(store.entries().first(where: { $0.id == request.id }))
+    #expect(saved.amountMinor == 1_250)
+    #expect(saved.currencyCode == "USD")
+    #expect(saved.category == "needs")
+    #expect(saved.note == "Lunch")
+  }
+
+  @MainActor @Test func rejectsStaleOrUnsupportedWatchSpending() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try ModelContainer(for: schema, configurations: [configuration])
+    let store = BudgetStore(context: ModelContext(container))
+    let date = try #require(
+      Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: 10)))
+    let month = BudgetMonth(year: 2026, month: 10, mode: "balanced", currencyCode: "USD")
+    let income = LedgerEntry(
+      amountMinor: 500_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "income", category: "income", occurredAt: date)
+    try store.createBudget(month, income: income)
+    let stale = WatchSpendingRequest(
+      year: 2026, month: 9, amountMinor: 1_250, fractionDigits: 2,
+      category: "needs", note: nil)
+    let unsupported = WatchSpendingRequest(
+      year: 2026, month: 10, amountMinor: 1_250, fractionDigits: 2,
+      category: "debt", note: nil)
+
+    #expect(throws: StoreError.invalidEntry) { try store.recordWatchSpending(stale, at: date) }
+    #expect(throws: StoreError.invalidEntry) { try store.recordWatchSpending(unsupported, at: date) }
+    #expect(try store.entries().count == 1)
+  }
+
   @MainActor @Test func storesAndDeletesLedgerEntries() throws {
     let schema = Schema([BudgetMonth.self, LedgerEntry.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
