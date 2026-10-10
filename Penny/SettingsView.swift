@@ -53,8 +53,10 @@ struct PennySettingsView: View {
         .foregroundStyle(.primary)
         .accessibilityIdentifier("preferredCurrencyPicker")
         .accessibilityValue(preferredCurrency)
+        .accessibilityHint("Saved months keep their current currency.")
         Text("Saved months keep their current currency.")
           .foregroundStyle(.primary)
+          .fixedSize(horizontal: false, vertical: true)
       }
       Section {
         Text("Privacy").font(.headline).accessibilityAddTraits(.isHeader)
@@ -69,6 +71,8 @@ struct PennySettingsView: View {
         Text(
           "Syncs budgets and entries with your private iCloud database. Turning it off stops this device from syncing; existing cloud copies remain."
         )
+        .foregroundStyle(.primary)
+        .fixedSize(horizontal: false, vertical: true)
         if let cloudSyncError { Text(cloudSyncError).foregroundStyle(.red) }
         if privateCloudSyncEnabled {
           Button("Sync now") { Task { await refreshCloudSync() } }

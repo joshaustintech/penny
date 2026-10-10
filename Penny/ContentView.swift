@@ -22,6 +22,7 @@ struct ContentView: View {
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
   @State private var income: Decimal = 0
+  @FocusState private var incomeFieldFocused: Bool
   @State private var selectedMonth = Date.now
   @State private var saveError: String?
   @State private var entryPresentation: EntryPresentation?
@@ -136,10 +137,12 @@ struct ContentView: View {
           }
         #endif
         if currentBudget != nil {
-          ToolbarItem(placement: .primaryAction) {
+          ToolbarItem(placement: addEntryToolbarPlacement) {
             Button("Add entry", systemImage: "plus") {
               entryPresentation = .new
             }
+            .frame(minWidth: 48, minHeight: 48)
+            .contentShape(Rectangle())
             #if os(macOS)
               .keyboardShortcut("n", modifiers: .command)
             #endif
@@ -279,6 +282,7 @@ struct ContentView: View {
           "Income (\(currency))", value: $income,
           format: .number.precision(.fractionLength(0...fractionDigits))
         )
+        .focused($incomeFieldFocused)
         #if os(iOS)
           .keyboardType(.decimalPad)
         #endif
@@ -584,6 +588,14 @@ struct ContentView: View {
     .sorted { $0.date < $1.date }
   }
 
+  private var addEntryToolbarPlacement: ToolbarItemPlacement {
+    #if os(macOS)
+      .primaryAction
+    #else
+      .topBarTrailing
+    #endif
+  }
+
   private var fractionDigits: Int {
     let formatter = NumberFormatter()
     formatter.numberStyle = .currency
@@ -614,6 +626,7 @@ struct ContentView: View {
     guard let year = currentComponents.year, let month = currentComponents.month,
       let minorIncome
     else { return }
+    incomeFieldFocused = false
     let budget = BudgetMonth(
       year: year, month: month, mode: selectedMode.rawValue, currencyCode: currency)
     let initialIncome = LedgerEntry(
