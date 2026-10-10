@@ -12,7 +12,8 @@ Voice execution, paired Watch transfer, and HomePod Personal Requests have not
 been verified on hardware. Apple TV does not support App Shortcuts.
 
 See [platform compatibility](docs/platform-compatibility.md) for build evidence
-and known limits.
+and [Siri support](docs/siri-support.md) for registered phrases and invocation
+limits.
 
 ## Export format
 
