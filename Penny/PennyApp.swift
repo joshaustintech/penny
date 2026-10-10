@@ -21,7 +21,7 @@ struct PennyApp: App {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }
       }
-      let configuration = ModelConfiguration(schema: schema, url: url)
+      let configuration = ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)
       do {
         container = try ModelContainer(for: schema, configurations: [configuration])
       } catch {
@@ -29,7 +29,8 @@ struct PennyApp: App {
       }
     } else {
       do {
-        container = try ModelContainer(for: schema)
+        let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+        container = try ModelContainer(for: schema, configurations: [configuration])
       } catch {
         fatalError("Penny could not open local storage: \(error)")
       }

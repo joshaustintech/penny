@@ -209,7 +209,7 @@ private enum CurrentMonthReport {
 
   static func load() throws -> MonthlyReport? {
     let components = Calendar.current.dateComponents([.year, .month], from: .now)
-    let container = try ModelContainer(for: BudgetMonth.self, LedgerEntry.self)
+    let container = try modelContainer()
     let context = ModelContext(container)
     guard
       let month = try context.fetch(FetchDescriptor<BudgetMonth>()).first(where: {
@@ -231,13 +231,19 @@ private enum CurrentMonthReport {
 
   @MainActor
   static func save(amount: Money, category: BudgetCategory, note: String) throws {
-    let container = try ModelContainer(for: BudgetMonth.self, LedgerEntry.self)
+    let container = try modelContainer()
     let context = ModelContext(container)
     try BudgetStore(context: context).save(
       LedgerEntry(
         amountMinor: amount.minorUnits, currencyCode: amount.currency,
         fractionDigits: amount.fractionDigits, kind: TransactionKind.spending.rawValue,
         category: category.rawValue, note: note))
+  }
+
+  private static func modelContainer() throws -> ModelContainer {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+    return try ModelContainer(for: schema, configurations: [configuration])
   }
 
   static func amount(_ money: Money) -> String {
