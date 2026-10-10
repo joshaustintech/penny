@@ -7,8 +7,14 @@ struct BudgetTests {
   @Test func convertsVoiceAmountExactlyToMinorUnits() throws {
     #expect(try Money.minorUnits(for: Decimal(string: "12.34")!, fractionDigits: 2) == 1_234)
     #expect(try Money.minorUnits(for: Decimal(12), fractionDigits: 0) == 12)
+    #expect(
+      try Money.minorUnits(for: Decimal(string: "-1.23")!, fractionDigits: 2, allowNegative: true)
+        == -123)
     #expect(throws: BudgetError.invalidTransaction) {
       try Money.minorUnits(for: Decimal(string: "1.001")!, fractionDigits: 2)
+    }
+    #expect(throws: BudgetError.invalidTransaction) {
+      try Money.minorUnits(for: Decimal(string: "1.001")!, fractionDigits: 2, allowNegative: true)
     }
   }
 

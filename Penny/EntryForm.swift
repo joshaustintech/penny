@@ -61,12 +61,8 @@ struct EntryForm: View {
   }
 
   private var minorAmount: Int64? {
-    let scale = Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
-    let scaled = amount * scale
-    guard scaled <= Decimal(Int64.max), scaled >= Decimal(Int64.min),
-      kind == .adjustment ? scaled != 0 : scaled > 0
-    else { return nil }
-    return NSDecimalNumber(decimal: scaled).int64Value
+    try? Money.minorUnits(
+      for: amount, fractionDigits: fractionDigits, allowNegative: kind == .adjustment)
   }
 
   var body: some View {

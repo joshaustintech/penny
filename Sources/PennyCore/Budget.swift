@@ -24,19 +24,24 @@ public struct Money: Equatable, Sendable {
     self.fractionDigits = fractionDigits
   }
 
-  public static func minorUnits(for amount: Decimal, fractionDigits: Int) throws -> Int64 {
-    guard amount > 0, (0...4).contains(fractionDigits) else {
+  public static func minorUnits(
+    for amount: Decimal, fractionDigits: Int, allowNegative: Bool = false
+  ) throws -> Int64 {
+    guard amount != 0, amount > 0 || allowNegative, (0...4).contains(fractionDigits) else {
       throw BudgetError.invalidTransaction
     }
     let scaled = amount * Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
-    guard scaled <= NSDecimalNumber(value: Int64.max).decimalValue else {
+    guard scaled <= Decimal(Int64.max),
+      allowNegative || scaled >= 0,
+      allowNegative ? scaled >= Decimal(Int64.min) : true
+    else {
       throw BudgetError.overflow
     }
     var rounded = Decimal()
     var value = scaled
     NSDecimalRound(&rounded, &value, 0, .plain)
     guard rounded == scaled else { throw BudgetError.invalidTransaction }
-    return NSDecimalNumber(decimal: scaled).int64Value
+    return NSDecimalNumber(decimal: rounded).int64Value
   }
 }
 
