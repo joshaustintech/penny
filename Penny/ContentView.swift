@@ -778,9 +778,10 @@ struct ContentView: View {
   }
 
   private var minorIncome: Int64? {
-    let scale = Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
-    guard income > 0, income <= Decimal(Int64.max) / scale else { return nil }
-    return NSDecimalNumber(decimal: income * scale).int64Value
+    guard income > 0,
+      let value = try? Money.minorUnits(for: income, fractionDigits: fractionDigits), value > 0
+    else { return nil }
+    return value
   }
 
   private func moveMonth(by offset: Int) {
