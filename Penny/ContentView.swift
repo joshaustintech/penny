@@ -8,6 +8,7 @@ struct ContentView: View {
   @State private var selectedMode = BudgetMode.balanced
   @State private var income: Decimal = 0
   @State private var saveError: String?
+  @State private var showingEntry = false
 
   private var currentComponents: DateComponents {
     Calendar.current.dateComponents([.year, .month], from: .now)
@@ -37,6 +38,21 @@ struct ContentView: View {
       .navigationTitle("Penny")
       .tint(Color(red: 0.16, green: 0.43, blue: 0.34))
       .task { loadBudget() }
+      .toolbar {
+        if currentBudget != nil {
+          ToolbarItem(placement: .primaryAction) {
+            Button("Add entry", systemImage: "plus") { showingEntry = true }
+              .accessibilityIdentifier("addEntryButton")
+          }
+        }
+      }
+      .sheet(isPresented: $showingEntry) {
+        if let currentBudget {
+          EntryForm(
+            mode: BudgetMode(rawValue: currentBudget.mode) ?? .balanced,
+            currency: currentBudget.currencyCode, onSave: loadBudget)
+        }
+      }
     }
     .alert(
       "Could not save budget",
@@ -88,38 +104,51 @@ struct ContentView: View {
 
   private func overview(_ budget: BudgetMonth) -> some View {
     let mode = BudgetMode(rawValue: budget.mode) ?? .balanced
-    let monthIncome = entries.filter {
-      $0.kind == "income"
-        && Calendar.current.isDate($0.occurredAt, equalTo: .now, toGranularity: .month)
+    let monthEntries = entries.filter {
+      isInMonth($0.occurredAt, year: budget.year, month: budget.month)
     }
-    let amounts = try? Budget.allocate(
-      income: monthIncome.map {
-        Money(
-          minorUnits: $0.amountMinor, currency: $0.currencyCode, fractionDigits: $0.fractionDigits)
-      },
+    let report = try? BudgetReporting.make(
+      entries: monthEntries, currencyCode: budget.currencyCode, fractionDigits: fractionDigits,
       mode: mode)
-    let totalIncome = (amounts ?? []).reduce(Int64(0)) { $0 + $1.amount.minorUnits }
     return VStack(alignment: .leading, spacing: 18) {
       Text("Monthly take-home")
         .font(.headline)
-      Text(amount(Int(totalIncome)))
+      Text(amount(report?.income.minorUnits ?? 0))
         .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
       Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
         .foregroundStyle(.secondary)
-      Divider()
-      Text("Your monthly plan")
+      Text("Your monthly budget")
         .font(.title2.bold())
-      ForEach(amounts ?? [], id: \.category) { item in
-        HStack {
-          Text(item.category.capitalized)
-          Spacer()
-          Text(amount(Int(item.amount.minorUnits)))
-            .monospacedDigit()
-          Text("\(item.percent)%")
-            .foregroundStyle(.secondary)
-            .frame(width: 48, alignment: .trailing)
+      ForEach(report?.categories ?? [], id: \.category) { item in
+        VStack(alignment: .leading, spacing: 8) {
+          HStack {
+            Text(item.category.rawValue.capitalized).font(.headline)
+            Spacer()
+            Text(amount(item.remaining.minorUnits)).font(.headline.monospacedDigit())
+          }
+          Text(
+            item.category == .debt || item.category == .savings
+              ? "\(amount(item.contributed.minorUnits)) contributed of \(amount(item.allocated.minorUnits))"
+              : "\(amount(item.spent.minorUnits)) spent of \(amount(item.allocated.minorUnits))"
+          )
+          .foregroundStyle(.secondary)
+          Text("\(item.percent)% of income")
+            .font(.caption)
         }
+        .padding(14)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
         .accessibilityElement(children: .combine)
+      }
+      Text("Recent activity").font(.title2.bold())
+      ForEach(monthEntries.reversed(), id: \.id) { entry in
+        HStack {
+          VStack(alignment: .leading) {
+            Text(entry.category.capitalized)
+            Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+          }
+          Spacer()
+          Text(amount(entry.amountMinor)).monospacedDigit()
+        }
       }
     }
   }
@@ -137,7 +166,12 @@ struct ContentView: View {
     return NSDecimalNumber(decimal: income * scale).int64Value
   }
 
-  private func amount(_ minorUnits: Int) -> String {
+  private func isInMonth(_ date: Date, year: Int, month: Int) -> Bool {
+    let components = Calendar.current.dateComponents([.year, .month], from: date)
+    return components.year == year && components.month == month
+  }
+
+  private func amount(_ minorUnits: Int64) -> String {
     let scale = Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
     let value = NSDecimalNumber(value: minorUnits).decimalValue / scale
     return value.formatted(.currency(code: currency))
