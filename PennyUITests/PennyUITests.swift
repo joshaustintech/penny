@@ -28,6 +28,7 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(income.waitForExistence(timeout: 5))
     enter("1000", in: income, app: app)
     app.scrollViews.firstMatch.swipeUp()
+    app.staticTexts["Every penny has a purpose."].tap()
     try audit(app)
     app.buttons["settingsButton"].tap()
     try audit(app)

@@ -124,7 +124,7 @@ struct ContentView: View {
       #endif
       #if os(iOS)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-          if currentBudget == nil {
+          if currentBudget == nil && !incomeFieldFocused {
             Button("Create my budget", action: saveBudget)
               .buttonStyle(.borderedProminent)
               .tint(.primary)
@@ -311,6 +311,8 @@ struct ContentView: View {
             ToolbarItemGroup(placement: .keyboard) {
               Spacer()
               Button("Create budget", action: saveBudget)
+                .disabled(minorIncome == nil)
+                .accessibilityIdentifier("createBudgetButton")
             }
           }
         #endif
@@ -376,9 +378,9 @@ struct ContentView: View {
             angle: .value("Allocation", item.allocated.minorUnits),
             innerRadius: .ratio(0.68), angularInset: 2
           )
-          .foregroundStyle(categoryColor(item.category))
           .accessibilityLabel(item.category.rawValue.capitalized)
           .accessibilityValue("\(item.percent)%")
+          .foregroundStyle(categoryColor(item.category))
         }
         .chartLegend(.hidden)
         .frame(height: 200)
@@ -526,23 +528,15 @@ struct ContentView: View {
   }
 
   private func allocationLegend(_ categories: [CategoryResult]) -> some View {
-    ViewThatFits(in: .horizontal) {
-      HStack(spacing: 12) { allocationLegendItems(categories) }
-      LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 220 : 100), alignment: .leading)]) {
-        allocationLegendItems(categories)
+    VStack(alignment: .leading, spacing: 8) {
+      ForEach(categories, id: \.category) { item in
+        HStack(spacing: 8) {
+          Circle().fill(categoryColor(item.category)).frame(width: 10, height: 10)
+            .accessibilityHidden(true)
+          Text(item.category.rawValue.capitalized).font(.body).foregroundStyle(.primary)
+        }
+        .accessibilityElement(children: .combine)
       }
-    }
-  }
-
-  @ViewBuilder private func allocationLegendItems(_ categories: [CategoryResult]) -> some View {
-    ForEach(categories, id: \.category) { item in
-      HStack(spacing: 5) {
-        Circle().fill(categoryColor(item.category)).frame(width: 8, height: 8)
-        Text(item.category.rawValue.capitalized)
-          .font(.body)
-          .foregroundStyle(.primary)
-      }
-      .accessibilityElement(children: .combine)
     }
   }
 
