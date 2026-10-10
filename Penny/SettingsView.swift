@@ -51,7 +51,11 @@ struct PennySettingsView: View {
               .tag(code)
           }
         }
-        .pickerStyle(.menu)
+        #if os(iOS)
+          .pickerStyle(.navigationLink)
+        #else
+          .pickerStyle(.menu)
+        #endif
         .foregroundStyle(.primary)
         .accessibilityIdentifier("preferredCurrencyPicker")
         .accessibilityValue(preferredCurrency)

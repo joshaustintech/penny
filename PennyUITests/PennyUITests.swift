@@ -61,6 +61,7 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     for label in [
+      "Preferred currency",
       "Sync is not a backup. Deleting an entry also deletes it from synced devices.",
       "Turn on iCloud sync to sync now.", "Share current budget with Apple Watch",
       "Shares category balances and the five latest entries with your paired Watch.",
@@ -105,7 +106,10 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(currency.waitForExistence(timeout: 5))
     XCTAssertEqual(currency.value as? String, "USD")
     currency.tap()
-    app.buttons["UYU — Uruguayan Peso"].tap()
+    let peso = app.buttons["UYU — Uruguayan Peso"]
+    for _ in 0..<24 where !peso.exists { app.collectionViews.firstMatch.swipeUp() }
+    XCTAssertTrue(peso.exists)
+    peso.tap()
     XCTAssertEqual(currency.value as? String, "UYU")
     let appearance = app.buttons["appearancePicker"]
     XCTAssertTrue(appearance.waitForExistence(timeout: 5))
