@@ -423,27 +423,7 @@ struct ContentView: View {
       }
       Text("Recent activity").font(.title2.bold())
       ForEach(monthEntries.reversed(), id: \.id) { entry in
-        HStack(spacing: 12) {
-          VStack(alignment: .leading) {
-            Text(entry.category.capitalized)
-            Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
-          }
-          Spacer()
-          Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
-          Button {
-            entryPresentation = .edit(entry)
-          } label: {
-            Image(systemName: "pencil")
-          }
-          .accessibilityLabel("Edit \(entry.note ?? entry.kind)")
-          Button(role: .destructive) {
-            pendingDelete = entry
-          } label: {
-            Image(systemName: "trash")
-          }
-          .accessibilityLabel("Delete \(entry.note ?? entry.kind)")
-        }
-        .padding(.vertical, 8)
+        activityRow(entry)
       }
       if let report {
         spendingTrend(report: report, budget: budget, entries: monthEntries)
@@ -639,6 +619,49 @@ struct ContentView: View {
               "\($0.category.rawValue.capitalized): actual \(amount(actual)), planned \(amount($0.allocated.minorUnits))"
           }.joined(separator: ". "))
       }
+    }
+  }
+
+  @ViewBuilder private func activityRow(_ entry: LedgerEntry) -> some View {
+    if dynamicTypeSize.isAccessibilitySize {
+      VStack(alignment: .leading, spacing: 4) {
+        Text(entry.category.capitalized).font(.headline)
+        Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+        HStack(spacing: 12) {
+          Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
+          Spacer()
+          activityButtons(entry)
+        }
+      }
+      .padding(.vertical, 8)
+    } else {
+      HStack(spacing: 12) {
+        VStack(alignment: .leading) {
+          Text(entry.category.capitalized)
+          Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+        }
+        Spacer()
+        Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
+        activityButtons(entry)
+      }
+      .padding(.vertical, 8)
+    }
+  }
+
+  private func activityButtons(_ entry: LedgerEntry) -> some View {
+    HStack(spacing: 12) {
+      Button {
+        entryPresentation = .edit(entry)
+      } label: {
+        Image(systemName: "pencil")
+      }
+      .accessibilityLabel("Edit \(entry.note ?? entry.kind)")
+      Button(role: .destructive) {
+        pendingDelete = entry
+      } label: {
+        Image(systemName: "trash")
+      }
+      .accessibilityLabel("Delete \(entry.note ?? entry.kind)")
     }
   }
 
