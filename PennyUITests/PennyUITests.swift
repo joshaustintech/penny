@@ -2,6 +2,34 @@ import XCTest
 
 @MainActor
 final class PennyUITests: XCTestCase {
+  func testAccessibilityAuditForSetupSettingsAndBudget() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    let income = app.textFields["incomeField"]
+    XCTAssertTrue(income.waitForExistence(timeout: 5))
+    enter("1000", in: income, app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    try audit(app)
+    app.buttons["settingsButton"].tap()
+    try audit(app)
+    app.buttons["settingsDoneButton"].tap()
+    app.buttons["createBudgetButton"].tap()
+    XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
+    try audit(app)
+  }
+
+  private func audit(_ app: XCUIApplication) throws {
+    try app.performAccessibilityAudit { issue in
+      print("AUDIT ISSUE: \(issue.detailedDescription)\n\(issue.element?.debugDescription ?? "")")
+      let attachment = XCTAttachment(screenshot: app.screenshot())
+      attachment.name = "Accessibility audit issue"
+      attachment.lifetime = .keepAlways
+      self.add(attachment)
+      return false
+    }
+  }
+
   func testSettingsPersistAppearanceAndShowPrivacy() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]

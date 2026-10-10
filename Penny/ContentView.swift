@@ -160,8 +160,14 @@ struct ContentView: View {
             PennySettingsView()
             .toolbar {
               ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { showingSettings = false }
-                .tint(.primary)
+                Button {
+                  showingSettings = false
+                } label: {
+                  Image(systemName: "xmark").foregroundStyle(.primary)
+                }
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
+                .accessibilityLabel("Close settings")
                 .accessibilityIdentifier("settingsDoneButton")
               }
             }
@@ -272,7 +278,7 @@ struct ContentView: View {
       .background(cardBackground, in: RoundedRectangle(cornerRadius: 20))
       Button("Create my budget", action: saveBudget)
         .buttonStyle(.borderedProminent)
-        .tint(Color(red: 0.1, green: 0.25, blue: 0.55))
+        .tint(.primary)
         .disabled(minorIncome == nil)
         .accessibilityIdentifier("createBudgetButton")
     }
@@ -291,7 +297,8 @@ struct ContentView: View {
         .font(.headline)
       Text(amount(report?.income.minorUnits ?? 0))
         .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
-        .accessibilityLabel(amount(report?.income.minorUnits ?? 0))
+        .accessibilityLabel("Income")
+        .accessibilityValue(amount(report?.income.minorUnits ?? 0))
       if let report,
         let spent = try? BudgetReporting.overallSpent(from: report),
         let remaining = try? BudgetReporting.overallRemaining(from: report)

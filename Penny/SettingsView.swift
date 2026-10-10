@@ -9,6 +9,7 @@ struct PennySettingsView: View {
   var body: some View {
     Form {
       Section {
+        Text("Appearance").font(.headline).accessibilityAddTraits(.isHeader)
         Picker("Appearance", selection: $appearance) {
           Text("System").tag("system")
           Text("Light").tag("light")
@@ -16,10 +17,9 @@ struct PennySettingsView: View {
         }
         .accessibilityIdentifier("appearancePicker")
         .accessibilityValue(appearance.capitalized)
-      } header: {
-        Text("Appearance").font(.title3.weight(.semibold)).foregroundStyle(.primary)
       }
       Section {
+        Text("New budgets").font(.headline).accessibilityAddTraits(.isHeader)
         Picker("Default budget style", selection: $defaultBudgetMode) {
           Text("Balanced").tag(BudgetMode.balanced.rawValue)
           Text("Housing First").tag(BudgetMode.housingFirst.rawValue)
@@ -40,16 +40,13 @@ struct PennySettingsView: View {
         Text("Saved months keep their current currency.")
           .font(.caption)
           .foregroundStyle(.primary)
-      } header: {
-        Text("New budgets").font(.title3.weight(.semibold)).foregroundStyle(.primary)
       }
       Section {
+        Text("Privacy").font(.headline).accessibilityAddTraits(.isHeader)
         Label("Budget data stays on this device.", systemImage: "lock.shield")
         Text("iCloud sync isn't configured yet.").foregroundStyle(.primary)
         Text("Penny uses no accounts, bank connections, ads, or analytics.")
           .foregroundStyle(.primary)
-      } header: {
-        Text("Privacy").font(.title3.weight(.semibold)).foregroundStyle(.primary)
       }
     }
     .formStyle(.grouped)
