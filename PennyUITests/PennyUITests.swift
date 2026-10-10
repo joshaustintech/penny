@@ -205,6 +205,40 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(error.label.contains("Penny could not sync."))
   }
 
+  func testNegativeAdjustmentReducesSpendingOnNumericKeypad() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    enter("1000", in: app.textFields["incomeField"], app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    app.buttons["createBudgetButton"].tap()
+    app.buttons["addEntryButton"].tap()
+    enter("100", in: app.textFields["entryAmountField"], app: app)
+    app.buttons["saveEntryButton"].tap()
+
+    app.buttons["addEntryButton"].tap()
+    app.buttons["entryKindPicker"].tap()
+    app.buttons["Adjustment"].tap()
+    enter("20", in: app.textFields["entryAmountField"], app: app)
+    app.textFields["Note (optional)"].tap()
+    app.textFields["Note (optional)"].typeText("Correction")
+    let subtract = app.switches["subtractAdjustmentToggle"]
+    XCTAssertTrue(subtract.waitForExistence(timeout: 5))
+    XCTAssertEqual(subtract.value as? String, "0")
+    subtract.descendants(matching: .switch).firstMatch.tap()
+    XCTAssertEqual(subtract.value as? String, "1")
+    app.buttons["saveEntryButton"].tap()
+
+    let actual = app.descendants(matching: .any)["actualSpendingSummary"]
+    XCTAssertTrue(actual.label.contains("$80.00"), actual.debugDescription)
+    let edit = app.buttons["Edit Correction"]
+    for _ in 0..<4 where !edit.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    edit.tap()
+    XCTAssertEqual(app.switches["subtractAdjustmentToggle"].value as? String, "1")
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(actual.label.contains("$80.00"), actual.debugDescription)
+  }
+
   func testEditAndDeleteSpendingEntry() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]

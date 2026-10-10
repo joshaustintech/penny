@@ -8,6 +8,7 @@ struct EntryForm: View {
   @State private var kind = TransactionKind.spending
   @State private var category = BudgetCategory.needs
   @State private var amount: Decimal = 0
+  @State private var subtractAdjustment = false
   @State private var date = Date.now
   @State private var note = ""
   @State private var errorMessage: String?
@@ -37,6 +38,7 @@ struct EntryForm: View {
     self.existingEntry = existingEntry
     self.onSave = onSave
     _date = State(initialValue: monthDate)
+    _subtractAdjustment = State(initialValue: (existingEntry?.amountMinor ?? 0) < 0)
     if let existingEntry {
       let scale = Decimal(sign: .plus, exponent: existingEntry.fractionDigits, significand: 1)
       _kind = State(initialValue: TransactionKind(rawValue: existingEntry.kind) ?? .spending)
@@ -72,8 +74,10 @@ struct EntryForm: View {
   }
 
   private var minorAmount: Int64? {
-    try? Money.minorUnits(
-      for: amount, fractionDigits: fractionDigits, allowNegative: kind == .adjustment)
+    let enteredAmount = amount < 0 ? -amount : amount
+    let signedAmount = kind == .adjustment && subtractAdjustment ? -enteredAmount : enteredAmount
+    return try? Money.minorUnits(
+      for: signedAmount, fractionDigits: fractionDigits, allowNegative: kind == .adjustment)
   }
 
   var body: some View {
@@ -87,6 +91,7 @@ struct EntryForm: View {
           Text("Refund").tag(TransactionKind.refund)
           Text("Adjustment").tag(TransactionKind.adjustment)
         }
+        .accessibilityIdentifier("entryKindPicker")
         Picker("Category", selection: $category) {
           ForEach(categories, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
         }
@@ -99,6 +104,10 @@ struct EntryForm: View {
         #endif
         .focused($fieldFocused)
         .accessibilityIdentifier("entryAmountField")
+        if kind == .adjustment {
+          Toggle("Subtract from category total", isOn: $subtractAdjustment)
+            .accessibilityIdentifier("subtractAdjustmentToggle")
+        }
         DatePicker("Date", selection: $date, in: monthRange, displayedComponents: .date)
           .accessibilityHint("Choose a date in the selected budget month")
         TextField("Note (optional)", text: $note)
@@ -122,7 +131,10 @@ struct EntryForm: View {
         #endif
       }
     }
-    .onChange(of: kind) { category = categories.first ?? .needs }
+    .onChange(of: kind) {
+      category = categories.first ?? .needs
+      if kind != .adjustment { subtractAdjustment = false }
+    }
     .alert(
       "Could not save entry",
       isPresented: Binding(
