@@ -4,7 +4,7 @@ import SwiftUI
 struct EntryForm: View {
   @Environment(\.modelContext) private var context
   @Environment(\.dismiss) private var dismiss
-  @FocusState private var amountFocused: Bool
+  @FocusState private var fieldFocused: Bool
   @State private var kind = TransactionKind.spending
   @State private var category = BudgetCategory.needs
   @State private var amount: Decimal = 0
@@ -97,11 +97,12 @@ struct EntryForm: View {
         #if os(iOS)
           .keyboardType(.decimalPad)
         #endif
-        .focused($amountFocused)
+        .focused($fieldFocused)
         .accessibilityIdentifier("entryAmountField")
         DatePicker("Date", selection: $date, in: monthRange, displayedComponents: .date)
           .accessibilityHint("Choose a date in the selected budget month")
         TextField("Note (optional)", text: $note)
+          .focused($fieldFocused)
       }
       .navigationTitle(existingEntry == nil ? "Add entry" : "Edit entry")
       .toolbar {
@@ -116,7 +117,7 @@ struct EntryForm: View {
         #if os(iOS)
           ToolbarItemGroup(placement: .keyboard) {
             Spacer()
-            Button("Done") { amountFocused = false }
+            Button("Done") { fieldFocused = false }
           }
         #endif
       }
@@ -156,6 +157,7 @@ struct EntryForm: View {
             kind: kind.rawValue, category: category.rawValue, occurredAt: date,
             note: trimmedNote.isEmpty ? nil : trimmedNote))
       }
+      fieldFocused = false
       onSave()
       dismiss()
     } catch {

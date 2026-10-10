@@ -150,6 +150,8 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.navigationBars["Add entry"].waitForNonExistence(timeout: 5))
 
     XCTAssertTrue(app.staticTexts["Lunch"].waitForExistence(timeout: 5))
+    XCTAssertFalse(
+      app.staticTexts.matching(identifier: "activityEntryDate").firstMatch.label.isEmpty)
     app.buttons["Edit Lunch"].tap()
     XCTAssertTrue(app.navigationBars["Edit entry"].waitForExistence(timeout: 5))
     let editAmount = app.textFields["entryAmountField"]
@@ -164,8 +166,11 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(editedEntry.waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["$55.00"].exists)
 
-    app.buttons["Delete Dinner"].tap()
-    let confirmDelete = app.buttons["Delete"]
+    let deleteEntry = app.buttons["Delete Dinner"]
+    for _ in 0..<4 where !deleteEntry.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(deleteEntry.isHittable)
+    deleteEntry.tap()
+    let confirmDelete = app.alerts.buttons["Delete"]
     XCTAssertTrue(confirmDelete.waitForExistence(timeout: 5))
     confirmDelete.tap()
     XCTAssertFalse(editedEntry.waitForExistence(timeout: 2))

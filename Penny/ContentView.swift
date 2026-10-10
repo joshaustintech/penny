@@ -30,6 +30,7 @@ struct ContentView: View {
   @State private var showingSettings = false
   @State private var showingModeChange = false
   @State private var pendingDelete: LedgerEntry?
+  @State private var showingDeleteConfirmation = false
   #if os(macOS)
     @State private var exportDocument: PennyTextDocument?
     @State private var exportType: UTType = .plainText
@@ -213,14 +214,11 @@ struct ContentView: View {
           .presentationDetents([.large])
         }
       #endif
-      .confirmationDialog(
-        "Delete this entry?",
-        isPresented: Binding(
-          get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
-        titleVisibility: .visible
-      ) {
+      .alert("Delete this entry?", isPresented: $showingDeleteConfirmation) {
         Button("Delete", role: .destructive, action: deletePendingEntry)
         Button("Cancel", role: .cancel) { pendingDelete = nil }
+      } message: {
+        Text("This entry will be removed from this month's budget.")
       }
       #if os(macOS)
         .fileExporter(
@@ -627,6 +625,7 @@ struct ContentView: View {
       VStack(alignment: .leading, spacing: 4) {
         Text(entry.category.capitalized).font(.headline)
         Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+        activityDate(entry)
         HStack(spacing: 12) {
           Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
           Spacer()
@@ -639,6 +638,7 @@ struct ContentView: View {
         VStack(alignment: .leading) {
           Text(entry.category.capitalized)
           Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+          activityDate(entry)
         }
         Spacer()
         Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
@@ -648,6 +648,13 @@ struct ContentView: View {
     }
   }
 
+  private func activityDate(_ entry: LedgerEntry) -> some View {
+    Text(entry.transactionDate.formatted(date: .abbreviated, time: .omitted))
+      .font(.caption)
+      .foregroundStyle(.secondary)
+      .accessibilityIdentifier("activityEntryDate")
+  }
+
   private func activityButtons(_ entry: LedgerEntry) -> some View {
     HStack(spacing: 12) {
       Button {
@@ -655,12 +662,17 @@ struct ContentView: View {
       } label: {
         Image(systemName: "pencil")
       }
+      .frame(minWidth: 44, minHeight: 44)
+      .contentShape(Rectangle())
       .accessibilityLabel("Edit \(entry.note ?? entry.kind)")
       Button(role: .destructive) {
         pendingDelete = entry
+        showingDeleteConfirmation = true
       } label: {
         Image(systemName: "trash")
       }
+      .frame(minWidth: 44, minHeight: 44)
+      .contentShape(Rectangle())
       .accessibilityLabel("Delete \(entry.note ?? entry.kind)")
     }
   }
