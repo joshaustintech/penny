@@ -82,6 +82,7 @@ struct ContentView: View {
           } detail: {
             dashboard
           }
+          .navigationSplitViewStyle(.balanced)
         } else {
           dashboard
         }
