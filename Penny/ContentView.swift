@@ -22,7 +22,7 @@ struct ContentView: View {
   @State private var entries: [LedgerEntry] = []
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
-  @State private var income: Decimal = 0
+  @State private var incomeText = ""
   @FocusState private var incomeFieldFocused: Bool
   @State private var selectedMonth = Date.now
   @State private var saveError: String?
@@ -140,7 +140,7 @@ struct ContentView: View {
       .navigationTitle("Penny")
       .tint(.accentColor)
       .task { loadBudget() }
-      .onChange(of: selectedMonth) { _, _ in income = 0 }
+      .onChange(of: selectedMonth) { _, _ in incomeText = "" }
       .onReceive(NotificationCenter.default.publisher(for: .cloudBudgetDidChange)) { _ in
         loadBudget()
       }
@@ -322,10 +322,7 @@ struct ContentView: View {
       VStack(alignment: .leading, spacing: 12) {
         Text("Monthly take-home income")
           .font(.headline)
-        TextField(
-          "Income (\(currency))", value: $income,
-          format: .number.precision(.fractionLength(0...fractionDigits))
-        )
+        TextField("Income (\(currency))", text: $incomeText)
         .focused($incomeFieldFocused)
         #if os(iOS)
           .keyboardType(.decimalPad)
@@ -806,7 +803,7 @@ struct ContentView: View {
   }
 
   private var minorIncome: Int64? {
-    guard income > 0,
+    guard let income = Decimal(string: incomeText, locale: Locale.current), income > 0,
       let value = try? Money.minorUnits(for: income, fractionDigits: fractionDigits), value > 0
     else { return nil }
     return value

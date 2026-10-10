@@ -87,7 +87,10 @@ final class PennyUITests: XCTestCase {
 
   private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication) {
     let scrollView = app.scrollViews.firstMatch
-    for _ in 0..<6 where !scrollView.frame.contains(element.frame) { scrollView.swipeUp() }
+    for _ in 0..<6 where !element.exists || !scrollView.frame.contains(element.frame) {
+      scrollView.swipeUp()
+    }
+    XCTAssertTrue(element.exists)
     XCTAssertTrue(scrollView.frame.contains(element.frame))
   }
 
@@ -161,7 +164,12 @@ final class PennyUITests: XCTestCase {
     let income = app.textFields["incomeField"]
     XCTAssertTrue(income.waitForExistence(timeout: 5))
     enter("1000", in: income, app: app)
-    app.buttons["createBudgetButton"].tap()
+    let createBudget = app.buttons["createBudgetButton"]
+    XCTAssertTrue(createBudget.waitForExistence(timeout: 5))
+    XCTAssertTrue(createBudget.isEnabled)
+    app.scrollViews.firstMatch.swipeUp()
+    XCTAssertTrue(createBudget.isHittable)
+    createBudget.tap()
     XCTAssertTrue(app.staticTexts["Housing"].waitForExistence(timeout: 5))
   }
 
