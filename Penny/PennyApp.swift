@@ -4,6 +4,7 @@ import SwiftUI
 
 @main
 struct PennyApp: App {
+  @Environment(\.scenePhase) private var scenePhase
   @AppStorage("appearance") private var appearance = "system"
   private let container: ModelContainer
 
@@ -18,6 +19,7 @@ struct PennyApp: App {
         UserDefaults.standard.removeObject(forKey: "preferredCurrency")
         UserDefaults.standard.removeObject(forKey: "defaultBudgetMode")
         UserDefaults.standard.removeObject(forKey: "watchSharingEnabled")
+        UserDefaults.standard.removeObject(forKey: "privateCloudSyncEnabled")
         for suffix in ["", "-shm", "-wal"] {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }
@@ -54,12 +56,22 @@ struct PennyApp: App {
     WindowGroup {
       ContentView()
         .preferredColorScheme(
-          appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
+          appearance == "light" ? .light : appearance == "dark" ? .dark : nil
+        )
+        .task { await refreshCloudSyncIfEnabled() }
+        .onChange(of: scenePhase) { _, phase in
+          if phase == .active { Task { await refreshCloudSyncIfEnabled() } }
+        }
     }
     .modelContainer(container)
     #if os(macOS)
       Settings { PennySettingsView() }
     #endif
+  }
+
+  @MainActor private func refreshCloudSyncIfEnabled() async {
+    guard UserDefaults.standard.bool(forKey: "privateCloudSyncEnabled") else { return }
+    try? await PrivateCloudSync.shared.refresh(context: container.mainContext)
   }
 }
 

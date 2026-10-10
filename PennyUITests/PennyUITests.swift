@@ -10,7 +10,7 @@ final class PennyUITests: XCTestCase {
       throw XCTSkip("The split view is only used on iPad.")
     }
     XCTAssertTrue(
-      app.staticTexts["This budget stays on this device. iCloud sync isn't configured yet."]
+      app.staticTexts["This budget stays on this device. Sync with iCloud in Settings."]
         .waitForExistence(timeout: 5))
     XCTAssertFalse(app.staticTexts["Months"].exists)
     let income = app.textFields["incomeField"]
@@ -72,7 +72,10 @@ final class PennyUITests: XCTestCase {
     let privacy = app.staticTexts["Budget data stays on this device."]
     for _ in 0..<4 where !privacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(privacy.isHittable)
-    XCTAssertTrue(app.staticTexts["iCloud sync isn't configured yet."].isHittable)
+    let cloudSync = app.switches["privateCloudSyncToggle"]
+    XCTAssertTrue(cloudSync.isHittable)
+    XCTAssertEqual(cloudSync.value as? String, "0")
+    XCTAssertFalse(app.buttons["Sync now"].isEnabled)
     let watchSharing = app.switches["watchSharingToggle"]
     XCTAssertTrue(watchSharing.isHittable)
     XCTAssertEqual(watchSharing.value as? String, "0")
@@ -89,14 +92,16 @@ final class PennyUITests: XCTestCase {
     XCTAssertEqual(app.buttons["appearancePicker"].value as? String, "Dark")
     XCTAssertEqual(app.buttons["defaultBudgetModePicker"].value as? String, "Housing First")
     XCTAssertEqual(app.buttons["preferredCurrencyPicker"].value as? String, "UYU")
-    XCTAssertEqual(app.switches["watchSharingToggle"].value as? String, "1")
+    let savedWatchSharing = app.switches["watchSharingToggle"]
+    for _ in 0..<10 where !savedWatchSharing.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertEqual(savedWatchSharing.value as? String, "1")
     let savedPrivacy = app.staticTexts["Budget data stays on your devices."]
     for _ in 0..<4 where !savedPrivacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(savedPrivacy.isHittable)
     app.buttons["settingsDoneButton"].tap()
     app.buttons["Previous month"].tap()
     XCTAssertTrue(
-      app.staticTexts["This budget stays on this device. iCloud sync isn't configured yet."]
+      app.staticTexts["This budget stays on this device. Sync with iCloud in Settings."]
         .waitForExistence(timeout: 5))
     let income = app.textFields["incomeField"]
     XCTAssertTrue(income.waitForExistence(timeout: 5))

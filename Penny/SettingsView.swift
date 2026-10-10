@@ -1,11 +1,15 @@
+import SwiftData
 import SwiftUI
 
 struct PennySettingsView: View {
+  @Environment(\.modelContext) private var modelContext
   @AppStorage("appearance") private var appearance = "system"
   @AppStorage("preferredCurrency") private var preferredCurrency =
     Locale.current.currency?.identifier ?? "USD"
   @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
   @AppStorage("watchSharingEnabled") private var watchSharingEnabled = false
+  @AppStorage("privateCloudSyncEnabled") private var privateCloudSyncEnabled = false
+  @State private var cloudSyncError: String?
 
   var body: some View {
     Form {
@@ -26,6 +30,7 @@ struct PennySettingsView: View {
           Text("Housing First").tag(BudgetMode.housingFirst.rawValue)
         }
         .pickerStyle(.menu)
+        .foregroundStyle(.primary)
         .accessibilityIdentifier("defaultBudgetModePicker")
         .accessibilityValue(
           defaultBudgetMode == BudgetMode.housingFirst.rawValue ? "Housing First" : "Balanced")
@@ -36,25 +41,35 @@ struct PennySettingsView: View {
           }
         }
         .pickerStyle(.menu)
+        .foregroundStyle(.primary)
         .accessibilityIdentifier("preferredCurrencyPicker")
         .accessibilityValue(preferredCurrency)
         Text("Saved months keep their current currency.")
-          .font(.caption)
           .foregroundStyle(.primary)
       }
       Section {
         Text("Privacy").font(.headline).accessibilityAddTraits(.isHeader)
         Label(
-          watchSharingEnabled
-            ? "Budget data stays on your devices." : "Budget data stays on this device.",
+          privateCloudSyncEnabled
+            ? "Budget data syncs through your private iCloud database."
+            : watchSharingEnabled
+              ? "Budget data stays on your devices." : "Budget data stays on this device.",
           systemImage: "lock.shield")
+        Toggle("Sync with iCloud", isOn: $privateCloudSyncEnabled)
+          .accessibilityIdentifier("privateCloudSyncToggle")
+        Text(
+          "Syncs budgets and entries with your private iCloud database. Turning it off stops this device from syncing; existing cloud copies remain."
+        )
+        if let cloudSyncError { Text(cloudSyncError).foregroundStyle(.red) }
+        Button("Sync now") {
+          Task { await refreshCloudSync() }
+        }
+        .disabled(!privateCloudSyncEnabled)
         #if os(iOS)
           Toggle("Share current budget with Apple Watch", isOn: $watchSharingEnabled)
             .accessibilityIdentifier("watchSharingToggle")
           Text("Shares category balances and the five latest entries with your paired Watch.")
-            .font(.caption)
         #endif
-        Text("iCloud sync isn't configured yet.").foregroundStyle(.primary)
         Text("Penny uses no accounts, bank connections, ads, or analytics.")
           .foregroundStyle(.primary)
       }
@@ -62,5 +77,29 @@ struct PennySettingsView: View {
     .formStyle(.grouped)
     .tint(.accentColor)
     .navigationTitle("Settings")
+    .onChange(of: privateCloudSyncEnabled) { _, enabled in
+      Task {
+        if enabled {
+          do {
+            try await PrivateCloudSync.shared.start(context: modelContext)
+            cloudSyncError = nil
+          } catch {
+            cloudSyncError = "iCloud sync failed: \(error.localizedDescription)"
+          }
+        } else {
+          await PrivateCloudSync.shared.stop()
+          cloudSyncError = nil
+        }
+      }
+    }
+  }
+
+  @MainActor private func refreshCloudSync() async {
+    do {
+      try await PrivateCloudSync.shared.refresh(context: modelContext)
+      cloudSyncError = nil
+    } catch {
+      cloudSyncError = "iCloud sync failed: \(error.localizedDescription)"
+    }
   }
 }

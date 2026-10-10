@@ -33,8 +33,15 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
     self.engine = engine
     let changes = records.keys.map(CKSyncEngine.PendingRecordZoneChange.saveRecord)
     engine.state.add(pendingRecordZoneChanges: changes)
-    try await engine.fetchChanges()
-    try await engine.sendChanges()
+    do {
+      try await engine.fetchChanges()
+      try await engine.sendChanges()
+    } catch {
+      await engine.cancelOperations()
+      self.engine = nil
+      self.context = nil
+      throw error
+    }
   }
 
   public func stop() async {

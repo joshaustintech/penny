@@ -182,6 +182,7 @@ struct ContentView: View {
               }
             }
           }
+          .presentationDetents([.large])
         }
       #endif
       .confirmationDialog(
@@ -249,7 +250,7 @@ struct ContentView: View {
       Text("Start with take-home income. Penny will give every dollar a clear place.")
         .foregroundStyle(.primary)
       Label(
-        "This budget stays on this device. iCloud sync isn't configured yet.",
+        "This budget stays on this device. Sync with iCloud in Settings.",
         systemImage: "lock.shield"
       )
       .font(.footnote)
