@@ -34,4 +34,23 @@ struct ExportTests {
     #expect(markdown.contains("Remaining: USD 4900.00"))
     #expect(markdown.contains("Market \\| food"))
   }
+
+  @Test func markdownEscapesRawHTMLInNotes() throws {
+    let month = BudgetMonth(year: 2026, month: 10, mode: "balanced", currencyCode: "USD")
+    let income = LedgerEntry(
+      amountMinor: 1_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "income", category: "income")
+    let note = "<img src=x onerror=alert(1)> & safe"
+    let entry = LedgerEntry(
+      amountMinor: 100, currencyCode: "USD", fractionDigits: 2,
+      kind: "spending", category: "needs", note: note)
+    let entries = [income, entry]
+    let report = try BudgetReporting.make(
+      entries: entries, currencyCode: "USD", fractionDigits: 2, mode: .balanced)
+
+    let markdown = try BudgetExport.markdown(month: month, report: report, entries: entries)
+
+    #expect(markdown.contains("&lt;img src=x onerror=alert(1)&gt; &amp; safe"))
+    #expect(!markdown.contains("<img"))
+  }
 }
