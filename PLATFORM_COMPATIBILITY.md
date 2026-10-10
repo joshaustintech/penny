@@ -1,22 +1,7 @@
 # Platform compatibility
 
-Minimum targets: iOS/iPadOS 17, macOS 14, watchOS 10, tvOS 17. SwiftData sets these floors; Swift Charts and App Intents are available on all four target families at these versions.
+See the current [platform compatibility report](docs/platform-compatibility.md).
 
-| Capability | Targets | Notes |
-| --- | --- | --- |
-| SwiftData | All | Local persistence; use CloudKit-compatible optional relationships and no uniqueness constraints. |
-| CloudKit sync | iOS, iPadOS, macOS, watchOS, tvOS | Explicit opt-in needs iCloud/CloudKit and Background Modes remote-notification capabilities; Apple Developer account with admin access required. Compatibility and user-controlled container switching remain unverified. |
-| Swift Charts | All | Shared chart data, platform-adapted views. |
-| App Intents | All | Structured intents; supported Siri exposure varies by OS. |
-| App Shortcuts | iOS, iPadOS, watchOS | Not supported on macOS or tvOS; macOS can expose App Intents to Shortcuts. |
-| Export | macOS | Use native save panels and UTF-8 files. |
-
-Verified locally with Xcode 27.0 and 27.0 SDKs. iOS 27 simulators are installed; watchOS 27 and tvOS 27 simulator runtimes are unavailable. A valid Apple Development certificate exists, but Watch/tvOS app targets, provisioning profiles, and a CloudKit container are not configured. These environment facts are not device or sync validation.
-
-The `PennyCore` Swift package cross-compiles for arm64 watchOS 10 and tvOS 17. This verifies shared model and reporting code only; neither platform has a Penny app target yet.
-
-The iOS and macOS builds extract eight App Intents and eight App Shortcuts each. Every intent requires authentication on the device running it. Metadata extraction is build evidence only; Siri voice execution and the HomePod Personal Requests pathway have not been exercised. Without Watch or Apple TV targets and a configured sync container, those platforms cannot yet show the user's iPhone budget.
-
-The macOS export UI test target builds successfully. XCTest could not start its UI test on this host because Xcode Helper lacks the Accessibility/UI Automation permission; the test timed out before executing any test method. Apple documents that permission as a prerequisite for macOS UI testing.
-
-Apple references: [SwiftData sync](https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices), [App Shortcuts HIG](https://developer.apple.com/design/human-interface-guidelines/app-shortcuts), [App Intents](https://developer.apple.com/documentation/AppIntents).
+The macOS export UI test target builds. XCTest could not start its UI test on
+this host because Xcode Helper lacks Accessibility/UI Automation permission;
+it timed out before executing a test method.
