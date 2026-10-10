@@ -13,6 +13,14 @@ private enum WatchBudgetQuery {
     let scale = Decimal(sign: .plus, exponent: snapshot.fractionDigits, significand: 1)
     return (Decimal(minor) / scale).formatted(.currency(code: snapshot.currency))
   }
+
+  static func period(_ snapshot: WatchBudgetSnapshot) -> String {
+    guard
+      let date = Calendar.current.date(
+        from: DateComponents(year: snapshot.year, month: snapshot.month))
+    else { return "\(snapshot.month)/\(snapshot.year)" }
+    return date.formatted(.dateTime.month(.wide).year())
+  }
 }
 
 struct WatchRemainingIntent: AppIntent {
@@ -27,7 +35,8 @@ struct WatchRemainingIntent: AppIntent {
         dialog: IntentDialog(stringLiteral: WatchBudgetQuery.noBudget))
     }
     let minor = snapshot.categories.reduce(Int64(0)) { $0 + $1.remainingMinor }
-    let answer = "You have \(WatchBudgetQuery.amount(minor, snapshot)) left in Penny."
+    let answer =
+      "You have \(WatchBudgetQuery.amount(minor, snapshot)) left in Penny for \(WatchBudgetQuery.period(snapshot))."
     return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
   }
 }
@@ -45,7 +54,8 @@ struct WatchSpendingIntent: AppIntent {
     }
     let minor = snapshot.categories.filter { !["debt", "savings"].contains($0.category) }
       .reduce(Int64(0)) { $0 + $1.usedMinor }
-    let answer = "You've spent \(WatchBudgetQuery.amount(minor, snapshot)) in Penny."
+    let answer =
+      "You've spent \(WatchBudgetQuery.amount(minor, snapshot)) in Penny for \(WatchBudgetQuery.period(snapshot))."
     return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
   }
 }
