@@ -7,13 +7,14 @@ struct ContentView: View {
   @State private var entries: [LedgerEntry] = []
   @State private var selectedMode = BudgetMode.balanced
   @State private var income: Decimal = 0
+  @State private var selectedMonth = Date.now
   @State private var saveError: String?
   @State private var showingEntry = false
   @State private var selectedEntry: LedgerEntry?
   @State private var pendingDelete: LedgerEntry?
 
   private var currentComponents: DateComponents {
-    Calendar.current.dateComponents([.year, .month], from: .now)
+    Calendar.current.dateComponents([.year, .month], from: selectedMonth)
   }
 
   private var currentBudget: BudgetMonth? {
@@ -31,6 +32,7 @@ struct ContentView: View {
           Text("Every penny has a purpose.")
             .font(.largeTitle.bold())
             .accessibilityAddTraits(.isHeader)
+          monthSwitcher
           if let currentBudget { overview(currentBudget) } else { setup }
         }
         .frame(maxWidth: 620, alignment: .leading)
@@ -40,6 +42,7 @@ struct ContentView: View {
       .navigationTitle("Penny")
       .tint(Color(red: 0.16, green: 0.43, blue: 0.34))
       .task { loadBudget() }
+      .onChange(of: selectedMonth) { _, _ in income = 0 }
       .toolbar {
         if currentBudget != nil {
           ToolbarItem(placement: .primaryAction) {
@@ -55,7 +58,9 @@ struct ContentView: View {
         if let currentBudget {
           EntryForm(
             mode: BudgetMode(rawValue: currentBudget.mode) ?? .balanced,
-            currency: currentBudget.currencyCode, existingEntry: selectedEntry,
+            currency: currentBudget.currencyCode,
+            monthDate: selectedMonth,
+            existingEntry: selectedEntry,
             onSave: loadBudget)
         }
       }
@@ -78,6 +83,21 @@ struct ContentView: View {
     } message: {
       Text(saveError ?? "Try again.")
     }
+  }
+
+  private var monthSwitcher: some View {
+    HStack {
+      Button("Previous month", systemImage: "chevron.left") { moveMonth(by: -1) }
+        .labelStyle(.iconOnly)
+      Spacer()
+      Text(selectedMonth.formatted(.dateTime.month(.wide).year()))
+        .font(.title3.weight(.semibold))
+        .accessibilityAddTraits(.isHeader)
+      Spacer()
+      Button("Next month", systemImage: "chevron.right") { moveMonth(by: 1) }
+        .labelStyle(.iconOnly)
+    }
+    .accessibilityElement(children: .contain)
   }
 
   private var setup: some View {
@@ -197,6 +217,13 @@ struct ContentView: View {
   private func isInMonth(_ date: Date, year: Int, month: Int) -> Bool {
     let components = Calendar.current.dateComponents([.year, .month], from: date)
     return components.year == year && components.month == month
+  }
+
+  private func moveMonth(by offset: Int) {
+    guard let start = Calendar.current.date(from: currentComponents),
+      let next = Calendar.current.date(byAdding: .month, value: offset, to: start)
+    else { return }
+    selectedMonth = next
   }
 
   private func amount(_ minorUnits: Int64) -> String {

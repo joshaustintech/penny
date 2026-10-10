@@ -17,13 +17,15 @@ struct EntryForm: View {
   let onSave: () -> Void
 
   init(
-    mode: BudgetMode, currency: String, existingEntry: LedgerEntry? = nil,
+    mode: BudgetMode, currency: String, monthDate: Date = .now,
+    existingEntry: LedgerEntry? = nil,
     onSave: @escaping () -> Void
   ) {
     self.mode = mode
     self.currency = currency
     self.existingEntry = existingEntry
     self.onSave = onSave
+    _date = State(initialValue: monthDate)
     if let existingEntry {
       let scale = Decimal(sign: .plus, exponent: existingEntry.fractionDigits, significand: 1)
       _kind = State(initialValue: TransactionKind(rawValue: existingEntry.kind) ?? .spending)
