@@ -8,7 +8,7 @@ struct PennySettingsView: View {
 
   var body: some View {
     Form {
-      Section("Appearance") {
+      Section {
         Picker("Appearance", selection: $appearance) {
           Text("System").tag("system")
           Text("Light").tag("light")
@@ -16,8 +16,10 @@ struct PennySettingsView: View {
         }
         .accessibilityIdentifier("appearancePicker")
         .accessibilityValue(appearance.capitalized)
+      } header: {
+        Text("Appearance").font(.title3.weight(.semibold)).foregroundStyle(.primary)
       }
-      Section("New budgets") {
+      Section {
         Picker("Default budget style", selection: $defaultBudgetMode) {
           Text("Balanced").tag(BudgetMode.balanced.rawValue)
           Text("Housing First").tag(BudgetMode.housingFirst.rawValue)
@@ -37,16 +39,21 @@ struct PennySettingsView: View {
         .accessibilityValue(preferredCurrency)
         Text("Saved months keep their current currency.")
           .font(.caption)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(.primary)
+      } header: {
+        Text("New budgets").font(.title3.weight(.semibold)).foregroundStyle(.primary)
       }
-      Section("Privacy") {
+      Section {
         Label("Budget data stays on this device.", systemImage: "lock.shield")
-        Text("iCloud sync isn't configured yet.")
+        Text("iCloud sync isn't configured yet.").foregroundStyle(.primary)
         Text("Penny uses no accounts, bank connections, ads, or analytics.")
-          .foregroundStyle(.secondary)
+          .foregroundStyle(.primary)
+      } header: {
+        Text("Privacy").font(.title3.weight(.semibold)).foregroundStyle(.primary)
       }
     }
     .formStyle(.grouped)
+    .tint(.accentColor)
     .navigationTitle("Settings")
   }
 }

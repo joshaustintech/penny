@@ -2,7 +2,10 @@ import Charts
 import SwiftData
 import SwiftUI
 
-#if os(macOS)
+#if os(iOS)
+  import UIKit
+#elseif os(macOS)
+  import AppKit
   import UniformTypeIdentifiers
 #endif
 
@@ -48,6 +51,16 @@ struct ContentView: View {
 
   private var currency: String {
     currentBudget?.currencyCode ?? preferredCurrency
+  }
+
+  private var cardBackground: Color {
+    #if os(iOS)
+      Color(uiColor: .secondarySystemBackground)
+    #elseif os(macOS)
+      Color(nsColor: .controlBackgroundColor)
+    #else
+      Color.gray.opacity(0.1)
+    #endif
   }
 
   var body: some View {
@@ -148,6 +161,7 @@ struct ContentView: View {
             .toolbar {
               ToolbarItem(placement: .confirmationAction) {
                 Button("Done") { showingSettings = false }
+                .tint(.primary)
                 .accessibilityIdentifier("settingsDoneButton")
               }
             }
@@ -199,6 +213,8 @@ struct ContentView: View {
     HStack {
       Button("Previous month", systemImage: "chevron.left") { moveMonth(by: -1) }
         .labelStyle(.iconOnly)
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
       Spacer()
       Text(selectedMonth.formatted(.dateTime.month(.wide).year()))
         .font(.title3.weight(.semibold))
@@ -206,6 +222,8 @@ struct ContentView: View {
       Spacer()
       Button("Next month", systemImage: "chevron.right") { moveMonth(by: 1) }
         .labelStyle(.iconOnly)
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(Rectangle())
     }
     .accessibilityElement(children: .contain)
   }
@@ -213,13 +231,13 @@ struct ContentView: View {
   private var setup: some View {
     VStack(alignment: .leading, spacing: 18) {
       Text("Start with take-home income. Penny will give every dollar a clear place.")
-        .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
       Label(
         "This budget stays on this device. iCloud sync isn't configured yet.",
         systemImage: "lock.shield"
       )
       .font(.footnote)
-      .foregroundStyle(.secondary)
+      .foregroundStyle(.primary)
       Picker(
         "Budget style",
         selection: selectedModeBinding
@@ -235,7 +253,7 @@ struct ContentView: View {
           : "50% housing · 15% needs · 10% giving · 10% debt · 10% savings · 5% wants"
       )
       .font(.callout)
-      .foregroundStyle(.secondary)
+      .foregroundStyle(.primary)
       VStack(alignment: .leading, spacing: 12) {
         Text("Monthly take-home income")
           .font(.headline)
@@ -251,9 +269,10 @@ struct ContentView: View {
       }
       .padding(18)
       .frame(maxWidth: .infinity, alignment: .leading)
-      .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+      .background(cardBackground, in: RoundedRectangle(cornerRadius: 20))
       Button("Create my budget", action: saveBudget)
         .buttonStyle(.borderedProminent)
+        .tint(Color(red: 0.1, green: 0.25, blue: 0.55))
         .disabled(minorIncome == nil)
         .accessibilityIdentifier("createBudgetButton")
     }
@@ -272,6 +291,7 @@ struct ContentView: View {
         .font(.headline)
       Text(amount(report?.income.minorUnits ?? 0))
         .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
+        .accessibilityLabel(amount(report?.income.minorUnits ?? 0))
       if let report,
         let spent = try? BudgetReporting.overallSpent(from: report),
         let remaining = try? BudgetReporting.overallRemaining(from: report)
@@ -279,10 +299,11 @@ struct ContentView: View {
         budgetSummary(spent: spent.minorUnits, remaining: remaining.minorUnits)
       }
       Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
-        .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
       Button("Change budget style", systemImage: "slider.horizontal.3") {
         showingModeChange = true
       }
+      .foregroundStyle(.primary)
       .confirmationDialog(
         "Change budget style?", isPresented: $showingModeChange, titleVisibility: .visible
       ) {
@@ -323,7 +344,7 @@ struct ContentView: View {
               ? "\(amount(item.contributed.minorUnits)) contributed of \(amount(item.allocated.minorUnits))"
               : "\(amount(item.spent.minorUnits)) spent of \(amount(item.allocated.minorUnits))"
           )
-          .foregroundStyle(.secondary)
+          .foregroundStyle(.primary)
           if let status = budgetStatus(for: item) {
             Label(
               status,
@@ -336,7 +357,7 @@ struct ContentView: View {
             .font(.caption)
         }
         .padding(14)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .background(cardBackground, in: RoundedRectangle(cornerRadius: 16))
         .accessibilityElement(children: .combine)
       }
       Text("Recent activity").font(.title2.bold())
@@ -411,12 +432,12 @@ struct ContentView: View {
     }
     .padding(16)
     .frame(maxWidth: .infinity, alignment: .leading)
-    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
+    .background(cardBackground, in: RoundedRectangle(cornerRadius: 18))
   }
 
   private func summaryMetric(_ title: String, _ value: String) -> some View {
     VStack(alignment: .leading, spacing: 6) {
-      Text(title).font(.subheadline).foregroundStyle(.secondary)
+      Text(title).font(.subheadline).foregroundStyle(.primary)
       Text(value).font(.title3.bold().monospacedDigit())
     }
     .accessibilityElement(children: .combine)
@@ -436,7 +457,7 @@ struct ContentView: View {
       Text("Planned versus actual").font(.title2.bold())
       Text("Bars show actual use; square marks show each plan.")
         .font(.caption)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
       Chart(report.categories, id: \.category) { item in
         let planned = Double(item.allocated.minorUnits) / pow(10, Double(fractionDigits))
         let actualAmount =
@@ -495,7 +516,7 @@ struct ContentView: View {
       Text("Spending through month").font(.title2.bold())
       Text("Actual spending accumulates daily; dashed line marks the plan.")
         .font(.caption)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
       if !days.isEmpty {
         Chart {
           ForEach(days, id: \.day) { point in
@@ -516,7 +537,7 @@ struct ContentView: View {
         .accessibilityValue(actualSummary)
       } else {
         Text("Spending trend starts when this month begins.")
-          .foregroundStyle(.secondary)
+          .foregroundStyle(.primary)
       }
     }
   }
