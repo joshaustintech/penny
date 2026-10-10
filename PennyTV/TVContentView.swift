@@ -248,3 +248,9 @@ struct TVContentView: View {
     return (Decimal(minor) / scale).formatted(.currency(code: currency))
   }
 }
+
+#Preview("TV budget") {
+  TVContentView(seedTestBudgetForUITests: false)
+    .modelContainer(
+      for: [BudgetMonth.self, LedgerEntry.self, CloudTombstone.self], inMemory: true)
+}

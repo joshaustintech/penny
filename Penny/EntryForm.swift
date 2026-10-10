@@ -177,3 +177,9 @@ struct EntryForm: View {
     }
   }
 }
+
+#Preview("New entry") {
+  EntryForm(mode: .balanced, currency: "USD", onSave: {})
+    .modelContainer(
+      for: [BudgetMonth.self, LedgerEntry.self, CloudTombstone.self], inMemory: true)
+}

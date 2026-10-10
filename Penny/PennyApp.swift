@@ -110,6 +110,10 @@ private struct StorageUnavailableView: View {
   }
 }
 
+#Preview("Storage unavailable") {
+  StorageUnavailableView()
+}
+
 #if os(macOS)
   struct PennyCommandActions {
     let canAddEntry: Bool

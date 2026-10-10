@@ -1024,3 +1024,9 @@ private struct MonthSpending: Identifiable {
     }
   }
 #endif
+
+#Preview("Budget setup") {
+  ContentView()
+    .modelContainer(
+      for: [BudgetMonth.self, LedgerEntry.self, CloudTombstone.self], inMemory: true)
+}

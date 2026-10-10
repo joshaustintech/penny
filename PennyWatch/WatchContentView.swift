@@ -130,3 +130,7 @@ struct WatchContentView: View {
     return (Decimal(minor) / scale).formatted(.currency(code: snapshot.currency))
   }
 }
+
+#Preview("Watch budget") {
+  WatchContentView(snapshot: nil, entryStatus: nil) { _ in }
+}

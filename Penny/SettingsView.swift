@@ -142,3 +142,9 @@ struct PennySettingsView: View {
     }
   }
 }
+
+#Preview("Settings") {
+  PennySettingsView()
+    .modelContainer(
+      for: [BudgetMonth.self, LedgerEntry.self, CloudTombstone.self], inMemory: true)
+}
