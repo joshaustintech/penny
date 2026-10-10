@@ -637,7 +637,7 @@ struct ContentView: View {
           return
         }
         exportDocument = PennyTextDocument(markdown)
-        exportType = .plainText
+        exportType = PennyTextDocument.markdownContentType
         exportFilename = "Penny-\(monthName)-report.md"
       }
       showingExporter = exportDocument != nil
@@ -653,7 +653,9 @@ private struct MonthSpending: Identifiable {
 
 #if os(macOS)
   private struct PennyTextDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.plainText, .commaSeparatedText] }
+    static let markdownContentType =
+      UTType(filenameExtension: "md", conformingTo: .plainText) ?? .plainText
+    static var readableContentTypes: [UTType] { [markdownContentType, .commaSeparatedText] }
     let text: String
 
     init(_ text: String) { self.text = text }
