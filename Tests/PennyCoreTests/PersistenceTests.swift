@@ -5,6 +5,19 @@ import Testing
 @testable import PennyCore
 
 struct PersistenceTests {
+  @Test func transactionMonthUsesStoredCalendarDate() throws {
+    let entry = LedgerEntry(
+      amountMinor: 100, currencyCode: "USD", fractionDigits: 2,
+      kind: "spending", category: "needs")
+    entry.calendarDate = "2026-10-1"
+    entry.occurredAt = try #require(
+      Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 1)))
+
+    #expect(entry.dateComponents?.year == 2026)
+    #expect(entry.dateComponents?.month == 10)
+    #expect(entry.transactionDate != entry.occurredAt)
+  }
+
   @MainActor @Test func createsBudgetAndIncomeTogether() throws {
     let schema = Schema([BudgetMonth.self, LedgerEntry.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

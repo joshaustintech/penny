@@ -140,7 +140,7 @@ struct ContentView: View {
   private func overview(_ budget: BudgetMonth) -> some View {
     let mode = BudgetMode(rawValue: budget.mode) ?? .balanced
     let monthEntries = entries.filter {
-      isInMonth($0.occurredAt, year: budget.year, month: budget.month)
+      $0.dateComponents?.year == budget.year && $0.dateComponents?.month == budget.month
     }
     let report = try? BudgetReporting.make(
       entries: monthEntries, currencyCode: budget.currencyCode, fractionDigits: fractionDigits,
@@ -212,11 +212,6 @@ struct ContentView: View {
     let scale = Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
     guard income > 0, income <= Decimal(Int64.max) / scale else { return nil }
     return NSDecimalNumber(decimal: income * scale).int64Value
-  }
-
-  private func isInMonth(_ date: Date, year: Int, month: Int) -> Bool {
-    let components = Calendar.current.dateComponents([.year, .month], from: date)
-    return components.year == year && components.month == month
   }
 
   private func moveMonth(by offset: Int) {

@@ -20,6 +20,10 @@ final class PennyUITests: XCTestCase {
     app.textFields["Note (optional)"].typeText("Groceries")
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
+    app.buttons["Previous month"].tap()
+    XCTAssertFalse(app.staticTexts["Groceries"].exists)
+    app.buttons["Next month"].tap()
+    XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
 
     app.terminate()
     app.launch()

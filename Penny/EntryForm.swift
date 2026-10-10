@@ -32,7 +32,7 @@ struct EntryForm: View {
       _category = State(initialValue: BudgetCategory(rawValue: existingEntry.category) ?? .needs)
       _amount = State(
         initialValue: NSDecimalNumber(value: existingEntry.amountMinor).decimalValue / scale)
-      _date = State(initialValue: existingEntry.occurredAt)
+      _date = State(initialValue: existingEntry.transactionDate)
       _note = State(initialValue: existingEntry.note ?? "")
     }
   }
@@ -127,6 +127,8 @@ struct EntryForm: View {
         existingEntry.kind = kind.rawValue
         existingEntry.category = category.rawValue
         existingEntry.occurredAt = date
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        existingEntry.calendarDate = "\(parts.year ?? 0)-\(parts.month ?? 0)-\(parts.day ?? 0)"
         existingEntry.note = trimmedNote.isEmpty ? nil : trimmedNote
         try store.update(existingEntry)
       } else {

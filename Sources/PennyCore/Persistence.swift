@@ -30,6 +30,7 @@ public final class LedgerEntry {
   public var subcategory: String?
   public var note: String?
   public var occurredAt: Date = Date.now
+  public var calendarDate: String = ""
   public var createdAt: Date = Date.now
   public var updatedAt: Date = Date.now
 
@@ -43,7 +44,30 @@ public final class LedgerEntry {
     self.kind = kind
     self.category = category
     self.occurredAt = occurredAt
+    let parts = Calendar.current.dateComponents([.year, .month, .day], from: occurredAt)
+    self.calendarDate = "\(parts.year ?? 0)-\(parts.month ?? 0)-\(parts.day ?? 0)"
     self.note = note
+  }
+
+  public var dateComponents: DateComponents? {
+    guard !calendarDate.isEmpty else {
+      return Calendar.current.dateComponents([.year, .month, .day], from: occurredAt)
+    }
+    let parts = calendarDate.split(separator: "-").compactMap { Int($0) }
+    guard parts.count == 3,
+      let date = Calendar.current.date(
+        from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+    else { return nil }
+    let verified = Calendar.current.dateComponents([.year, .month, .day], from: date)
+    return verified.year == parts[0] && verified.month == parts[1] && verified.day == parts[2]
+      ? verified : nil
+  }
+
+  public var transactionDate: Date {
+    guard let dateComponents, let date = Calendar.current.date(from: dateComponents) else {
+      return occurredAt
+    }
+    return date
   }
 }
 
@@ -111,6 +135,7 @@ public struct BudgetStore {
     guard let kind = TransactionKind(rawValue: entry.kind),
       let category = BudgetCategory(rawValue: entry.category),
       (0...4).contains(entry.fractionDigits), validCurrency(entry.currencyCode),
+      entry.dateComponents != nil,
       entry.amountMinor > 0 || (kind == .adjustment && entry.amountMinor != 0)
     else { throw StoreError.invalidEntry }
     switch kind {
