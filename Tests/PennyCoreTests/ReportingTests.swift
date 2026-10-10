@@ -35,6 +35,20 @@ struct ReportingTests {
     #expect(try BudgetReporting.remaining(for: .wants, from: report).minorUnits == 2_000)
     #expect(try BudgetReporting.overallSpent(from: report).minorUnits == 800)
     #expect(try BudgetReporting.overallRemaining(from: report).minorUnits == 8_000)
+    #expect(!BudgetReporting.isOverBudget(from: report))
+  }
+
+  @Test func detectsCategoryOverspendingEvenWhenOtherCategoriesRemain() throws {
+    let report = try BudgetReporting.make(
+      entries: [
+        LedgerEntry(
+          amountMinor: 10_000, currencyCode: "USD", fractionDigits: 2,
+          kind: "income", category: "income"),
+        LedgerEntry(
+          amountMinor: 5_001, currencyCode: "USD", fractionDigits: 2,
+          kind: "spending", category: "needs"),
+      ], currencyCode: "USD", fractionDigits: 2, mode: .balanced)
+    #expect(BudgetReporting.isOverBudget(from: report))
   }
 
   @Test func supportsEmptyMonthAndRejectsWrongCurrency() throws {

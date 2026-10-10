@@ -35,6 +35,25 @@ struct SpentBudgetIntent: AppIntent {
   }
 }
 
+struct BudgetStatusIntent: AppIntent {
+  static let title: LocalizedStringResource = "Check budget status"
+  static let description = IntentDescription(
+    "Reports whether any Penny budget category is over budget.")
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let report = try CurrentMonthReport.load() else {
+      return .result(
+        value: CurrentMonthReport.noBudget,
+        dialog: IntentDialog(stringLiteral: CurrentMonthReport.noBudget))
+    }
+    let answer =
+      BudgetReporting.isOverBudget(from: report)
+      ? "Yes. You're over budget in Penny this month."
+      : "No. You're within your Penny budget this month."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
 enum BudgetCategoryParameter: String, AppEnum {
   case housing, needs, wants, giving, debt, savings
 
@@ -165,5 +184,9 @@ struct PennyShortcuts: AppShortcutsProvider {
       intent: CategorySpentIntent(),
       phrases: ["How much have I spent on \(\.$category) in \(.applicationName) this month?"],
       shortTitle: "Category spending", systemImageName: "dollarsign.circle")
+    AppShortcut(
+      intent: BudgetStatusIntent(),
+      phrases: ["Am I over budget in \(.applicationName) this month?"],
+      shortTitle: "Budget status", systemImageName: "checkmark.circle")
   }
 }
