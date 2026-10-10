@@ -16,7 +16,7 @@ public struct WatchCategorySnapshot: Codable, Equatable, Sendable {
   }
 }
 
-public struct WatchTransactionSnapshot: Codable, Equatable, Sendable {
+public struct WatchTransactionSnapshot: Codable, Equatable, Identifiable, Sendable {
   public let id: UUID
   public let amountMinor: Int64
   public let category: String
@@ -30,6 +30,7 @@ public struct WatchBudgetSnapshot: Codable, Equatable, Sendable {
   public let year: Int
   public let month: Int
   public let currency: String
+  public let fractionDigits: Int
   public let incomeMinor: Int64
   public let categories: [WatchCategorySnapshot]
   public let recentTransactions: [WatchTransactionSnapshot]
@@ -40,6 +41,7 @@ public struct WatchBudgetSnapshot: Codable, Equatable, Sendable {
     self.year = year
     self.month = month
     currency = report.income.currency
+    fractionDigits = report.income.fractionDigits
     incomeMinor = report.income.minorUnits
     categories = report.categories.map(WatchCategorySnapshot.init(category:))
     recentTransactions = entries.compactMap { entry in
