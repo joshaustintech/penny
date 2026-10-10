@@ -24,9 +24,10 @@ struct TVContentView: View {
           dashboard(month, report)
         } else {
           ContentUnavailableView(
-            "No local budget", systemImage: "chart.bar.xaxis",
+            "No budget on Apple TV", systemImage: "chart.bar.xaxis",
             description: Text(
-              "Penny TV is ready for the private iCloud sync option. Sync is not enabled yet."))
+              "Create a budget on iPhone, iPad, or Mac. iCloud sync to Apple TV isn't available yet."
+            ))
         }
       }
       .navigationTitle("Penny")
