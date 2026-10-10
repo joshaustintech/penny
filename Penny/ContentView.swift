@@ -9,6 +9,8 @@ struct ContentView: View {
   @State private var income: Decimal = 0
   @State private var saveError: String?
   @State private var showingEntry = false
+  @State private var selectedEntry: LedgerEntry?
+  @State private var pendingDelete: LedgerEntry?
 
   private var currentComponents: DateComponents {
     Calendar.current.dateComponents([.year, .month], from: .now)
@@ -41,8 +43,11 @@ struct ContentView: View {
       .toolbar {
         if currentBudget != nil {
           ToolbarItem(placement: .primaryAction) {
-            Button("Add entry", systemImage: "plus") { showingEntry = true }
-              .accessibilityIdentifier("addEntryButton")
+            Button("Add entry", systemImage: "plus") {
+              selectedEntry = nil
+              showingEntry = true
+            }
+            .accessibilityIdentifier("addEntryButton")
           }
         }
       }
@@ -50,8 +55,18 @@ struct ContentView: View {
         if let currentBudget {
           EntryForm(
             mode: BudgetMode(rawValue: currentBudget.mode) ?? .balanced,
-            currency: currentBudget.currencyCode, onSave: loadBudget)
+            currency: currentBudget.currencyCode, existingEntry: selectedEntry,
+            onSave: loadBudget)
         }
+      }
+      .confirmationDialog(
+        "Delete this entry?",
+        isPresented: Binding(
+          get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
+        titleVisibility: .visible
+      ) {
+        Button("Delete", role: .destructive, action: deletePendingEntry)
+        Button("Cancel", role: .cancel) { pendingDelete = nil }
       }
     }
     .alert(
@@ -141,13 +156,26 @@ struct ContentView: View {
       }
       Text("Recent activity").font(.title2.bold())
       ForEach(monthEntries.reversed(), id: \.id) { entry in
-        HStack {
-          VStack(alignment: .leading) {
-            Text(entry.category.capitalized)
-            Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+        Button {
+          selectedEntry = entry
+          showingEntry = true
+        } label: {
+          HStack {
+            VStack(alignment: .leading) {
+              Text(entry.category.capitalized)
+              Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text(amount(entry.amountMinor)).monospacedDigit()
           }
-          Spacer()
-          Text(amount(entry.amountMinor)).monospacedDigit()
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+          Button("Edit", systemImage: "pencil") {
+            selectedEntry = entry
+            showingEntry = true
+          }
+          Button("Delete", systemImage: "trash", role: .destructive) { pendingDelete = entry }
         }
       }
     }
@@ -199,6 +227,17 @@ struct ContentView: View {
       let store = BudgetStore(context: context)
       months = try store.months()
       entries = try store.entries()
+    } catch {
+      saveError = error.localizedDescription
+    }
+  }
+
+  private func deletePendingEntry() {
+    guard let pendingDelete else { return }
+    do {
+      try BudgetStore(context: context).delete(pendingDelete)
+      self.pendingDelete = nil
+      loadBudget()
     } catch {
       saveError = error.localizedDescription
     }

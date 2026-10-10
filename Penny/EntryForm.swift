@@ -13,17 +13,42 @@ struct EntryForm: View {
 
   let mode: BudgetMode
   let currency: String
+  let existingEntry: LedgerEntry?
   let onSave: () -> Void
 
+  init(
+    mode: BudgetMode, currency: String, existingEntry: LedgerEntry? = nil,
+    onSave: @escaping () -> Void
+  ) {
+    self.mode = mode
+    self.currency = currency
+    self.existingEntry = existingEntry
+    self.onSave = onSave
+    if let existingEntry {
+      let scale = Decimal(sign: .plus, exponent: existingEntry.fractionDigits, significand: 1)
+      _kind = State(initialValue: TransactionKind(rawValue: existingEntry.kind) ?? .spending)
+      _category = State(initialValue: BudgetCategory(rawValue: existingEntry.category) ?? .needs)
+      _amount = State(
+        initialValue: NSDecimalNumber(value: existingEntry.amountMinor).decimalValue / scale)
+      _date = State(initialValue: existingEntry.occurredAt)
+      _note = State(initialValue: existingEntry.note ?? "")
+    }
+  }
+
   private var categories: [BudgetCategory] {
+    let available: [BudgetCategory]
     switch kind {
-    case .income: return [.income]
-    case .savings: return [.savings]
-    case .debt: return [.debt]
+    case .income: available = [.income]
+    case .savings: available = [.savings]
+    case .debt: available = [.debt]
     default:
-      return mode.allocations.compactMap { BudgetCategory(rawValue: $0.category) }
+      available = mode.allocations.compactMap { BudgetCategory(rawValue: $0.category) }
         .filter { ![.debt, .savings].contains($0) }
     }
+    guard let existingEntry, let original = BudgetCategory(rawValue: existingEntry.category),
+      !available.contains(original)
+    else { return available }
+    return [original] + available
   }
 
   private var fractionDigits: Int {
@@ -35,8 +60,11 @@ struct EntryForm: View {
 
   private var minorAmount: Int64? {
     let scale = Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
-    guard amount > 0, amount <= Decimal(Int64.max) / scale else { return nil }
-    return NSDecimalNumber(decimal: amount * scale).int64Value
+    let scaled = amount * scale
+    guard scaled <= Decimal(Int64.max), scaled >= Decimal(Int64.min),
+      kind == .adjustment ? scaled != 0 : scaled > 0
+    else { return nil }
+    return NSDecimalNumber(decimal: scaled).int64Value
   }
 
   var body: some View {
@@ -47,6 +75,8 @@ struct EntryForm: View {
           Text("Income").tag(TransactionKind.income)
           Text("Savings").tag(TransactionKind.savings)
           Text("Debt payment").tag(TransactionKind.debt)
+          Text("Refund").tag(TransactionKind.refund)
+          Text("Adjustment").tag(TransactionKind.adjustment)
         }
         Picker("Category", selection: $category) {
           ForEach(categories, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
@@ -59,13 +89,13 @@ struct EntryForm: View {
         DatePicker("Date", selection: $date, displayedComponents: .date)
         TextField("Note (optional)", text: $note)
       }
-      .navigationTitle("Add entry")
+      .navigationTitle(existingEntry == nil ? "Add entry" : "Edit entry")
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button("Cancel") { dismiss() }
         }
         ToolbarItem(placement: .confirmationAction) {
-          Button("Save", action: save)
+          Button(existingEntry == nil ? "Save" : "Update", action: save)
             .disabled(minorAmount == nil)
             .accessibilityIdentifier("saveEntryButton")
         }
@@ -85,12 +115,25 @@ struct EntryForm: View {
 
   private func save() {
     guard let minorAmount else { return }
-    let entry = LedgerEntry(
-      amountMinor: minorAmount, currencyCode: currency, fractionDigits: fractionDigits,
-      kind: kind.rawValue, category: category.rawValue, occurredAt: date,
-      note: note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : note)
+    let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
     do {
-      try BudgetStore(context: context).save(entry)
+      let store = BudgetStore(context: context)
+      if let existingEntry {
+        existingEntry.amountMinor = minorAmount
+        existingEntry.currencyCode = currency
+        existingEntry.fractionDigits = fractionDigits
+        existingEntry.kind = kind.rawValue
+        existingEntry.category = category.rawValue
+        existingEntry.occurredAt = date
+        existingEntry.note = trimmedNote.isEmpty ? nil : trimmedNote
+        try store.update(existingEntry)
+      } else {
+        try store.save(
+          LedgerEntry(
+            amountMinor: minorAmount, currencyCode: currency, fractionDigits: fractionDigits,
+            kind: kind.rawValue, category: category.rawValue, occurredAt: date,
+            note: trimmedNote.isEmpty ? nil : trimmedNote))
+      }
       onSave()
       dismiss()
     } catch {

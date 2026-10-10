@@ -67,6 +67,8 @@ public struct BudgetStore {
   public func createBudget(_ month: BudgetMonth, income: LedgerEntry) throws {
     guard try !months().contains(where: { $0.year == month.year && $0.month == month.month })
     else { throw StoreError.duplicateIdentifier }
+    try validate(income)
+    guard income.kind == TransactionKind.income.rawValue else { throw StoreError.invalidEntry }
     context.insert(month)
     context.insert(income)
     do {
@@ -81,10 +83,35 @@ public struct BudgetStore {
     guard try !entries().contains(where: { $0.id == entry.id }) else {
       throw StoreError.duplicateIdentifier
     }
+    try validate(entry)
+    context.insert(entry)
+    do {
+      try context.save()
+    } catch {
+      context.rollback()
+      throw error
+    }
+  }
+
+  public func update(_ entry: LedgerEntry) throws {
+    guard try entries().contains(where: { $0.id == entry.id }) else {
+      throw StoreError.missingEntry
+    }
+    try validate(entry)
+    entry.updatedAt = .now
+    do {
+      try context.save()
+    } catch {
+      context.rollback()
+      throw error
+    }
+  }
+
+  private func validate(_ entry: LedgerEntry) throws {
     guard let kind = TransactionKind(rawValue: entry.kind),
       let category = BudgetCategory(rawValue: entry.category),
       (0...4).contains(entry.fractionDigits), validCurrency(entry.currencyCode),
-      entry.amountMinor >= 0 || kind == .adjustment
+      entry.amountMinor > 0 || (kind == .adjustment && entry.amountMinor != 0)
     else { throw StoreError.invalidEntry }
     switch kind {
     case .income: guard category == .income else { throw StoreError.invalidEntry }
@@ -95,18 +122,16 @@ public struct BudgetStore {
         throw StoreError.invalidEntry
       }
     }
-    context.insert(entry)
+  }
+
+  public func delete(_ entry: LedgerEntry) throws {
+    context.delete(entry)
     do {
       try context.save()
     } catch {
       context.rollback()
       throw error
     }
-  }
-
-  public func delete(_ entry: LedgerEntry) throws {
-    context.delete(entry)
-    try context.save()
   }
 
   private func validCurrency(_ code: String) -> Bool {
@@ -118,4 +143,5 @@ public struct BudgetStore {
 public enum StoreError: Error, Equatable {
   case duplicateIdentifier
   case invalidEntry
+  case missingEntry
 }
