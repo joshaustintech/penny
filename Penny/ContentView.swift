@@ -24,10 +24,9 @@ struct ContentView: View {
   @State private var income: Decimal = 0
   @State private var selectedMonth = Date.now
   @State private var saveError: String?
-  @State private var showingEntry = false
+  @State private var entryPresentation: EntryPresentation?
   @State private var showingSettings = false
   @State private var showingModeChange = false
-  @State private var selectedEntry: LedgerEntry?
   @State private var pendingDelete: LedgerEntry?
   #if os(macOS)
     @State private var exportDocument: PennyTextDocument?
@@ -139,8 +138,7 @@ struct ContentView: View {
         if currentBudget != nil {
           ToolbarItem(placement: .primaryAction) {
             Button("Add entry", systemImage: "plus") {
-              selectedEntry = nil
-              showingEntry = true
+              entryPresentation = .new
             }
             #if os(macOS)
               .keyboardShortcut("n", modifiers: .command)
@@ -157,13 +155,13 @@ struct ContentView: View {
           #endif
         }
       }
-      .sheet(isPresented: $showingEntry) {
+      .sheet(item: $entryPresentation) { presentation in
         if let currentBudget {
           EntryForm(
             mode: BudgetMode(rawValue: currentBudget.mode) ?? .balanced,
             currency: currentBudget.currencyCode,
             monthDate: selectedMonth,
-            existingEntry: selectedEntry,
+            existingEntry: presentation.entry,
             onSave: loadBudget)
         }
       }
@@ -383,27 +381,27 @@ struct ContentView: View {
       }
       Text("Recent activity").font(.title2.bold())
       ForEach(monthEntries.reversed(), id: \.id) { entry in
-        Button {
-          selectedEntry = entry
-          showingEntry = true
-        } label: {
-          HStack {
-            VStack(alignment: .leading) {
-              Text(entry.category.capitalized)
-              Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
-            }
-            Spacer()
-            Text(amount(entry.amountMinor)).monospacedDigit()
+        HStack(spacing: 12) {
+          VStack(alignment: .leading) {
+            Text(entry.category.capitalized)
+            Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
           }
-        }
-        .buttonStyle(.plain)
-        .contextMenu {
-          Button("Edit", systemImage: "pencil") {
-            selectedEntry = entry
-            showingEntry = true
+          Spacer()
+          Text(amount(entry.amountMinor)).monospacedDigit()
+          Button {
+            entryPresentation = .edit(entry)
+          } label: {
+            Image(systemName: "pencil")
           }
-          Button("Delete", systemImage: "trash", role: .destructive) { pendingDelete = entry }
+          .accessibilityLabel("Edit \(entry.note ?? entry.kind)")
+          Button(role: .destructive) {
+            pendingDelete = entry
+          } label: {
+            Image(systemName: "trash")
+          }
+          .accessibilityLabel("Delete \(entry.note ?? entry.kind)")
         }
+        .padding(.vertical, 8)
       }
       if let report {
         spendingTrend(report: report, budget: budget, entries: monthEntries)
@@ -729,6 +727,23 @@ struct ContentView: View {
       showingExporter = exportDocument != nil
     }
   #endif
+}
+
+private enum EntryPresentation: Identifiable {
+  case new
+  case edit(LedgerEntry)
+
+  var id: String {
+    switch self {
+    case .new: "new"
+    case .edit(let entry): "edit-\(entry.id)"
+    }
+  }
+
+  var entry: LedgerEntry? {
+    guard case .edit(let entry) = self else { return nil }
+    return entry
+  }
 }
 
 private struct MonthSpending: Identifiable {

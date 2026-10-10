@@ -131,6 +131,46 @@ final class PennyUITests: XCTestCase {
     XCTAssertEqual(sharing.value as? String, "1")
   }
 
+  func testEditAndDeleteSpendingEntry() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    let income = app.textFields["incomeField"]
+    XCTAssertTrue(income.waitForExistence(timeout: 5))
+    enter("1000", in: income, app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    app.buttons["createBudgetButton"].tap()
+    app.buttons["addEntryButton"].tap()
+    let amount = app.textFields["entryAmountField"]
+    XCTAssertTrue(amount.waitForExistence(timeout: 5))
+    enter("40", in: amount, app: app)
+    app.textFields["Note (optional)"].tap()
+    app.textFields["Note (optional)"].typeText("Lunch")
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(app.navigationBars["Add entry"].waitForNonExistence(timeout: 5))
+
+    XCTAssertTrue(app.staticTexts["Lunch"].waitForExistence(timeout: 5))
+    app.buttons["Edit Lunch"].tap()
+    XCTAssertTrue(app.navigationBars["Edit entry"].waitForExistence(timeout: 5))
+    let editAmount = app.textFields["entryAmountField"]
+    XCTAssertTrue(editAmount.waitForExistence(timeout: 5))
+    enter("55", in: editAmount, app: app)
+    let note = app.textFields["Note (optional)"]
+    note.tap()
+    enter("Dinner", in: note, app: app)
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(app.navigationBars["Edit entry"].waitForNonExistence(timeout: 5))
+    let editedEntry = app.staticTexts["Dinner"]
+    XCTAssertTrue(editedEntry.waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["$55.00"].exists)
+
+    app.buttons["Delete Dinner"].tap()
+    let confirmDelete = app.buttons["Delete"]
+    XCTAssertTrue(confirmDelete.waitForExistence(timeout: 5))
+    confirmDelete.tap()
+    XCTAssertFalse(editedEntry.waitForExistence(timeout: 2))
+  }
+
   func testOnboardAddSpendingAndReload() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
