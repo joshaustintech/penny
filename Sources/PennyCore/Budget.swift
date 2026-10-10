@@ -26,6 +26,7 @@ public struct Money: Equatable, Sendable {
 public enum BudgetError: Error, Equatable {
   case invalidIncome
   case incompatibleMoney
+  case invalidTransaction
   case overflow
 }
 

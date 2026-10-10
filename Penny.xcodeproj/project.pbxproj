@@ -14,6 +14,8 @@
 		A00000000000000000000006 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000003 /* Budget.swift */; };
 		A00000000000000000000007 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* Persistence.swift */; };
 		A00000000000000000000008 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* Persistence.swift */; };
+		A00000000000000000000009 /* Transactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* Transactions.swift */; };
+		A00000000000000000000010 /* Transactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* Transactions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +25,7 @@
 		B00000000000000000000004 /* Penny-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Penny-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B00000000000000000000005 /* Penny-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Penny-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B00000000000000000000006 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		B00000000000000000000007 /* Transactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transactions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,7 +36,7 @@
 /* Begin PBXGroup section */
 		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* Penny */, D00000000000000000000003 /* PennyCore */, D00000000000000000000004 /* Products */, ); sourceTree = "<group>"; };
 		D00000000000000000000002 /* Penny */ = {isa = PBXGroup; children = (B00000000000000000000001 /* PennyApp.swift */, B00000000000000000000002 /* ContentView.swift */, ); path = Penny; sourceTree = "<group>"; };
-		D00000000000000000000003 /* PennyCore */ = {isa = PBXGroup; children = (B00000000000000000000003 /* Budget.swift */, B00000000000000000000006 /* Persistence.swift */, ); path = Sources/PennyCore; sourceTree = "<group>"; };
+		D00000000000000000000003 /* PennyCore */ = {isa = PBXGroup; children = (B00000000000000000000003 /* Budget.swift */, B00000000000000000000006 /* Persistence.swift */, B00000000000000000000007 /* Transactions.swift */, ); path = Sources/PennyCore; sourceTree = "<group>"; };
 		D00000000000000000000004 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000004 /* Penny-iOS.app */, B00000000000000000000005 /* Penny-macOS.app */, ); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -47,9 +50,9 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C00000000000000000000003 /* Sources iOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000007, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000003 /* Sources iOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000007, A00000000000000000000009, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000004 /* Resources iOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		C00000000000000000000005 /* Sources macOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000008, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000005 /* Sources macOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000008, A00000000000000000000010, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000006 /* Resources macOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
