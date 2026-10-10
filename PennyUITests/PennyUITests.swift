@@ -8,6 +8,12 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     XCTAssertTrue(app.staticTexts["Budget data stays on this device."].waitForExistence(timeout: 5))
+    let style = app.buttons["defaultBudgetModePicker"]
+    XCTAssertTrue(style.waitForExistence(timeout: 5))
+    XCTAssertEqual(style.value as? String, "Balanced")
+    style.tap()
+    app.collectionViews.buttons["Housing First"].tap()
+    XCTAssertEqual(style.value as? String, "Housing First")
     let currency = app.buttons["preferredCurrencyPicker"]
     XCTAssertTrue(currency.waitForExistence(timeout: 5))
     XCTAssertEqual(currency.value as? String, "USD")
@@ -25,8 +31,16 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     XCTAssertEqual(app.buttons["appearancePicker"].value as? String, "Dark")
+    XCTAssertEqual(app.buttons["defaultBudgetModePicker"].value as? String, "Housing First")
     XCTAssertEqual(app.buttons["preferredCurrencyPicker"].value as? String, "UYU")
     XCTAssertTrue(app.staticTexts["Budget data stays on this device."].exists)
+    app.buttons["settingsDoneButton"].tap()
+    app.buttons["Previous month"].tap()
+    let income = app.textFields["incomeField"]
+    XCTAssertTrue(income.waitForExistence(timeout: 5))
+    enter("1000", in: income, app: app)
+    app.buttons["createBudgetButton"].tap()
+    XCTAssertTrue(app.staticTexts["Housing"].waitForExistence(timeout: 5))
   }
 
   func testOnboardAddSpendingAndReload() {

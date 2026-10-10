@@ -13,7 +13,7 @@ struct ContentView: View {
     Locale.current.currency?.identifier ?? "USD"
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
-  @State private var selectedMode = BudgetMode.balanced
+  @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
   @State private var income: Decimal = 0
   @State private var selectedMonth = Date.now
   @State private var saveError: String?
@@ -31,6 +31,15 @@ struct ContentView: View {
 
   private var currentComponents: DateComponents {
     Calendar.current.dateComponents([.year, .month], from: selectedMonth)
+  }
+
+  private var selectedMode: BudgetMode {
+    BudgetMode(rawValue: defaultBudgetMode) ?? .balanced
+  }
+
+  private var selectedModeBinding: Binding<BudgetMode> {
+    Binding(
+      get: { selectedMode }, set: { defaultBudgetMode = $0.rawValue })
   }
 
   private var currentBudget: BudgetMonth? {
@@ -205,7 +214,10 @@ struct ContentView: View {
     VStack(alignment: .leading, spacing: 18) {
       Text("Start with take-home income. Penny will give every dollar a clear place.")
         .foregroundStyle(.secondary)
-      Picker("Budget style", selection: $selectedMode) {
+      Picker(
+        "Budget style",
+        selection: selectedModeBinding
+      ) {
         Text("Balanced").tag(BudgetMode.balanced)
         Text("Housing First").tag(BudgetMode.housingFirst)
       }

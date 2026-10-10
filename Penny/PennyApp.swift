@@ -16,6 +16,7 @@ struct PennyApp: App {
       if arguments.contains("--reset-store") {
         UserDefaults.standard.removeObject(forKey: "appearance")
         UserDefaults.standard.removeObject(forKey: "preferredCurrency")
+        UserDefaults.standard.removeObject(forKey: "defaultBudgetMode")
         for suffix in ["", "-shm", "-wal"] {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }

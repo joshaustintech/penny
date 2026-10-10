@@ -4,6 +4,7 @@ struct PennySettingsView: View {
   @AppStorage("appearance") private var appearance = "system"
   @AppStorage("preferredCurrency") private var preferredCurrency =
     Locale.current.currency?.identifier ?? "USD"
+  @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
 
   var body: some View {
     Form {
@@ -17,6 +18,14 @@ struct PennySettingsView: View {
         .accessibilityValue(appearance.capitalized)
       }
       Section("New budgets") {
+        Picker("Default budget style", selection: $defaultBudgetMode) {
+          Text("Balanced").tag(BudgetMode.balanced.rawValue)
+          Text("Housing First").tag(BudgetMode.housingFirst.rawValue)
+        }
+        .pickerStyle(.menu)
+        .accessibilityIdentifier("defaultBudgetModePicker")
+        .accessibilityValue(
+          defaultBudgetMode == BudgetMode.housingFirst.rawValue ? "Housing First" : "Balanced")
         Picker("Preferred currency", selection: $preferredCurrency) {
           ForEach(Locale.commonISOCurrencyCodes, id: \.self) { code in
             Text("\(code) — \(Locale.current.localizedString(forCurrencyCode: code) ?? code)")
