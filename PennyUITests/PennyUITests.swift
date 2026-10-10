@@ -20,6 +20,20 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Months"].waitForExistence(timeout: 5))
   }
 
+  func testCommandNOpensEntryOnIPad() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    guard app.windows.firstMatch.frame.width > 700 else {
+      throw XCTSkip("The hardware keyboard shortcut is for iPad.")
+    }
+    enter("1000", in: app.textFields["incomeField"], app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    app.buttons["createBudgetButton"].tap()
+    app.typeKey("n", modifierFlags: .command)
+    XCTAssertTrue(app.textFields["entryAmountField"].waitForExistence(timeout: 5))
+  }
+
   func testAccessibilityAuditForSetupSettingsAndBudget() throws {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]

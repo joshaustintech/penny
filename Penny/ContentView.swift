@@ -168,7 +168,7 @@ struct ContentView: View {
             }
             .frame(minWidth: 48, minHeight: 48)
             .contentShape(Rectangle())
-            #if os(macOS)
+            #if os(macOS) || os(iOS)
               .keyboardShortcut("n", modifiers: .command)
             #endif
             .accessibilityIdentifier("addEntryButton")
