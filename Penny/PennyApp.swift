@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 @main
@@ -6,5 +7,6 @@ struct PennyApp: App {
     WindowGroup {
       ContentView()
     }
+    .modelContainer(for: [BudgetMonth.self, LedgerEntry.self])
   }
 }

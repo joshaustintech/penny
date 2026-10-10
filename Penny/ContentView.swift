@@ -1,14 +1,24 @@
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-  @AppStorage("budgetMode") private var savedMode = ""
-  @AppStorage("monthlyIncomeMinor") private var savedIncome = 0
-  @AppStorage("currencyCode") private var savedCurrency = ""
+  @Environment(\.modelContext) private var context
+  @State private var months: [BudgetMonth] = []
+  @State private var entries: [LedgerEntry] = []
   @State private var selectedMode = BudgetMode.balanced
   @State private var income: Decimal = 0
+  @State private var saveError: String?
+
+  private var currentComponents: DateComponents {
+    Calendar.current.dateComponents([.year, .month], from: .now)
+  }
+
+  private var currentBudget: BudgetMonth? {
+    months.first { $0.year == currentComponents.year && $0.month == currentComponents.month }
+  }
 
   private var currency: String {
-    savedCurrency.isEmpty ? (Locale.current.currency?.identifier ?? "USD") : savedCurrency
+    currentBudget?.currencyCode ?? (Locale.current.currency?.identifier ?? "USD")
   }
 
   var body: some View {
@@ -18,11 +28,7 @@ struct ContentView: View {
           Text("Every penny has a purpose.")
             .font(.largeTitle.bold())
             .accessibilityAddTraits(.isHeader)
-          if savedMode.isEmpty {
-            setup
-          } else {
-            overview
-          }
+          if let currentBudget { overview(currentBudget) } else { setup }
         }
         .frame(maxWidth: 620, alignment: .leading)
         .padding()
@@ -30,6 +36,16 @@ struct ContentView: View {
       }
       .navigationTitle("Penny")
       .tint(Color(red: 0.16, green: 0.43, blue: 0.34))
+      .task { loadBudget() }
+    }
+    .alert(
+      "Could not save budget",
+      isPresented: Binding(
+        get: { saveError != nil }, set: { if !$0 { saveError = nil } })
+    ) {
+      Button("OK") { saveError = nil }
+    } message: {
+      Text(saveError ?? "Try again.")
     }
   }
 
@@ -70,17 +86,23 @@ struct ContentView: View {
     }
   }
 
-  private var overview: some View {
-    let mode = BudgetMode(rawValue: savedMode) ?? .balanced
+  private func overview(_ budget: BudgetMonth) -> some View {
+    let mode = BudgetMode(rawValue: budget.mode) ?? .balanced
+    let monthIncome = entries.filter {
+      $0.kind == "income"
+        && Calendar.current.isDate($0.occurredAt, equalTo: .now, toGranularity: .month)
+    }
     let amounts = try? Budget.allocate(
-      income: [
-        Money(minorUnits: Int64(savedIncome), currency: currency, fractionDigits: fractionDigits)
-      ],
+      income: monthIncome.map {
+        Money(
+          minorUnits: $0.amountMinor, currency: $0.currencyCode, fractionDigits: $0.fractionDigits)
+      },
       mode: mode)
+    let totalIncome = (amounts ?? []).reduce(Int64(0)) { $0 + $1.amount.minorUnits }
     return VStack(alignment: .leading, spacing: 18) {
       Text("Monthly take-home")
         .font(.headline)
-      Text(amount(savedIncome))
+      Text(amount(Int(totalIncome)))
         .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
       Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
         .foregroundStyle(.secondary)
@@ -122,9 +144,29 @@ struct ContentView: View {
   }
 
   private func saveBudget() {
-    guard let minorIncome, let storedIncome = Int(exactly: minorIncome) else { return }
-    savedIncome = storedIncome
-    savedCurrency = currency
-    savedMode = selectedMode.rawValue
+    guard let year = currentComponents.year, let month = currentComponents.month,
+      let minorIncome
+    else { return }
+    let budget = BudgetMonth(
+      year: year, month: month, mode: selectedMode.rawValue, currencyCode: currency)
+    let initialIncome = LedgerEntry(
+      amountMinor: minorIncome, currencyCode: currency, fractionDigits: fractionDigits,
+      kind: "income", category: "income")
+    do {
+      try BudgetStore(context: context).createBudget(budget, income: initialIncome)
+      loadBudget()
+    } catch {
+      saveError = error.localizedDescription
+    }
+  }
+
+  private func loadBudget() {
+    do {
+      let store = BudgetStore(context: context)
+      months = try store.months()
+      entries = try store.entries()
+    } catch {
+      saveError = error.localizedDescription
+    }
   }
 }

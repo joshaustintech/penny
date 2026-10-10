@@ -59,6 +59,24 @@ public struct BudgetStore {
     try context.fetch(FetchDescriptor<LedgerEntry>(sortBy: [SortDescriptor(\.occurredAt)]))
   }
 
+  public func months() throws -> [BudgetMonth] {
+    try context.fetch(
+      FetchDescriptor<BudgetMonth>(sortBy: [SortDescriptor(\.year), SortDescriptor(\.month)]))
+  }
+
+  public func createBudget(_ month: BudgetMonth, income: LedgerEntry) throws {
+    guard try !months().contains(where: { $0.year == month.year && $0.month == month.month })
+    else { throw StoreError.duplicateIdentifier }
+    context.insert(month)
+    context.insert(income)
+    do {
+      try context.save()
+    } catch {
+      context.rollback()
+      throw error
+    }
+  }
+
   public func save(_ entry: LedgerEntry) throws {
     guard try !entries().contains(where: { $0.id == entry.id }) else {
       throw StoreError.duplicateIdentifier
