@@ -6,6 +6,7 @@ struct TVContentView: View {
   let seedTestBudgetForUITests: Bool
   @Environment(\.modelContext) private var modelContext
   @Environment(\.scenePhase) private var scenePhase
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @AppStorage("privateCloudSyncEnabled") private var privateCloudSyncEnabled = false
   @AppStorage("privateCloudSyncError") private var cloudSyncError = ""
   @Query(sort: \BudgetMonth.year, order: .reverse) private var months: [BudgetMonth]
@@ -186,8 +187,8 @@ struct TVContentView: View {
     .frame(width: 280, height: 160, alignment: .leading)
     .padding(24)
     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
-    .scaleEffect(focusedCategory == category.category.rawValue ? 1.06 : 1)
-    .animation(.easeOut(duration: 0.15), value: focusedCategory)
+    .scaleEffect(!reduceMotion && focusedCategory == category.category.rawValue ? 1.06 : 1)
+    .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: focusedCategory)
     .accessibilityElement(children: .combine)
     .accessibilityLabel(
       "\(category.category.rawValue) remaining \(money(category.remaining.minorUnits, month.currencyCode, fractionDigits))"
