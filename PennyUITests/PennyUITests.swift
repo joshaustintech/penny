@@ -74,6 +74,13 @@ final class PennyUITests: XCTestCase {
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
     XCTAssertTrue(actualSpending.label.contains("$100.00"))
+    app.buttons["addEntryButton"].tap()
+    let overspendAmount = app.textFields["entryAmountField"]
+    XCTAssertTrue(overspendAmount.waitForExistence(timeout: 5))
+    enter("2500", in: overspendAmount, app: app)
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(app.staticTexts["Over budget"].waitForExistence(timeout: 5))
+    XCTAssertTrue(actualSpending.label.contains("$2,600.00"))
     let trendHeading = app.staticTexts["Spending through month"]
     for _ in 0..<4 where !trendHeading.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(trendHeading.isHittable)

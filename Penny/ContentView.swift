@@ -318,6 +318,14 @@ struct ContentView: View {
               : "\(amount(item.spent.minorUnits)) spent of \(amount(item.allocated.minorUnits))"
           )
           .foregroundStyle(.secondary)
+          if let status = budgetStatus(for: item) {
+            Label(
+              status,
+              systemImage: status == "Over budget" ? "exclamationmark.circle.fill" : "hourglass"
+            )
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(status == "Over budget" ? .red : .orange)
+          }
           Text("\(item.percent)% of income")
             .font(.caption)
         }
@@ -406,6 +414,15 @@ struct ContentView: View {
       Text(value).font(.title3.bold().monospacedDigit())
     }
     .accessibilityElement(children: .combine)
+  }
+
+  private func budgetStatus(for item: CategoryResult) -> String? {
+    if item.remaining.minorUnits < 0 { return "Over budget" }
+    guard item.allocated.minorUnits > 0 else { return nil }
+    let used =
+      item.category == .debt || item.category == .savings
+      ? item.contributed.minorUnits : item.spent.minorUnits
+    return used >= item.allocated.minorUnits - item.allocated.minorUnits / 5 ? "Near limit" : nil
   }
 
   private func plannedVsActual(_ report: MonthlyReport) -> some View {
