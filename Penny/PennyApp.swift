@@ -20,6 +20,7 @@ struct PennyApp: App {
         UserDefaults.standard.removeObject(forKey: "defaultBudgetMode")
         UserDefaults.standard.removeObject(forKey: "watchSharingEnabled")
         UserDefaults.standard.removeObject(forKey: "privateCloudSyncEnabled")
+        UserDefaults.standard.removeObject(forKey: "privateCloudSyncError")
         for suffix in ["", "-shm", "-wal"] {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }

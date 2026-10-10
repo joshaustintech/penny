@@ -17,6 +17,7 @@ struct PennyTVApp: App {
       let url = FileManager.default.temporaryDirectory.appendingPathComponent(
         "penny-tv-ui-tests.store")
       if arguments.contains("--reset-store") {
+        UserDefaults.standard.removeObject(forKey: "privateCloudSyncError")
         for suffix in ["", "-shm", "-wal"] {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }
