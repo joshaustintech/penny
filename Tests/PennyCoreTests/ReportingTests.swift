@@ -32,6 +32,8 @@ struct ReportingTests {
     #expect(report.categories[4].spent.minorUnits == 0)
     #expect(report.categories[4].remaining.minorUnits == 500)
     #expect(try BudgetReporting.spent(for: .needs, from: report).minorUnits == 800)
+    #expect(try BudgetReporting.contributed(for: .savings, from: report).minorUnits == 500)
+    #expect(try BudgetReporting.contributed(for: .debt, from: report).minorUnits == 700)
     #expect(try BudgetReporting.remaining(for: .wants, from: report).minorUnits == 2_000)
     #expect(try BudgetReporting.overallSpent(from: report).minorUnits == 800)
     #expect(try BudgetReporting.overallRemaining(from: report).minorUnits == 8_000)

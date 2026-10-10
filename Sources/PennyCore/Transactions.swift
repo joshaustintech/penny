@@ -23,6 +23,15 @@ public struct MonthlyReport: Equatable, Sendable {
 }
 
 public enum BudgetReporting {
+  public static func contributed(for category: BudgetCategory, from report: MonthlyReport) throws
+    -> Money
+  {
+    guard let result = report.categories.first(where: { $0.category == category }) else {
+      throw BudgetError.invalidTransaction
+    }
+    return result.contributed
+  }
+
   public static func isOverBudget(from report: MonthlyReport) -> Bool {
     report.categories.contains { $0.remaining.minorUnits < 0 }
   }

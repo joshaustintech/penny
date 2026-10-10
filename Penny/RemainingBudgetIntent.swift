@@ -54,6 +54,26 @@ struct BudgetStatusIntent: AppIntent {
   }
 }
 
+struct SavingsProgressIntent: AppIntent {
+  static let title: LocalizedStringResource = "Get savings progress"
+  static let description = IntentDescription("Reports savings contributions recorded this month.")
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    let answer = try ContributionProgress.answer(for: .savings, verb: "saved")
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
+struct DebtProgressIntent: AppIntent {
+  static let title: LocalizedStringResource = "Get debt progress"
+  static let description = IntentDescription("Reports debt payments recorded this month.")
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    let answer = try ContributionProgress.answer(for: .debt, verb: "put toward debt")
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
 enum BudgetCategoryParameter: String, AppEnum {
   case housing, needs, wants, giving, debt, savings
 
@@ -166,6 +186,15 @@ private enum CurrentMonthReport {
   }
 }
 
+private enum ContributionProgress {
+  static func answer(for category: BudgetCategory, verb: String) throws -> String {
+    guard let report = try CurrentMonthReport.load() else { return CurrentMonthReport.noBudget }
+    let amount = CurrentMonthReport.amount(
+      try BudgetReporting.contributed(for: category, from: report))
+    return "You've \(verb) \(amount) this month."
+  }
+}
+
 struct PennyShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(
@@ -188,5 +217,13 @@ struct PennyShortcuts: AppShortcutsProvider {
       intent: BudgetStatusIntent(),
       phrases: ["Am I over budget in \(.applicationName) this month?"],
       shortTitle: "Budget status", systemImageName: "checkmark.circle")
+    AppShortcut(
+      intent: SavingsProgressIntent(),
+      phrases: ["How much have I saved with \(.applicationName) this month?"],
+      shortTitle: "Savings progress", systemImageName: "banknote")
+    AppShortcut(
+      intent: DebtProgressIntent(),
+      phrases: ["How much have I put toward debt with \(.applicationName) this month?"],
+      shortTitle: "Debt progress", systemImageName: "creditcard")
   }
 }
