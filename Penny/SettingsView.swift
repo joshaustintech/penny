@@ -14,7 +14,8 @@ struct PennySettingsView: View {
   var body: some View {
     Form {
       Section {
-        Text("Appearance").font(.headline).accessibilityAddTraits(.isHeader)
+        Text("Appearance").font(.headline).foregroundStyle(.primary)
+          .accessibilityAddTraits(.isHeader)
         Picker("Appearance", selection: $appearance) {
           Text("System").tag("system")
           Text("Light").tag("light")
@@ -29,7 +30,8 @@ struct PennySettingsView: View {
         .accessibilityValue(appearance.capitalized)
       }
       Section {
-        Text("New budgets").font(.headline).accessibilityAddTraits(.isHeader)
+        Text("New budgets").font(.headline).foregroundStyle(.primary)
+          .accessibilityAddTraits(.isHeader)
         Picker("Default budget style", selection: $defaultBudgetMode) {
           Text("Balanced").tag(BudgetMode.balanced.rawValue)
           Text("Housing First").tag(BudgetMode.housingFirst.rawValue)
@@ -60,7 +62,8 @@ struct PennySettingsView: View {
           .fixedSize(horizontal: false, vertical: true)
       }
       Section {
-        Text("Privacy").font(.headline).accessibilityAddTraits(.isHeader)
+        Text("Privacy").font(.headline).foregroundStyle(.primary)
+          .accessibilityAddTraits(.isHeader)
         Label(
           privateCloudSyncEnabled
             ? "Budget data syncs through your private iCloud database."
