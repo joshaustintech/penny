@@ -347,18 +347,19 @@ struct ContentView: View {
             angle: .value("Allocation", item.allocated.minorUnits),
             innerRadius: .ratio(0.68), angularInset: 2
           )
-          .foregroundStyle(by: .value("Category", item.category.rawValue.capitalized))
+          .foregroundStyle(categoryColor(item.category))
           .accessibilityLabel(item.category.rawValue.capitalized)
           .accessibilityValue("\(item.percent)%")
         }
-        .chartLegend(position: .bottom, alignment: .leading)
-        .frame(height: 220)
+        .chartLegend(.hidden)
+        .frame(height: 200)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Budget allocation")
         .accessibilityValue(
           report.categories.map {
             "\($0.category.rawValue.capitalized): \($0.percent)% of income, \(amount($0.allocated.minorUnits))"
           }.joined(separator: ". "))
+        allocationLegend(report.categories)
         plannedVsActual(report)
       }
       ForEach(report?.categories ?? [], id: \.category) { item in
@@ -432,10 +433,22 @@ struct ContentView: View {
         )
         .chartXAxis {
           AxisMarks(values: history.map(\.date)) {
+            AxisGridLine()
+            AxisTick()
             AxisValueLabel(format: .dateTime.month(.abbreviated))
+              .font(.body)
+              .foregroundStyle(.primary)
           }
         }
-        .chartYAxis { AxisMarks(format: .currency(code: currency)) }
+        .chartYAxis {
+          AxisMarks { _ in
+            AxisGridLine()
+            AxisTick()
+            AxisValueLabel(format: .currency(code: currency))
+              .font(.body)
+              .foregroundStyle(.primary)
+          }
+        }
         .frame(height: 200)
         .accessibilityLabel("Monthly spending history")
         .accessibilityValue(
@@ -481,6 +494,39 @@ struct ContentView: View {
     return used >= item.allocated.minorUnits - item.allocated.minorUnits / 5 ? "Near limit" : nil
   }
 
+  private func categoryColor(_ category: BudgetCategory) -> Color {
+    switch category {
+    case .needs: .blue
+    case .wants: .green
+    case .giving: .orange
+    case .debt: .purple
+    case .savings: .red
+    case .housing: .brown
+    case .income: .gray
+    }
+  }
+
+  private func allocationLegend(_ categories: [CategoryResult]) -> some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(spacing: 12) { allocationLegendItems(categories) }
+      LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), alignment: .leading)]) {
+        allocationLegendItems(categories)
+      }
+    }
+  }
+
+  @ViewBuilder private func allocationLegendItems(_ categories: [CategoryResult]) -> some View {
+    ForEach(categories, id: \.category) { item in
+      HStack(spacing: 5) {
+        Circle().fill(categoryColor(item.category)).frame(width: 8, height: 8)
+        Text(item.category.rawValue.capitalized)
+          .font(.body)
+          .foregroundStyle(.primary)
+      }
+      .accessibilityElement(children: .combine)
+    }
+  }
+
   private func plannedVsActual(_ report: MonthlyReport) -> some View {
     VStack(alignment: .leading, spacing: 8) {
       Text("Planned versus actual").font(.title2.bold())
@@ -509,7 +555,22 @@ struct ContentView: View {
         .accessibilityLabel("\(item.category.rawValue.capitalized) planned")
         .accessibilityValue(amount(item.allocated.minorUnits))
       }
-      .chartXAxis { AxisMarks(format: .currency(code: currency)) }
+      .chartXAxis {
+        AxisMarks { _ in
+          AxisGridLine()
+          AxisTick()
+          AxisValueLabel(format: .currency(code: currency))
+            .font(.body)
+            .foregroundStyle(.primary)
+        }
+      }
+      .chartYAxis {
+        AxisMarks { _ in
+          AxisGridLine()
+          AxisTick()
+          AxisValueLabel().font(.body).foregroundStyle(.primary)
+        }
+      }
       .frame(height: CGFloat(report.categories.count * 34))
       .accessibilityLabel("Planned versus actual")
       .accessibilityValue(
@@ -558,8 +619,22 @@ struct ContentView: View {
             .lineStyle(StrokeStyle(lineWidth: 2, dash: [6, 4]))
             .foregroundStyle(.secondary)
         }
-        .chartXAxis { AxisMarks(values: .stride(by: 5)) }
-        .chartYAxis { AxisMarks(format: .currency(code: budget.currencyCode)) }
+        .chartXAxis {
+          AxisMarks(values: .stride(by: 5)) { _ in
+            AxisGridLine()
+            AxisTick()
+            AxisValueLabel().font(.body).foregroundStyle(.primary)
+          }
+        }
+        .chartYAxis {
+          AxisMarks { _ in
+            AxisGridLine()
+            AxisTick()
+            AxisValueLabel(format: .currency(code: budget.currencyCode))
+              .font(.body)
+              .foregroundStyle(.primary)
+          }
+        }
         .chartXScale(domain: 1...max(1, throughDay))
         .frame(height: 190)
         .accessibilityLabel("Spending against monthly plan")
