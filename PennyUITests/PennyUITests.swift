@@ -38,6 +38,10 @@ final class PennyUITests: XCTestCase {
     app.buttons["Previous month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 10))
     XCTAssertTrue(app.staticTexts["$2,400.00"].exists)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "Penny budget overview"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
   }
 
   private func enter(_ value: String, in field: XCUIElement, app: XCUIApplication) {

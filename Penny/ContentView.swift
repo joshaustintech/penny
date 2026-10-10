@@ -1,3 +1,4 @@
+import Charts
 import SwiftData
 import SwiftUI
 
@@ -167,6 +168,20 @@ struct ContentView: View {
       }
       Text("Your monthly budget")
         .font(.title2.bold())
+      if let report, report.income.minorUnits > 0 {
+        Chart(report.categories, id: \.category) { item in
+          SectorMark(
+            angle: .value("Allocation", item.allocated.minorUnits),
+            innerRadius: .ratio(0.68), angularInset: 2
+          )
+          .foregroundStyle(by: .value("Category", item.category.rawValue.capitalized))
+          .accessibilityLabel(item.category.rawValue.capitalized)
+          .accessibilityValue("\(item.percent)%")
+        }
+        .chartLegend(position: .bottom, alignment: .leading)
+        .frame(height: 220)
+        .accessibilityLabel("Budget allocation")
+      }
       ForEach(report?.categories ?? [], id: \.category) { item in
         VStack(alignment: .leading, spacing: 8) {
           HStack {
