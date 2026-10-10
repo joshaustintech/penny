@@ -40,6 +40,12 @@
 		A00000000000000000000032 /* Transactions.swift in Sources watchOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* Transactions.swift */; };
 		A00000000000000000000033 /* WatchSync.swift in Sources iOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000019 /* WatchSync.swift */; };
 		A00000000000000000000034 /* Penny Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B00000000000000000000022 /* Penny Watch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A00000000000000000000035 /* PennyTVApp.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000023 /* PennyTVApp.swift */; };
+		A00000000000000000000036 /* TVContentView.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000024 /* TVContentView.swift */; };
+		A00000000000000000000037 /* Budget.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000003 /* Budget.swift */; };
+		A00000000000000000000038 /* Persistence.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* Persistence.swift */; };
+		A00000000000000000000039 /* Transactions.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* Transactions.swift */; };
+		A00000000000000000000040 /* WatchSnapshot.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000018 /* WatchSnapshot.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +71,9 @@
 		B00000000000000000000020 /* PennyWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PennyWatchApp.swift; sourceTree = "<group>"; };
 		B00000000000000000000021 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
 		B00000000000000000000022 /* PennyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PennyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B00000000000000000000023 /* PennyTVApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PennyTVApp.swift; sourceTree = "<group>"; };
+		B00000000000000000000024 /* TVContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVContentView.swift; sourceTree = "<group>"; };
+		B00000000000000000000025 /* Penny-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Penny-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,16 +81,18 @@
 		C00000000000000000000002 /* Frameworks macOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000023 /* AppIntents.framework in Frameworks macOS */, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000007 /* Frameworks UI tests */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000013 /* Frameworks watchOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000017 /* Frameworks tvOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* Penny */, D00000000000000000000003 /* PennyCore */, D00000000000000000000005 /* PennyUITests */, D00000000000000000000006 /* PennyMacUITests */, D00000000000000000000007 /* PennyWatch */, D00000000000000000000004 /* Products */, ); sourceTree = "<group>"; };
+		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* Penny */, D00000000000000000000003 /* PennyCore */, D00000000000000000000005 /* PennyUITests */, D00000000000000000000006 /* PennyMacUITests */, D00000000000000000000007 /* PennyWatch */, D00000000000000000000008 /* PennyTV */, D00000000000000000000004 /* Products */, ); sourceTree = "<group>"; };
 		D00000000000000000000002 /* Penny */ = {isa = PBXGroup; children = (B00000000000000000000001 /* PennyApp.swift */, B00000000000000000000002 /* ContentView.swift */, B00000000000000000000008 /* EntryForm.swift */, B00000000000000000000012 /* RemainingBudgetIntent.swift */, B00000000000000000000013 /* SettingsView.swift */, B00000000000000000000019 /* WatchSync.swift */, B00000000000000000000014 /* Assets.xcassets */, ); path = Penny; sourceTree = "<group>"; };
 		D00000000000000000000003 /* PennyCore */ = {isa = PBXGroup; children = (B00000000000000000000003 /* Budget.swift */, B00000000000000000000006 /* Persistence.swift */, B00000000000000000000007 /* Transactions.swift */, B00000000000000000000011 /* Export.swift */, B00000000000000000000018 /* WatchSnapshot.swift */, ); path = Sources/PennyCore; sourceTree = "<group>"; };
-		D00000000000000000000004 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000004 /* Penny-iOS.app */, B00000000000000000000005 /* Penny-macOS.app */, B00000000000000000000010 /* PennyUITests.xctest */, B00000000000000000000017 /* PennyMacUITests.xctest */, B00000000000000000000022 /* Penny Watch.app */, ); name = Products; sourceTree = "<group>"; };
+		D00000000000000000000004 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000004 /* Penny-iOS.app */, B00000000000000000000005 /* Penny-macOS.app */, B00000000000000000000010 /* PennyUITests.xctest */, B00000000000000000000017 /* PennyMacUITests.xctest */, B00000000000000000000022 /* Penny Watch.app */, B00000000000000000000025 /* Penny-tvOS.app */, ); name = Products; sourceTree = "<group>"; };
 		D00000000000000000000005 /* PennyUITests */ = {isa = PBXGroup; children = (B00000000000000000000009 /* PennyUITests.swift */, ); path = PennyUITests; sourceTree = "<group>"; };
 		D00000000000000000000006 /* PennyMacUITests */ = {isa = PBXGroup; children = (B00000000000000000000016 /* PennyMacUITests.swift */, ); path = PennyMacUITests; sourceTree = "<group>"; };
 		D00000000000000000000007 /* PennyWatch */ = {isa = PBXGroup; children = (B00000000000000000000020 /* PennyWatchApp.swift */, B00000000000000000000021 /* WatchContentView.swift */, ); path = PennyWatch; sourceTree = "<group>"; };
+		D00000000000000000000008 /* PennyTV */ = {isa = PBXGroup; children = (B00000000000000000000023 /* PennyTVApp.swift */, B00000000000000000000024 /* TVContentView.swift */, ); path = PennyTV; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -90,10 +101,11 @@
 		E00000000000000000000004 /* PennyUITests */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000012; buildPhases = (C00000000000000000000007, C00000000000000000000008, C00000000000000000000009, ); buildRules = (); dependencies = (E00000000000000000000006, ); name = PennyUITests; productName = PennyUITests; productReference = B00000000000000000000010; productType = "com.apple.product-type.bundle.ui-testing"; };
 		E00000000000000000000009 /* PennyMacUITests */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000013; buildPhases = (C00000000000000000000010, C00000000000000000000011, C00000000000000000000012, ); buildRules = (); dependencies = (E00000000000000000000008, ); name = PennyMacUITests; productName = PennyMacUITests; productReference = B00000000000000000000017; productType = "com.apple.product-type.bundle.ui-testing"; };
 		E00000000000000000000010 /* Penny-Watch */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000020; buildPhases = (C00000000000000000000013, C00000000000000000000014, C00000000000000000000015, ); buildRules = (); dependencies = (); name = "Penny-Watch"; productName = PennyWatch; productReference = B00000000000000000000022; productType = "com.apple.product-type.application"; };
+		E00000000000000000000013 /* Penny-tvOS */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000021; buildPhases = (C00000000000000000000017, C00000000000000000000018, C00000000000000000000019, ); buildRules = (); dependencies = (); name = "Penny-tvOS"; productName = Penny; productReference = B00000000000000000000025; productType = "com.apple.product-type.application"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		E00000000000000000000003 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2700; TargetAttributes = {E00000000000000000000001 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000002 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000004 = {CreatedOnToolsVersion = 27.0; TestTargetID = E00000000000000000000001; }; E00000000000000000000009 = {CreatedOnToolsVersion = 27.0; TestTargetID = E00000000000000000000002; }; E00000000000000000000010 = {CreatedOnToolsVersion = 27.0; }; }; }; buildConfigurationList = F00000000000000000000007; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base, ); mainGroup = D00000000000000000000001; productRefGroup = D00000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (E00000000000000000000001, E00000000000000000000002, E00000000000000000000004, E00000000000000000000009, E00000000000000000000010, ); };
+		E00000000000000000000003 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2700; TargetAttributes = {E00000000000000000000001 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000002 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000004 = {CreatedOnToolsVersion = 27.0; TestTargetID = E00000000000000000000001; }; E00000000000000000000009 = {CreatedOnToolsVersion = 27.0; TestTargetID = E00000000000000000000002; }; E00000000000000000000010 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000013 = {CreatedOnToolsVersion = 27.0; }; }; }; buildConfigurationList = F00000000000000000000007; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base, ); mainGroup = D00000000000000000000001; productRefGroup = D00000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (E00000000000000000000001, E00000000000000000000002, E00000000000000000000004, E00000000000000000000009, E00000000000000000000010, E00000000000000000000013, ); };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -109,6 +121,8 @@
 		C00000000000000000000014 /* Sources watchOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000025, A00000000000000000000026, A00000000000000000000029, A00000000000000000000030, A00000000000000000000031, A00000000000000000000032, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000015 /* Resources watchOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000016 /* Embed Watch Content */ = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; dstPath = "$(CONTENTS_FOLDER_PATH)/Watch"; dstSubfolderSpec = 16; files = (A00000000000000000000034, ); name = "Embed Watch Content"; runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000018 /* Sources tvOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000035, A00000000000000000000036, A00000000000000000000037, A00000000000000000000038, A00000000000000000000039, A00000000000000000000040, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000019 /* Resources tvOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -124,6 +138,8 @@
 		F00000000000000000000015 /* Mac UI tests Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.macuitests; PRODUCT_NAME = PennyMacUITests; SDKROOT = macosx; SUPPORTED_PLATFORMS = macosx; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = "Penny-macOS"; }; name = Release; };
 		F00000000000000000000018 /* Watch target Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Penny Watch"; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joshaustintech.penny.ios; INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.ios.watchkitapp; PRODUCT_NAME = PennyWatch; SDKROOT = watchos; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "watchos watchsimulator"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Debug; };
 		F00000000000000000000019 /* Watch target Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Penny Watch"; INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.joshaustintech.penny.ios; INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.ios.watchkitapp; PRODUCT_NAME = PennyWatch; SDKROOT = watchos; SKIP_INSTALL = YES; SUPPORTED_PLATFORMS = "watchos watchsimulator"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 4; WATCHOS_DEPLOYMENT_TARGET = 10.0; }; name = Release; };
+		F00000000000000000000022 /* tvOS target Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = Penny; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.tv; PRODUCT_NAME = Penny; SDKROOT = appletvos; SUPPORTED_PLATFORMS = "appletvos appletvsimulator"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 3; TVOS_DEPLOYMENT_TARGET = 17.0; }; name = Debug; };
+		F00000000000000000000023 /* tvOS target Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = Penny; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.tv; PRODUCT_NAME = Penny; SDKROOT = appletvos; SUPPORTED_PLATFORMS = "appletvos appletvsimulator"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 3; TVOS_DEPLOYMENT_TARGET = 17.0; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -133,6 +149,7 @@
 		F00000000000000000000012 /* UI tests Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000010, F00000000000000000000011, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		F00000000000000000000013 /* Mac UI tests Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000014, F00000000000000000000015, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		F00000000000000000000020 /* Watch Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000018, F00000000000000000000019, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		F00000000000000000000021 /* tvOS Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000022, F00000000000000000000023, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 		E00000000000000000000005 /* App test dependency proxy */ = {isa = PBXContainerItemProxy; containerPortal = E00000000000000000000003; proxyType = 1; remoteGlobalIDString = E00000000000000000000001; remoteInfo = "Penny-iOS"; };
 		E00000000000000000000006 /* App test dependency */ = {isa = PBXTargetDependency; target = E00000000000000000000001; targetProxy = E00000000000000000000005; };

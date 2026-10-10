@@ -6,8 +6,8 @@ app.
 
 | Capability | iOS/iPadOS | macOS | watchOS | tvOS | Penny status |
 | --- | --- | --- | --- | --- | --- |
-| SwiftData | 17+ | 14+ | 10+ | 17+ | Local models compile on iOS, macOS, and watchOS. TV target not added. |
-| Swift Charts | 16+ | 13+ | 9+ | 16+ | Current floors cover it; TV chart has not been built. |
+| SwiftData | 17+ | 14+ | 10+ | 17+ | Local models compile on all four targets; TV currently uses local storage only. |
+| Swift Charts | 16+ | 13+ | 9+ | 16+ | The TV category and history charts compile; rendered layout is pending runtime validation. |
 | CloudKit private database | Supported | Supported | Supported | Supported | Requires the CloudKit capability and an iCloud account. Not configured or used. |
 | App Intents | 16+ | 13+ | 9+ | 16+ | Penny intent currently builds only for iOS and macOS. |
 | App Shortcuts | Supported | Supported | Supported | Not supported | Keep shortcuts off tvOS; do not promise direct Penny Siri requests on Apple TV. |
