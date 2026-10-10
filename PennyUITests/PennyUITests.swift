@@ -41,8 +41,8 @@ final class PennyUITests: XCTestCase {
     let income = app.textFields["incomeField"]
     XCTAssertTrue(income.waitForExistence(timeout: 5))
     enter("1000", in: income, app: app)
-    app.scrollViews.firstMatch.swipeUp()
-    app.staticTexts["Every penny has a purpose."].tap()
+    app.buttons["dismissIncomeKeyboardButton"].tap()
+    XCTAssertFalse(app.keyboards.firstMatch.exists)
     try audit(app)
     app.buttons["settingsButton"].tap()
     try audit(app)
@@ -50,6 +50,19 @@ final class PennyUITests: XCTestCase {
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
     try audit(app)
+  }
+
+  func testIncomeKeyboardCanBeDismissed() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    let income = app.textFields["incomeField"]
+    XCTAssertTrue(income.waitForExistence(timeout: 5))
+    income.tap()
+    XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+    app.buttons["dismissIncomeKeyboardButton"].tap()
+    XCTAssertFalse(app.keyboards.firstMatch.exists)
+    XCTAssertTrue(app.buttons["createBudgetButton"].waitForExistence(timeout: 5))
   }
 
   func testSettingsAtLargestDynamicType() {

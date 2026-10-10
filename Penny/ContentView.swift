@@ -339,6 +339,8 @@ struct ContentView: View {
           .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
               Spacer()
+              Button("Done") { incomeFieldFocused = false }
+                .accessibilityIdentifier("dismissIncomeKeyboardButton")
               Button("Create budget", action: saveBudget)
                 .disabled(minorIncome == nil)
                 .accessibilityIdentifier("createBudgetButton")
