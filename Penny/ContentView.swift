@@ -2,6 +2,10 @@ import Charts
 import SwiftData
 import SwiftUI
 
+#if os(macOS)
+  import UniformTypeIdentifiers
+#endif
+
 struct ContentView: View {
   @Environment(\.modelContext) private var context
   @State private var months: [BudgetMonth] = []
@@ -14,6 +18,12 @@ struct ContentView: View {
   @State private var showingModeChange = false
   @State private var selectedEntry: LedgerEntry?
   @State private var pendingDelete: LedgerEntry?
+  #if os(macOS)
+    @State private var exportDocument: PennyTextDocument?
+    @State private var exportType: UTType = .plainText
+    @State private var exportFilename = ""
+    @State private var showingExporter = false
+  #endif
 
   private var currentComponents: DateComponents {
     Calendar.current.dateComponents([.year, .month], from: selectedMonth)
@@ -54,6 +64,14 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("addEntryButton")
           }
+          #if os(macOS)
+            ToolbarItem(placement: .primaryAction) {
+              Menu("Export", systemImage: "square.and.arrow.up") {
+                Button("Markdown report") { prepareExport(asCSV: false) }
+                Button("CSV transactions") { prepareExport(asCSV: true) }
+              }
+            }
+          #endif
         }
       }
       .sheet(isPresented: $showingEntry) {
@@ -75,9 +93,17 @@ struct ContentView: View {
         Button("Delete", role: .destructive, action: deletePendingEntry)
         Button("Cancel", role: .cancel) { pendingDelete = nil }
       }
+      #if os(macOS)
+        .fileExporter(
+          isPresented: $showingExporter, document: exportDocument, contentType: exportType,
+          defaultFilename: exportFilename
+        ) { result in
+          if case .failure(let error) = result { saveError = error.localizedDescription }
+        }
+      #endif
     }
     .alert(
-      "Could not save budget",
+      "Penny couldn't complete the action",
       isPresented: Binding(
         get: { saveError != nil }, set: { if !$0 { saveError = nil } })
     ) {
@@ -357,6 +383,38 @@ struct ContentView: View {
       saveError = error.localizedDescription
     }
   }
+
+  #if os(macOS)
+    private func prepareExport(asCSV: Bool) {
+      guard let currentBudget else { return }
+      let selectedEntries = entries.filter {
+        $0.dateComponents?.year == currentBudget.year
+          && $0.dateComponents?.month == currentBudget.month
+      }
+      let monthName = String(format: "%04d-%02d", currentBudget.year, currentBudget.month)
+      if asCSV {
+        exportDocument = PennyTextDocument(BudgetExport.csv(entries: selectedEntries))
+        exportType = .commaSeparatedText
+        exportFilename = "Penny-\(monthName)-transactions.csv"
+      } else {
+        let mode = BudgetMode(rawValue: currentBudget.mode) ?? .balanced
+        guard
+          let report = try? BudgetReporting.make(
+            entries: selectedEntries, currencyCode: currentBudget.currencyCode,
+            fractionDigits: fractionDigits, mode: mode),
+          let markdown = try? BudgetExport.markdown(
+            month: currentBudget, report: report, entries: selectedEntries)
+        else {
+          saveError = "Penny could not prepare this month's report."
+          return
+        }
+        exportDocument = PennyTextDocument(markdown)
+        exportType = .plainText
+        exportFilename = "Penny-\(monthName)-report.md"
+      }
+      showingExporter = exportDocument != nil
+    }
+  #endif
 }
 
 private struct MonthSpending: Identifiable {
@@ -364,3 +422,20 @@ private struct MonthSpending: Identifiable {
   let spent: Double
   var id: Date { date }
 }
+
+#if os(macOS)
+  private struct PennyTextDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.plainText, .commaSeparatedText] }
+    let text: String
+
+    init(_ text: String) { self.text = text }
+
+    init(configuration: ReadConfiguration) throws {
+      text = String(decoding: configuration.file.regularFileContents ?? Data(), as: UTF8.self)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+      FileWrapper(regularFileWithContents: Data(text.utf8))
+    }
+  }
+#endif
