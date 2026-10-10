@@ -241,7 +241,7 @@ private enum CurrentMonthReport {
   }
 
   private static func modelContainer() throws -> ModelContainer {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
     return try ModelContainer(for: schema, configurations: [configuration])
   }

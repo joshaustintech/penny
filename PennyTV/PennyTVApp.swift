@@ -6,7 +6,7 @@ struct PennyTVApp: App {
   private let container: ModelContainer
 
   init() {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     do {
       container = try ModelContainer(
         for: schema,

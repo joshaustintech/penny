@@ -9,7 +9,7 @@ struct PennyApp: App {
 
   init() {
     let arguments = ProcessInfo.processInfo.arguments
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     if arguments.contains("--ui-testing") {
       let url = FileManager.default.temporaryDirectory.appendingPathComponent(
         "penny-ui-tests.store")

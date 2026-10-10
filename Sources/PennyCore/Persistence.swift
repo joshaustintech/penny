@@ -71,6 +71,19 @@ public final class LedgerEntry {
   }
 }
 
+@Model
+public final class CloudTombstone {
+  public var id: UUID = UUID()
+  public var recordType: String = "PennyLedgerEntry"
+  public var deletedAt: Date = Date.now
+
+  public init(id: UUID, recordType: String = "PennyLedgerEntry", deletedAt: Date = .now) {
+    self.id = id
+    self.recordType = recordType
+    self.deletedAt = deletedAt
+  }
+}
+
 @MainActor
 public struct BudgetStore {
   private let context: ModelContext
@@ -90,6 +103,10 @@ public struct BudgetStore {
       FetchDescriptor<BudgetMonth>(sortBy: [SortDescriptor(\.year), SortDescriptor(\.month)]))
   }
 
+  public func tombstones() throws -> [CloudTombstone] {
+    try context.fetch(FetchDescriptor<CloudTombstone>(sortBy: [SortDescriptor(\.deletedAt)]))
+  }
+
   public func createBudget(_ month: BudgetMonth, income: LedgerEntry) throws {
     guard try !months().contains(where: { $0.year == month.year && $0.month == month.month })
     else { throw StoreError.duplicateIdentifier }
@@ -106,7 +123,9 @@ public struct BudgetStore {
   }
 
   public func save(_ entry: LedgerEntry) throws {
-    guard try !entries().contains(where: { $0.id == entry.id }) else {
+    guard try !entries().contains(where: { $0.id == entry.id }),
+      try !tombstones().contains(where: { $0.id == entry.id })
+    else {
       throw StoreError.duplicateIdentifier
     }
     try validate(entry)
@@ -122,7 +141,11 @@ public struct BudgetStore {
   public func recordWatchSpending(_ request: WatchSpendingRequest, at date: Date = .now) throws
     -> Bool
   {
-    if try entries().contains(where: { $0.id == request.id }) { return false }
+    if try entries().contains(where: { $0.id == request.id })
+      || tombstones().contains(where: { $0.id == request.id })
+    {
+      return false
+    }
     let month = try months().first { $0.year == request.year && $0.month == request.month }
     let current = Calendar.current.dateComponents([.year, .month], from: date)
     guard current.year == request.year, current.month == request.month,
@@ -199,6 +222,10 @@ public struct BudgetStore {
   }
 
   public func delete(_ entry: LedgerEntry) throws {
+    guard try entries().contains(where: { $0.id == entry.id }) else {
+      throw StoreError.missingEntry
+    }
+    context.insert(CloudTombstone(id: entry.id))
     context.delete(entry)
     do {
       try context.save()

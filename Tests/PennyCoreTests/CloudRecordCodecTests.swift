@@ -83,4 +83,21 @@ struct CloudRecordCodecTests {
     #expect(try CloudRecordCodec.entry(from: resolved).amountMinor == 100)
     #expect(resolved.recordID == server.recordID)
   }
+
+  @MainActor @Test func deletionRecordRetainsOnlyTombstoneData() throws {
+    let id = try #require(UUID(uuidString: "2D4AC950-4F33-4B2B-9DAE-8EC7021E4871"))
+    let deletedAt = Date(timeIntervalSince1970: 1_700_000_100)
+    let tombstone = CloudTombstone(id: id, deletedAt: deletedAt)
+    let zone = CKRecordZone.ID(zoneName: "Penny", ownerName: CKCurrentUserDefaultName)
+
+    let record = CloudRecordCodec.record(for: tombstone, zoneID: zone)
+    let decoded = try CloudRecordCodec.tombstone(from: record)
+
+    #expect(record.recordType == CloudRecordCodec.deletionType)
+    #expect(record.recordID.recordName != id.uuidString)
+    #expect(decoded.id == id)
+    #expect(decoded.deletedAt == deletedAt)
+    #expect(record["amountMinor"] == nil)
+    #expect(record["note"] == nil)
+  }
 }

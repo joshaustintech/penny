@@ -8,6 +8,7 @@ public enum CloudRecordCodecError: Error {
 public enum CloudRecordCodec {
   public static let budgetType = "PennyBudgetMonth"
   public static let entryType = "PennyLedgerEntry"
+  public static let deletionType = "PennyDeletion"
   public static let schemaVersion = 1
 
   public static func record(for month: BudgetMonth, zoneID: CKRecordZone.ID) -> CKRecord {
@@ -41,6 +42,17 @@ public enum CloudRecordCodec {
     record["calendarDate"] = entry.calendarDate as CKRecordValue
     record["createdAt"] = entry.createdAt as CKRecordValue
     record["updatedAt"] = entry.updatedAt as CKRecordValue
+    return record
+  }
+
+  public static func record(for tombstone: CloudTombstone, zoneID: CKRecordZone.ID) -> CKRecord {
+    let record = CKRecord(
+      recordType: deletionType,
+      recordID: CKRecord.ID(recordName: deletionName(tombstone.id), zoneID: zoneID))
+    record["schemaVersion"] = NSNumber(value: schemaVersion)
+    record["id"] = tombstone.id.uuidString as CKRecordValue
+    record["targetRecordType"] = tombstone.recordType as CKRecordValue
+    record["deletedAt"] = tombstone.deletedAt as CKRecordValue
     return record
   }
 
@@ -82,17 +94,41 @@ public enum CloudRecordCodec {
     return entry
   }
 
-  public static func resolve(client: CKRecord, server: CKRecord) throws -> CKRecord {
-    guard client.recordType == server.recordType, client.recordID == server.recordID,
-      let clientDate = date(client, "updatedAt"), let serverDate = date(server, "updatedAt")
+  public static func tombstone(from record: CKRecord) throws -> CloudTombstone {
+    guard record.recordType == deletionType,
+      integer(record, "schemaVersion") == schemaVersion,
+      let id = identifier(record), record.recordID.recordName == deletionName(id),
+      string(record, "targetRecordType") == entryType,
+      let deletedAt = date(record, "deletedAt")
     else { throw CloudRecordCodecError.malformedRecord }
+    return CloudTombstone(id: id, deletedAt: deletedAt)
+  }
+
+  public static func resolve(client: CKRecord, server: CKRecord) throws -> CKRecord {
+    guard client.recordType == server.recordType, client.recordID == server.recordID
+    else { throw CloudRecordCodecError.malformedRecord }
+    let clientDate: Date
+    let serverDate: Date
     switch client.recordType {
     case budgetType:
       _ = try budget(from: client)
       _ = try budget(from: server)
+      guard let clientUpdatedAt = date(client, "updatedAt"),
+        let serverUpdatedAt = date(server, "updatedAt")
+      else { throw CloudRecordCodecError.malformedRecord }
+      clientDate = clientUpdatedAt
+      serverDate = serverUpdatedAt
     case entryType:
       _ = try entry(from: client)
       _ = try entry(from: server)
+      guard let clientUpdatedAt = date(client, "updatedAt"),
+        let serverUpdatedAt = date(server, "updatedAt")
+      else { throw CloudRecordCodecError.malformedRecord }
+      clientDate = clientUpdatedAt
+      serverDate = serverUpdatedAt
+    case deletionType:
+      clientDate = try tombstone(from: client).deletedAt
+      serverDate = try tombstone(from: server).deletedAt
     default: throw CloudRecordCodecError.malformedRecord
     }
     guard clientDate > serverDate else { return server }
@@ -107,6 +143,8 @@ public enum CloudRecordCodec {
         "schemaVersion", "id", "amountMinor", "currencyCode", "fractionDigits", "kind",
         "category", "subcategory", "note", "occurredAt", "calendarDate", "createdAt", "updatedAt",
       ]
+    case deletionType:
+      fields = ["schemaVersion", "id", "targetRecordType", "deletedAt"]
     default: throw CloudRecordCodecError.malformedRecord
     }
     for field in fields { server[field] = client[field] }
@@ -121,6 +159,10 @@ public enum CloudRecordCodec {
   private static func identifier(_ record: CKRecord) -> UUID? {
     guard let value = string(record, "id"), let id = UUID(uuidString: value) else { return nil }
     return id
+  }
+
+  private static func deletionName(_ id: UUID) -> String {
+    "deleted-\(id.uuidString)"
   }
 
   private static func integer(_ record: CKRecord, _ key: String) -> Int? {

@@ -19,7 +19,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func createsBudgetAndIncomeTogether() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -34,7 +34,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func recordsWatchSpendingOnceInItsCurrentBudget() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -59,7 +59,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func rejectsStaleOrUnsupportedWatchSpending() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -78,12 +78,14 @@ struct PersistenceTests {
       category: "debt", note: nil)
 
     #expect(throws: StoreError.invalidEntry) { try store.recordWatchSpending(stale, at: date) }
-    #expect(throws: StoreError.invalidEntry) { try store.recordWatchSpending(unsupported, at: date) }
+    #expect(throws: StoreError.invalidEntry) {
+      try store.recordWatchSpending(unsupported, at: date)
+    }
     #expect(try store.entries().count == 1)
   }
 
   @MainActor @Test func storesAndDeletesLedgerEntries() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -95,10 +97,14 @@ struct PersistenceTests {
     #expect(try store.entries().map(\.id) == [entry.id])
     try store.delete(entry)
     #expect(try store.entries().isEmpty)
+    let tombstone = try #require(store.tombstones().first)
+    #expect(tombstone.id == entry.id)
+    #expect(tombstone.recordType == CloudRecordCodec.entryType)
+    #expect(tombstone.deletedAt > .distantPast)
   }
 
   @MainActor @Test func ordersEntriesByDateCreationAndStableIdentifier() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -121,7 +127,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func rejectsDuplicateIdentifiers() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -138,7 +144,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func rejectsInvalidLedgerCategory() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -151,7 +157,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func updatesExistingEntryWithoutChangingIdentifier() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
@@ -167,7 +173,7 @@ struct PersistenceTests {
   }
 
   @MainActor @Test func changingModePreservesRecordedEntryCategory() throws {
-    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
     let container = try ModelContainer(for: schema, configurations: [configuration])
     let store = BudgetStore(context: ModelContext(container))
