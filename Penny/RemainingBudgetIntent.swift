@@ -3,6 +3,7 @@ import Foundation
 import SwiftData
 
 struct RemainingBudgetIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Get remaining budget"
   static let description = IntentDescription(
     "Reports how much remains in this month's Penny budget.")
@@ -20,6 +21,7 @@ struct RemainingBudgetIntent: AppIntent {
 }
 
 struct SpentBudgetIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Get monthly spending"
   static let description = IntentDescription("Reports spending recorded in Penny this month.")
 
@@ -36,6 +38,7 @@ struct SpentBudgetIntent: AppIntent {
 }
 
 struct BudgetStatusIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Check budget status"
   static let description = IntentDescription(
     "Reports whether any Penny budget category is over budget.")
@@ -55,6 +58,7 @@ struct BudgetStatusIntent: AppIntent {
 }
 
 struct SavingsProgressIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Get savings progress"
   static let description = IntentDescription("Reports savings contributions recorded this month.")
 
@@ -65,6 +69,7 @@ struct SavingsProgressIntent: AppIntent {
 }
 
 struct DebtProgressIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Get debt progress"
   static let description = IntentDescription("Reports debt payments recorded this month.")
 
@@ -85,6 +90,7 @@ enum BudgetCategoryParameter: String, AppEnum {
 }
 
 struct CategoryRemainingIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Get category remaining amount"
   static let description = IntentDescription(
     "Reports remaining amount for a Penny budget category.")
@@ -126,6 +132,7 @@ enum SpendingCategoryParameter: String, AppEnum {
 }
 
 struct CategorySpentIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Get category spending"
   static let description = IntentDescription("Reports spending for a Penny category this month.")
   @Parameter(title: "Category") var category: SpendingCategoryParameter
@@ -156,6 +163,7 @@ struct CategorySpentIntent: AppIntent {
 }
 
 struct RecordTransactionIntent: AppIntent {
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
   static let title: LocalizedStringResource = "Record spending"
   static let description = IntentDescription("Records a confirmed Penny spending entry.")
   @Parameter(title: "Amount") var amount: IntentCurrencyAmount
