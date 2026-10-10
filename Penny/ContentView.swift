@@ -266,6 +266,12 @@ struct ContentView: View {
         .font(.headline)
       Text(amount(report?.income.minorUnits ?? 0))
         .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
+      if let report,
+        let spent = try? BudgetReporting.overallSpent(from: report),
+        let remaining = try? BudgetReporting.overallRemaining(from: report)
+      {
+        budgetSummary(spent: spent.minorUnits, remaining: remaining.minorUnits)
+      }
       Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
         .foregroundStyle(.secondary)
       Button("Change budget style", systemImage: "slider.horizontal.3") {
@@ -379,6 +385,27 @@ struct ContentView: View {
         )
       }
     }
+  }
+
+  private func budgetSummary(spent: Int64, remaining: Int64) -> some View {
+    HStack(alignment: .firstTextBaseline) {
+      summaryMetric("Actual spending", amount(spent))
+        .accessibilityIdentifier("actualSpendingSummary")
+      Spacer(minLength: 12)
+      summaryMetric("Left in plan", amount(remaining))
+        .accessibilityIdentifier("remainingPlanSummary")
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
+  }
+
+  private func summaryMetric(_ title: String, _ value: String) -> some View {
+    VStack(alignment: .leading, spacing: 6) {
+      Text(title).font(.subheadline).foregroundStyle(.secondary)
+      Text(value).font(.title3.bold().monospacedDigit())
+    }
+    .accessibilityElement(children: .combine)
   }
 
   private func plannedVsActual(_ report: MonthlyReport) -> some View {

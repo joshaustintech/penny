@@ -55,6 +55,8 @@ final class PennyUITests: XCTestCase {
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["$5,000.00"].exists)
+    let actualSpending = app.descendants(matching: .any)["actualSpendingSummary"]
+    XCTAssertTrue(actualSpending.label.contains("$0.00"))
     let plannedChart = app.staticTexts["Planned versus actual"]
     for _ in 0..<3 where !plannedChart.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(plannedChart.isHittable)
@@ -71,6 +73,7 @@ final class PennyUITests: XCTestCase {
     app.textFields["Note (optional)"].typeText("Groceries")
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
+    XCTAssertTrue(actualSpending.label.contains("$100.00"))
     let trendHeading = app.staticTexts["Spending through month"]
     for _ in 0..<4 where !trendHeading.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(trendHeading.isHittable)
