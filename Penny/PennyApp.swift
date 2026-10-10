@@ -14,6 +14,8 @@ struct PennyApp: App {
       let url = FileManager.default.temporaryDirectory.appendingPathComponent(
         "penny-ui-tests.store")
       if arguments.contains("--reset-store") {
+        UserDefaults.standard.removeObject(forKey: "appearance")
+        UserDefaults.standard.removeObject(forKey: "preferredCurrency")
         for suffix in ["", "-shm", "-wal"] {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }
