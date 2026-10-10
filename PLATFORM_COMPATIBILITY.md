@@ -13,4 +13,6 @@ Minimum targets: iOS/iPadOS 17, macOS 14, watchOS 10, tvOS 17. SwiftData sets th
 
 Verified locally with Xcode 27.0 and 27.0 SDKs. iOS 27 simulators are installed; watchOS 27 and tvOS 27 simulator runtimes are unavailable. A valid Apple Development certificate exists, but no Penny app target, provisioning profile, or CloudKit container is configured yet. These environment facts are not device or sync validation.
 
+The iOS and macOS builds extract eight App Intents and eight App Shortcuts each. Every intent requires authentication on the device running it. Metadata extraction is build evidence only; Siri voice execution and the HomePod Personal Requests pathway have not been exercised. Without Watch or Apple TV targets and a configured sync container, those platforms cannot yet show the user's iPhone budget.
+
 Apple references: [SwiftData sync](https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices), [App Shortcuts HIG](https://developer.apple.com/design/human-interface-guidelines/app-shortcuts), [App Intents](https://developer.apple.com/documentation/AppIntents).
