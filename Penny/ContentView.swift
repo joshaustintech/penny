@@ -272,13 +272,15 @@ struct ContentView: View {
         showingModeChange = true
       }
       .confirmationDialog(
-        "Change this month's budget?", isPresented: $showingModeChange, titleVisibility: .visible
+        "Change budget style?", isPresented: $showingModeChange, titleVisibility: .visible
       ) {
         if mode != .balanced { Button("Balanced") { changeMode(.balanced) } }
         if mode != .housingFirst { Button("Housing First") { changeMode(.housingFirst) } }
         Button("Cancel", role: .cancel) {}
       } message: {
-        Text("Category allocations will change. Recorded transactions stay the same.")
+        Text(
+          "Category allocations for \(selectedMonth.formatted(.dateTime.month(.wide).year())) will change. Recorded transactions stay the same."
+        )
       }
       Text("Your monthly budget")
         .font(.title2.bold())
