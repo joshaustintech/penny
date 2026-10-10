@@ -3,6 +3,10 @@ import SwiftData
 import SwiftUI
 
 struct TVContentView: View {
+  @Environment(\.modelContext) private var modelContext
+  @Environment(\.scenePhase) private var scenePhase
+  @AppStorage("privateCloudSyncEnabled") private var privateCloudSyncEnabled = false
+  @State private var cloudSyncError: String?
   @Query(sort: \BudgetMonth.year, order: .reverse) private var months: [BudgetMonth]
   @Query private var entries: [LedgerEntry]
   @FocusState private var focusedCategory: String?
@@ -26,11 +30,54 @@ struct TVContentView: View {
           ContentUnavailableView(
             "No budget on Apple TV", systemImage: "chart.bar.xaxis",
             description: Text(
-              "Create a budget on iPhone, iPad, or Mac. iCloud sync to Apple TV isn't available yet."
+              "Create a budget on iPhone, iPad, or Mac, then turn on iCloud sync in Settings."
             ))
         }
       }
       .navigationTitle("Penny")
+      .toolbar {
+        NavigationLink("Settings") { settings }
+      }
+    }
+    .task { await refreshCloudSync() }
+    .onChange(of: privateCloudSyncEnabled) { _, enabled in
+      Task {
+        if enabled {
+          await refreshCloudSync()
+        } else {
+          await PrivateCloudSync.shared.stop()
+          cloudSyncError = nil
+        }
+      }
+    }
+    .onChange(of: scenePhase) { _, phase in
+      if phase == .active { Task { await refreshCloudSync() } }
+    }
+  }
+
+  private var settings: some View {
+    Form {
+      Section("Privacy") {
+        Toggle("Sync with iCloud", isOn: $privateCloudSyncEnabled)
+          .accessibilityIdentifier("privateCloudSyncToggle")
+        Text(
+          "Syncs budgets and entries with your private iCloud database. Turning it off stops this device from syncing; existing cloud copies remain."
+        )
+        if let cloudSyncError { Text(cloudSyncError).foregroundStyle(.red) }
+        Button("Sync now") { Task { await refreshCloudSync() } }
+          .disabled(!privateCloudSyncEnabled)
+      }
+    }
+    .navigationTitle("Settings")
+  }
+
+  @MainActor private func refreshCloudSync() async {
+    guard privateCloudSyncEnabled else { return }
+    do {
+      try await PrivateCloudSync.shared.refresh(context: modelContext)
+      cloudSyncError = nil
+    } catch {
+      cloudSyncError = "iCloud sync failed: \(error.localizedDescription)"
     }
   }
 
