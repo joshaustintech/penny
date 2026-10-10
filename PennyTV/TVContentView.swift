@@ -3,6 +3,7 @@ import SwiftData
 import SwiftUI
 
 struct TVContentView: View {
+  let seedTestBudgetForUITests: Bool
   @Environment(\.modelContext) private var modelContext
   @Environment(\.scenePhase) private var scenePhase
   @AppStorage("privateCloudSyncEnabled") private var privateCloudSyncEnabled = false
@@ -39,7 +40,16 @@ struct TVContentView: View {
         NavigationLink("Settings") { settings }
       }
     }
-    .task { await refreshCloudSync() }
+    .task {
+      if seedTestBudgetForUITests {
+        do {
+          try seedTestBudget()
+        } catch {
+          fatalError("Penny TV could not seed UI test data: \(error)")
+        }
+      }
+      await refreshCloudSync()
+    }
     .onChange(of: privateCloudSyncEnabled) { _, enabled in
       Task {
         if enabled {
@@ -81,6 +91,29 @@ struct TVContentView: View {
     }
   }
 
+  @MainActor private func seedTestBudget() throws {
+    guard try modelContext.fetch(FetchDescriptor<BudgetMonth>()).isEmpty else { return }
+    let now = Date.now
+    let parts = Calendar.current.dateComponents([.year, .month], from: now)
+    guard let year = parts.year, let month = parts.month else { return }
+    modelContext.insert(
+      BudgetMonth(year: year, month: month, mode: "balanced", currencyCode: "USD"))
+    for (amount, kind, category, note) in [
+      (500_000, "income", "income", "Take-home pay"),
+      (90_000, "spending", "needs", "Groceries"),
+      (35_000, "spending", "wants", "Dining"),
+      (12_000, "spending", "giving", "Giving"),
+      (20_000, "debt", "debt", "Debt payment"),
+      (50_000, "savings", "savings", "Savings"),
+    ] {
+      modelContext.insert(
+        LedgerEntry(
+          amountMinor: Int64(amount), currencyCode: "USD", fractionDigits: 2,
+          kind: kind, category: category, occurredAt: now, note: note))
+    }
+    try modelContext.save()
+  }
+
   private func dashboard(_ month: BudgetMonth, _ report: MonthlyReport) -> some View {
     let remaining = try? BudgetReporting.overallRemaining(from: report)
     let remainingText =
@@ -96,6 +129,7 @@ struct TVContentView: View {
             Text(remainingText)
               .font(.system(size: 64, weight: .bold, design: .rounded).monospacedDigit())
               .accessibilityLabel("Remaining budget, \(remainingText)")
+              .accessibilityIdentifier("remainingBudgetValue")
           }
           categoryChart(report, month)
         }
@@ -154,6 +188,7 @@ struct TVContentView: View {
     .accessibilityLabel(
       "\(category.category.rawValue) remaining \(money(category.remaining.minorUnits, month.currencyCode, fractionDigits))"
     )
+    .accessibilityIdentifier("category-\(category.category.rawValue)")
   }
 
   private func historicalChart(currencyCode: String) -> some View {
