@@ -80,7 +80,9 @@ public struct BudgetStore {
   }
 
   public func entries() throws -> [LedgerEntry] {
-    try context.fetch(FetchDescriptor<LedgerEntry>(sortBy: [SortDescriptor(\.occurredAt)]))
+    try context.fetch(
+      FetchDescriptor<LedgerEntry>(
+        sortBy: [SortDescriptor(\.occurredAt), SortDescriptor(\.createdAt), SortDescriptor(\.id)]))
   }
 
   public func months() throws -> [BudgetMonth] {

@@ -48,6 +48,29 @@ struct PersistenceTests {
     #expect(try store.entries().isEmpty)
   }
 
+  @MainActor @Test func ordersEntriesByDateCreationAndStableIdentifier() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try ModelContainer(for: schema, configurations: [configuration])
+    let store = BudgetStore(context: ModelContext(container))
+    let date = try #require(
+      Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: 1)))
+    let first = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
+    let second = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000002"))
+    let third = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000003"))
+    let entries = [(third, date.addingTimeInterval(1)), (second, date), (first, date)]
+    for (id, createdAt) in entries {
+      let entry = LedgerEntry(
+        amountMinor: 100, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs", occurredAt: date)
+      entry.id = id
+      entry.createdAt = createdAt
+      try store.save(entry)
+    }
+
+    #expect(try store.entries().map(\.id) == [first, second, third])
+  }
+
   @MainActor @Test func rejectsDuplicateIdentifiers() throws {
     let schema = Schema([BudgetMonth.self, LedgerEntry.self])
     let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
