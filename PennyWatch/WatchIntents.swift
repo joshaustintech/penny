@@ -24,7 +24,7 @@ private enum WatchBudgetQuery {
 
   static func categoryLabel(_ category: String, _ snapshot: WatchBudgetSnapshot) -> String {
     category == "housing" && !snapshot.categories.contains { $0.category == "housing" }
-      ? "needs" : category
+      ? "needs, including housing" : category
   }
 }
 

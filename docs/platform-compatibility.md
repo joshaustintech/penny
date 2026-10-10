@@ -40,7 +40,7 @@ unverified. Apple says locked-device shortcuts that open an app ask the user to
 unlock that device.
 
 The built metadata contains eight App Intents and eight App Shortcuts for iOS,
-eight App Intents and no App Shortcuts for macOS, and two App Intents and two
+eight App Intents and no App Shortcuts for macOS, and four App Intents and four
 App Shortcuts for watchOS. This verifies build metadata, not Siri execution.
 
 See [Siri support](siri-support.md) for registered phrases and platform limits.

@@ -25,9 +25,13 @@ validated.
 ## Apple Watch
 
 Watch offers “How much money do I have left in Penny?” and “How much have I
-spent in Penny?” The answer uses the month named in the explicitly shared
-snapshot. The intents require local device authentication and do not speak
-transaction notes.
+spent in Penny?”, plus “How much is left in my [category] budget in Penny?” and
+“How much have I spent on [category] in Penny?” Remaining queries accept
+housing, needs, wants, giving, debt, or savings; spending queries accept
+housing, needs, wants, or giving. The answer uses the month named in the
+explicitly shared snapshot. The intents require local device authentication
+and do not speak transaction notes. A housing query reports Needs when the
+selected mode groups housing into that category.
 
 Paired Watch transfer and Siri invocation remain untested on hardware.
 
