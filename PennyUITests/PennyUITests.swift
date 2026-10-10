@@ -97,6 +97,29 @@ final class PennyUITests: XCTestCase {
     }
   }
 
+  func testSettingsBodyTextScalesWithDynamicType() {
+    let normalApp = XCUIApplication()
+    normalApp.launchArguments = ["--ui-testing", "--reset-store"]
+    normalApp.launch()
+    normalApp.buttons["settingsButton"].tap()
+    let label = "Sync is not a backup. Deleting an entry also deletes it from synced devices."
+    let normalText = normalApp.staticTexts[label]
+    XCTAssertTrue(normalText.waitForExistence(timeout: 5))
+    let normalHeight = normalText.frame.height
+    normalApp.terminate()
+
+    let largeApp = XCUIApplication()
+    largeApp.launchArguments = [
+      "--ui-testing", "--reset-store", "-UIPreferredContentSizeCategoryName",
+      "UICTContentSizeCategoryAccessibilityXXXL",
+    ]
+    largeApp.launch()
+    largeApp.buttons["settingsButton"].tap()
+    let largeText = largeApp.staticTexts[label]
+    scrollIntoView(largeText, in: largeApp)
+    XCTAssertGreaterThan(largeText.frame.height, normalHeight * 1.5)
+  }
+
   private func audit(_ app: XCUIApplication) throws {
     try app.performAccessibilityAudit { issue in
       print("AUDIT ISSUE: \(issue.detailedDescription)\n\(issue.element?.debugDescription ?? "")")
