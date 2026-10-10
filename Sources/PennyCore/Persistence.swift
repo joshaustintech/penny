@@ -81,16 +81,41 @@ public struct BudgetStore {
     guard try !entries().contains(where: { $0.id == entry.id }) else {
       throw StoreError.duplicateIdentifier
     }
+    guard let kind = TransactionKind(rawValue: entry.kind),
+      let category = BudgetCategory(rawValue: entry.category),
+      (0...4).contains(entry.fractionDigits), validCurrency(entry.currencyCode),
+      entry.amountMinor >= 0 || kind == .adjustment
+    else { throw StoreError.invalidEntry }
+    switch kind {
+    case .income: guard category == .income else { throw StoreError.invalidEntry }
+    case .savings: guard category == .savings else { throw StoreError.invalidEntry }
+    case .debt: guard category == .debt else { throw StoreError.invalidEntry }
+    case .spending, .refund, .adjustment:
+      guard [.housing, .needs, .wants, .giving].contains(category) else {
+        throw StoreError.invalidEntry
+      }
+    }
     context.insert(entry)
-    try context.save()
+    do {
+      try context.save()
+    } catch {
+      context.rollback()
+      throw error
+    }
   }
 
   public func delete(_ entry: LedgerEntry) throws {
     context.delete(entry)
     try context.save()
   }
+
+  private func validCurrency(_ code: String) -> Bool {
+    let bytes = code.utf8
+    return bytes.count == 3 && bytes.allSatisfy { (65...90).contains($0) }
+  }
 }
 
 public enum StoreError: Error, Equatable {
   case duplicateIdentifier
+  case invalidEntry
 }

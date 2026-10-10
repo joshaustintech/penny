@@ -51,4 +51,17 @@ struct PersistenceTests {
     try store.save(original)
     #expect(throws: StoreError.duplicateIdentifier) { try store.save(duplicate) }
   }
+
+  @MainActor @Test func rejectsInvalidLedgerCategory() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self])
+    let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+    let container = try ModelContainer(for: schema, configurations: [configuration])
+    let store = BudgetStore(context: ModelContext(container))
+    let invalid = LedgerEntry(
+      amountMinor: 10, currencyCode: "USD", fractionDigits: 2,
+      kind: "spending", category: "savings")
+
+    #expect(throws: StoreError.invalidEntry) { try store.save(invalid) }
+    #expect(try store.entries().isEmpty)
+  }
 }
