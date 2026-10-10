@@ -1,7 +1,7 @@
 # Siri and Shortcuts
 
 Penny uses App Intents. Build metadata confirms eight intents and eight App
-Shortcuts on iOS/iPadOS, and two snapshot queries and two App Shortcuts on
+Shortcuts on iOS/iPadOS, and four snapshot intents and four App Shortcuts on
 watchOS. Siri voice execution has not been tested on hardware.
 
 ## iPhone and iPad
