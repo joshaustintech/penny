@@ -64,10 +64,11 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
   }
 
   public func refresh(context: ModelContext) async throws {
-    guard engine != nil else {
+    guard let engine else {
       try await start(context: context)
       return
     }
+    try await engine.fetchChanges()
     let store = BudgetStore(context: context)
     var localRecords = try store.months().map { CloudRecordCodec.record(for: $0, zoneID: zoneID) }
     localRecords += try store.entries().map { CloudRecordCodec.record(for: $0, zoneID: zoneID) }
@@ -77,13 +78,13 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
       if client.recordType == CloudRecordCodec.deletionType,
         let deletedID = UUID(uuidString: client["id"] as? String ?? "")
       {
-        engine?.state.add(pendingRecordZoneChanges: [
+        engine.state.add(pendingRecordZoneChanges: [
           .deleteRecord(CKRecord.ID(recordName: deletedID.uuidString, zoneID: zoneID))
         ])
       }
       guard let server = records[id] else {
         records[id] = client
-        engine?.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
+        engine.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
         continue
       }
       guard let resolved = try? CloudRecordCodec.resolve(client: client, server: server) else {
@@ -91,12 +92,12 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
       }
       records[id] = resolved
       if recordDate(resolved) > recordDate(server) {
-        engine?.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
+        engine.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
       } else if recordDate(server) >= recordDate(client) {
         try apply(resolved)
       }
     }
-    try await engine?.sendChanges()
+    try await engine.sendChanges()
   }
 
   public func handleEvent(_ event: CKSyncEngine.Event, syncEngine: CKSyncEngine) async {
