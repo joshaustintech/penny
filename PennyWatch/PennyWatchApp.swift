@@ -48,9 +48,14 @@ final class WatchBudgetReceiver: NSObject, WCSessionDelegate {
 
   nonisolated private static func snapshot(from context: [String: Any]) -> WatchBudgetSnapshot? {
     guard context["sharingEnabled"] as? Bool == true,
-      let data = context["snapshot"] as? Data
-    else { return nil }
-    return try? JSONDecoder().decode(WatchBudgetSnapshot.self, from: data)
+      let data = context["snapshot"] as? Data,
+      let snapshot = try? JSONDecoder().decode(WatchBudgetSnapshot.self, from: data)
+    else {
+      UserDefaults.standard.removeObject(forKey: "watchBudgetSnapshot")
+      return nil
+    }
+    UserDefaults.standard.set(data, forKey: "watchBudgetSnapshot")
+    return snapshot
   }
 }
 
