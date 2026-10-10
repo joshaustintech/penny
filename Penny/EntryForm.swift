@@ -13,8 +13,17 @@ struct EntryForm: View {
 
   let mode: BudgetMode
   let currency: String
+  let monthDate: Date
   let existingEntry: LedgerEntry?
   let onSave: () -> Void
+
+  private var monthRange: ClosedRange<Date> {
+    let calendar = Calendar.current
+    let components = calendar.dateComponents([.year, .month], from: monthDate)
+    let start = calendar.date(from: components) ?? monthDate
+    let next = calendar.date(byAdding: .month, value: 1, to: start) ?? start
+    return start...next.addingTimeInterval(-1)
+  }
 
   init(
     mode: BudgetMode, currency: String, monthDate: Date = .now,
@@ -23,6 +32,7 @@ struct EntryForm: View {
   ) {
     self.mode = mode
     self.currency = currency
+    self.monthDate = monthDate
     self.existingEntry = existingEntry
     self.onSave = onSave
     _date = State(initialValue: monthDate)
@@ -87,7 +97,8 @@ struct EntryForm: View {
           .keyboardType(.decimalPad)
         #endif
         .accessibilityIdentifier("entryAmountField")
-        DatePicker("Date", selection: $date, displayedComponents: .date)
+        DatePicker("Date", selection: $date, in: monthRange, displayedComponents: .date)
+          .accessibilityHint("Choose a date in the selected budget month")
         TextField("Note (optional)", text: $note)
       }
       .navigationTitle(existingEntry == nil ? "Add entry" : "Edit entry")
