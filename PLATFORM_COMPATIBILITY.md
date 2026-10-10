@@ -15,4 +15,6 @@ Verified locally with Xcode 27.0 and 27.0 SDKs. iOS 27 simulators are installed;
 
 The iOS and macOS builds extract eight App Intents and eight App Shortcuts each. Every intent requires authentication on the device running it. Metadata extraction is build evidence only; Siri voice execution and the HomePod Personal Requests pathway have not been exercised. Without Watch or Apple TV targets and a configured sync container, those platforms cannot yet show the user's iPhone budget.
 
+The macOS export UI test target builds successfully. XCTest could not start its UI test on this host because Xcode Helper lacks the Accessibility/UI Automation permission; the test timed out before executing any test method. Apple documents that permission as a prerequisite for macOS UI testing.
+
 Apple references: [SwiftData sync](https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices), [App Shortcuts HIG](https://developer.apple.com/design/human-interface-guidelines/app-shortcuts), [App Intents](https://developer.apple.com/documentation/AppIntents).
