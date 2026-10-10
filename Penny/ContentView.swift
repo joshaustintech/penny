@@ -16,6 +16,7 @@ struct ContentView: View {
     Locale.current.currency?.identifier ?? "USD"
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
+  @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
   @State private var income: Decimal = 0
   @State private var selectedMonth = Date.now
@@ -73,7 +74,7 @@ struct ContentView: View {
         }
       #else
         if horizontalSizeClass == .regular {
-          NavigationSplitView {
+          NavigationSplitView(columnVisibility: $columnVisibility) {
             monthSidebar
           } detail: {
             dashboard
@@ -618,8 +619,14 @@ struct ContentView: View {
   private func loadBudget() {
     do {
       let store = BudgetStore(context: context)
-      months = try store.months()
+      let savedMonths = try store.months()
+      months = savedMonths
       entries = try store.entries()
+      #if os(iOS)
+        if horizontalSizeClass == .regular {
+          columnVisibility = savedMonths.isEmpty ? .detailOnly : .all
+        }
+      #endif
     } catch {
       saveError = error.localizedDescription
     }

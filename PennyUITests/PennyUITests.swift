@@ -2,6 +2,24 @@ import XCTest
 
 @MainActor
 final class PennyUITests: XCTestCase {
+  func testIPadSetupHidesEmptyMonthsSidebar() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    guard app.windows.firstMatch.frame.width > 700 else {
+      throw XCTSkip("The split view is only used on iPad.")
+    }
+    XCTAssertTrue(
+      app.staticTexts["This budget stays on this device. iCloud sync isn't configured yet."]
+        .waitForExistence(timeout: 5))
+    XCTAssertFalse(app.staticTexts["Months"].exists)
+    let income = app.textFields["incomeField"]
+    enter("1000", in: income, app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    app.buttons["createBudgetButton"].tap()
+    XCTAssertTrue(app.staticTexts["Months"].waitForExistence(timeout: 5))
+  }
+
   func testAccessibilityAuditForSetupSettingsAndBudget() throws {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
