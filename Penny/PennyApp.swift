@@ -4,6 +4,7 @@ import SwiftUI
 
 @main
 struct PennyApp: App {
+  @AppStorage("appearance") private var appearance = "system"
   private let container: ModelContainer
 
   init() {
@@ -35,7 +36,12 @@ struct PennyApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .preferredColorScheme(
+          appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
     }
     .modelContainer(container)
+    #if os(macOS)
+      Settings { PennySettingsView() }
+    #endif
   }
 }

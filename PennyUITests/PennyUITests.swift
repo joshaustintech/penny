@@ -2,6 +2,26 @@ import XCTest
 
 @MainActor
 final class PennyUITests: XCTestCase {
+  func testSettingsPersistAppearanceAndShowPrivacy() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    app.buttons["settingsButton"].tap()
+    XCTAssertTrue(app.staticTexts["Budget data stays on this device."].waitForExistence(timeout: 5))
+    let appearance = app.buttons["appearancePicker"]
+    XCTAssertTrue(appearance.waitForExistence(timeout: 5))
+    appearance.tap()
+    app.buttons["Dark"].tap()
+    app.buttons["settingsDoneButton"].tap()
+
+    app.terminate()
+    app.launchArguments = ["--ui-testing"]
+    app.launch()
+    app.buttons["settingsButton"].tap()
+    XCTAssertEqual(app.buttons["appearancePicker"].value as? String, "Dark")
+    XCTAssertTrue(app.staticTexts["Budget data stays on this device."].exists)
+  }
+
   func testOnboardAddSpendingAndReload() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]

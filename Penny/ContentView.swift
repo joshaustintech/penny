@@ -16,6 +16,7 @@ struct ContentView: View {
   @State private var selectedMonth = Date.now
   @State private var saveError: String?
   @State private var showingEntry = false
+  @State private var showingSettings = false
   @State private var showingModeChange = false
   @State private var selectedEntry: LedgerEntry?
   @State private var pendingDelete: LedgerEntry?
@@ -88,6 +89,16 @@ struct ContentView: View {
       .task { loadBudget() }
       .onChange(of: selectedMonth) { _, _ in income = 0 }
       .toolbar {
+        #if os(macOS)
+          ToolbarItem {
+            SettingsLink { Label("Settings", systemImage: "gearshape") }
+          }
+        #else
+          ToolbarItem(placement: .topBarTrailing) {
+            Button("Settings", systemImage: "gearshape") { showingSettings = true }
+              .accessibilityIdentifier("settingsButton")
+          }
+        #endif
         if currentBudget != nil {
           ToolbarItem(placement: .primaryAction) {
             Button("Add entry", systemImage: "plus") {
@@ -116,6 +127,19 @@ struct ContentView: View {
             onSave: loadBudget)
         }
       }
+      #if os(iOS)
+        .sheet(isPresented: $showingSettings) {
+          NavigationStack {
+            PennySettingsView()
+            .toolbar {
+              ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { showingSettings = false }
+                .accessibilityIdentifier("settingsDoneButton")
+              }
+            }
+          }
+        }
+      #endif
       .confirmationDialog(
         "Delete this entry?",
         isPresented: Binding(
