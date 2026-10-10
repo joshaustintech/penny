@@ -12,13 +12,15 @@ final class WatchBudgetReceiver: NSObject, WCSessionDelegate {
     guard WCSession.isSupported() else { return }
     let session = WCSession.default
     session.delegate = self
-    snapshot = Self.snapshot(from: session.receivedApplicationContext)
+    snapshot = ProcessInfo.processInfo.arguments.contains("--ui-testing")
+      ? Self.uiTestSnapshot() : Self.snapshot(from: session.receivedApplicationContext)
     session.activate()
   }
 
   nonisolated func session(
     _ session: WCSession, didReceiveApplicationContext context: [String: Any]
   ) {
+    guard !ProcessInfo.processInfo.arguments.contains("--ui-testing") else { return }
     let received = Self.snapshot(from: context)
     Task { @MainActor in snapshot = received }
   }
@@ -56,6 +58,19 @@ final class WatchBudgetReceiver: NSObject, WCSessionDelegate {
     }
     UserDefaults.standard.set(data, forKey: "watchBudgetSnapshot")
     return snapshot
+  }
+
+  private static func uiTestSnapshot() -> WatchBudgetSnapshot? {
+    let now = Date.now
+    let parts = Calendar.current.dateComponents([.year, .month], from: now)
+    guard let year = parts.year, let month = parts.month else { return nil }
+    let income = LedgerEntry(
+      amountMinor: 100_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "income", category: "income", occurredAt: now)
+    guard let report = try? BudgetReporting.make(
+      entries: [income], currencyCode: "USD", fractionDigits: 2, mode: .balanced)
+    else { return nil }
+    return try? WatchBudgetSnapshot(report: report, entries: [income], year: year, month: month)
   }
 }
 
