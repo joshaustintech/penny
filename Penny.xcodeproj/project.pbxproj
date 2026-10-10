@@ -27,6 +27,8 @@
 		A00000000000000000000019 /* SettingsView.swift in Sources macOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000013 /* SettingsView.swift */; };
 		A00000000000000000000020 /* Assets.xcassets in Resources iOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000014 /* Assets.xcassets */; };
 		A00000000000000000000021 /* Assets.xcassets in Resources macOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000014 /* Assets.xcassets */; };
+		A00000000000000000000022 /* AppIntents.framework in Frameworks iOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000015 /* AppIntents.framework */; };
+		A00000000000000000000023 /* AppIntents.framework in Frameworks macOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000015 /* AppIntents.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,11 +46,12 @@
 		B00000000000000000000012 /* RemainingBudgetIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemainingBudgetIntent.swift; sourceTree = "<group>"; };
 		B00000000000000000000013 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B00000000000000000000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B00000000000000000000015 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C00000000000000000000001 /* Frameworks iOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		C00000000000000000000002 /* Frameworks macOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000001 /* Frameworks iOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000022 /* AppIntents.framework in Frameworks iOS */, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000002 /* Frameworks macOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000023 /* AppIntents.framework in Frameworks macOS */, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000007 /* Frameworks UI tests */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
