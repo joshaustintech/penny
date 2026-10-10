@@ -7,7 +7,6 @@ final class PennyUITests: XCTestCase {
     app.launchArguments = ["--ui-testing", "--reset-store"]
     app.launch()
     app.buttons["settingsButton"].tap()
-    XCTAssertTrue(app.staticTexts["Budget data stays on this device."].waitForExistence(timeout: 5))
     let style = app.buttons["defaultBudgetModePicker"]
     XCTAssertTrue(style.waitForExistence(timeout: 5))
     XCTAssertEqual(style.value as? String, "Balanced")
@@ -24,6 +23,9 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(appearance.waitForExistence(timeout: 5))
     appearance.tap()
     app.buttons["Dark"].tap()
+    let privacy = app.staticTexts["Budget data stays on this device."]
+    for _ in 0..<4 where !privacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(privacy.isHittable)
     app.buttons["settingsDoneButton"].tap()
 
     app.terminate()
@@ -33,7 +35,9 @@ final class PennyUITests: XCTestCase {
     XCTAssertEqual(app.buttons["appearancePicker"].value as? String, "Dark")
     XCTAssertEqual(app.buttons["defaultBudgetModePicker"].value as? String, "Housing First")
     XCTAssertEqual(app.buttons["preferredCurrencyPicker"].value as? String, "UYU")
-    XCTAssertTrue(app.staticTexts["Budget data stays on this device."].exists)
+    let savedPrivacy = app.staticTexts["Budget data stays on this device."]
+    for _ in 0..<4 where !savedPrivacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(savedPrivacy.isHittable)
     app.buttons["settingsDoneButton"].tap()
     app.buttons["Previous month"].tap()
     let income = app.textFields["incomeField"]
