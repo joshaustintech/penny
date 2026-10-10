@@ -82,6 +82,37 @@ public enum CloudRecordCodec {
     return entry
   }
 
+  public static func resolve(client: CKRecord, server: CKRecord) throws -> CKRecord {
+    guard client.recordType == server.recordType, client.recordID == server.recordID,
+      let clientDate = date(client, "updatedAt"), let serverDate = date(server, "updatedAt")
+    else { throw CloudRecordCodecError.malformedRecord }
+    switch client.recordType {
+    case budgetType:
+      _ = try budget(from: client)
+      _ = try budget(from: server)
+    case entryType:
+      _ = try entry(from: client)
+      _ = try entry(from: server)
+    default: throw CloudRecordCodecError.malformedRecord
+    }
+    guard clientDate > serverDate else { return server }
+    let fields: [String]
+    switch client.recordType {
+    case budgetType:
+      fields = [
+        "schemaVersion", "id", "year", "month", "mode", "currencyCode", "createdAt", "updatedAt",
+      ]
+    case entryType:
+      fields = [
+        "schemaVersion", "id", "amountMinor", "currencyCode", "fractionDigits", "kind",
+        "category", "subcategory", "note", "occurredAt", "calendarDate", "createdAt", "updatedAt",
+      ]
+    default: throw CloudRecordCodecError.malformedRecord
+    }
+    for field in fields { server[field] = client[field] }
+    return server
+  }
+
   private static func valid(_ record: CKRecord) -> Bool {
     integer(record, "schemaVersion") == schemaVersion
       && identifier(record)?.uuidString == record.recordID.recordName.uppercased()

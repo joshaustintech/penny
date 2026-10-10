@@ -55,4 +55,32 @@ struct CloudRecordCodecTests {
 
     #expect(throws: CloudRecordCodecError.self) { try CloudRecordCodec.budget(from: record) }
   }
+
+  @MainActor @Test func newestRecordWinsWholeRecordConflictAndTieUsesServer() throws {
+    let id = try #require(UUID(uuidString: "B332B91A-D85C-4B5F-AEF1-8EA6FC13C2F4"))
+    let zone = CKRecordZone.ID(zoneName: "Penny", ownerName: CKCurrentUserDefaultName)
+    let serverEntry = LedgerEntry(
+      amountMinor: 200, currencyCode: "USD", fractionDigits: 2, kind: "spending",
+      category: "needs", note: "server")
+    serverEntry.id = id
+    serverEntry.updatedAt = Date(timeIntervalSince1970: 200)
+    let clientEntry = LedgerEntry(
+      amountMinor: 100, currencyCode: "USD", fractionDigits: 2, kind: "spending",
+      category: "needs", note: "client")
+    clientEntry.id = id
+    clientEntry.updatedAt = Date(timeIntervalSince1970: 200)
+    let server = CloudRecordCodec.record(for: serverEntry, zoneID: zone)
+    let tiedClient = CloudRecordCodec.record(for: clientEntry, zoneID: zone)
+
+    #expect(
+      try CloudRecordCodec.entry(
+        from: CloudRecordCodec.resolve(
+          client: tiedClient, server: server)
+      ).note == "server")
+    clientEntry.updatedAt = Date(timeIntervalSince1970: 300)
+    let newerClient = CloudRecordCodec.record(for: clientEntry, zoneID: zone)
+    let resolved = try CloudRecordCodec.resolve(client: newerClient, server: server)
+    #expect(try CloudRecordCodec.entry(from: resolved).amountMinor == 100)
+    #expect(resolved.recordID == server.recordID)
+  }
 }
