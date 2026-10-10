@@ -11,7 +11,9 @@ Minimum targets: iOS/iPadOS 17, macOS 14, watchOS 10, tvOS 17. SwiftData sets th
 | App Shortcuts | iOS, iPadOS, watchOS | Not supported on macOS or tvOS; macOS can expose App Intents to Shortcuts. |
 | Export | macOS | Use native save panels and UTF-8 files. |
 
-Verified locally with Xcode 27.0 and 27.0 SDKs. iOS 27 simulators are installed; watchOS 27 and tvOS 27 simulator runtimes are unavailable. A valid Apple Development certificate exists, but no Penny app target, provisioning profile, or CloudKit container is configured yet. These environment facts are not device or sync validation.
+Verified locally with Xcode 27.0 and 27.0 SDKs. iOS 27 simulators are installed; watchOS 27 and tvOS 27 simulator runtimes are unavailable. A valid Apple Development certificate exists, but Watch/tvOS app targets, provisioning profiles, and a CloudKit container are not configured. These environment facts are not device or sync validation.
+
+The `PennyCore` Swift package cross-compiles for arm64 watchOS 10 and tvOS 17. This verifies shared model and reporting code only; neither platform has a Penny app target yet.
 
 The iOS and macOS builds extract eight App Intents and eight App Shortcuts each. Every intent requires authentication on the device running it. Metadata extraction is build evidence only; Siri voice execution and the HomePod Personal Requests pathway have not been exercised. Without Watch or Apple TV targets and a configured sync container, those platforms cannot yet show the user's iPhone budget.
 
