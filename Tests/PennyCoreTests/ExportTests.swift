@@ -53,4 +53,24 @@ struct ExportTests {
     #expect(markdown.contains("&lt;img src=x onerror=alert(1)&gt; &amp; safe"))
     #expect(!markdown.contains("<img"))
   }
+
+  @Test func markdownKeepsLinksAndImagesInNotesAsText() throws {
+    let month = BudgetMonth(year: 2026, month: 10, mode: "balanced", currencyCode: "USD")
+    let income = LedgerEntry(
+      amountMinor: 1_000, currencyCode: "USD", fractionDigits: 2,
+      kind: "income", category: "income")
+    let entry = LedgerEntry(
+      amountMinor: 100, currencyCode: "USD", fractionDigits: 2,
+      kind: "spending", category: "needs",
+      note: "[private](https://example.com) ![tracker](https://example.com/image.png)")
+    let entries = [income, entry]
+    let report = try BudgetReporting.make(
+      entries: entries, currencyCode: "USD", fractionDigits: 2, mode: .balanced)
+
+    let markdown = try BudgetExport.markdown(month: month, report: report, entries: entries)
+
+    #expect(
+      markdown.contains(
+        "\\[private\\](https://example.com) !\\[tracker\\](https://example.com/image.png)"))
+  }
 }
