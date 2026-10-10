@@ -71,7 +71,13 @@ struct PennyApp: App {
 
   @MainActor private func refreshCloudSyncIfEnabled() async {
     guard UserDefaults.standard.bool(forKey: "privateCloudSyncEnabled") else { return }
-    try? await PrivateCloudSync.shared.refresh(context: container.mainContext)
+    do {
+      try await PrivateCloudSync.shared.refresh(context: container.mainContext)
+      UserDefaults.standard.removeObject(forKey: "privateCloudSyncError")
+    } catch {
+      UserDefaults.standard.set(
+        PrivateCloudSync.recoveryGuidance, forKey: "privateCloudSyncError")
+    }
   }
 }
 

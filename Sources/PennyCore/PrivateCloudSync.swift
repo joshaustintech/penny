@@ -5,6 +5,8 @@ import SwiftData
 @MainActor
 public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
   public static let shared = PrivateCloudSync()
+  public static let recoveryGuidance =
+    "Penny could not sync. Check your Apple Account and iCloud settings; your data remains on this device. Tap Sync now to retry."
   private let zoneID = CKRecordZone.default().zoneID
   private var context: ModelContext?
   private var engine: CKSyncEngine?
@@ -222,7 +224,12 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
 
   private func refreshAfterLocalChange() async {
     guard engine != nil, let context else { return }
-    try? await refresh(context: context)
+    do {
+      try await refresh(context: context)
+      UserDefaults.standard.removeObject(forKey: "privateCloudSyncError")
+    } catch {
+      UserDefaults.standard.set(Self.recoveryGuidance, forKey: "privateCloudSyncError")
+    }
   }
 
   private func cache(_ record: CKRecord) { records[record.recordID] = record }

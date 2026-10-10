@@ -9,7 +9,7 @@ struct PennySettingsView: View {
   @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
   @AppStorage("watchSharingEnabled") private var watchSharingEnabled = false
   @AppStorage("privateCloudSyncEnabled") private var privateCloudSyncEnabled = false
-  @State private var cloudSyncError: String?
+  @AppStorage("privateCloudSyncError") private var cloudSyncError = ""
 
   var body: some View {
     Form {
@@ -73,7 +73,11 @@ struct PennySettingsView: View {
         )
         .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
-        if let cloudSyncError { Text(cloudSyncError).foregroundStyle(.red) }
+        if !cloudSyncError.isEmpty {
+          Text(cloudSyncError)
+            .foregroundStyle(.red)
+            .accessibilityIdentifier("privateCloudSyncError")
+        }
         if privateCloudSyncEnabled {
           Button("Sync now") { Task { await refreshCloudSync() } }
         } else {
@@ -97,13 +101,13 @@ struct PennySettingsView: View {
         if enabled {
           do {
             try await PrivateCloudSync.shared.start(context: modelContext)
-            cloudSyncError = nil
+            cloudSyncError = ""
           } catch {
-            cloudSyncError = "iCloud sync failed: \(error.localizedDescription)"
+            cloudSyncError = PrivateCloudSync.recoveryGuidance
           }
         } else {
           await PrivateCloudSync.shared.stop()
-          cloudSyncError = nil
+          cloudSyncError = ""
         }
       }
     }
@@ -112,9 +116,9 @@ struct PennySettingsView: View {
   @MainActor private func refreshCloudSync() async {
     do {
       try await PrivateCloudSync.shared.refresh(context: modelContext)
-      cloudSyncError = nil
+      cloudSyncError = ""
     } catch {
-      cloudSyncError = "iCloud sync failed: \(error.localizedDescription)"
+      cloudSyncError = PrivateCloudSync.recoveryGuidance
     }
   }
 }

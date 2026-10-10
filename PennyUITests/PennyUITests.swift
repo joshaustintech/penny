@@ -131,6 +131,19 @@ final class PennyUITests: XCTestCase {
     XCTAssertEqual(sharing.value as? String, "1")
   }
 
+  func testSyncRecoveryGuidanceAppearsInSettings() {
+    let app = XCUIApplication()
+    app.launchArguments = [
+      "--ui-testing", "--reset-store", "-privateCloudSyncError",
+      "Penny could not sync. Check your Apple Account and iCloud settings.",
+    ]
+    app.launch()
+    app.buttons["settingsButton"].tap()
+    let error = app.staticTexts["privateCloudSyncError"]
+    XCTAssertTrue(error.waitForExistence(timeout: 5))
+    XCTAssertTrue(error.label.contains("Penny could not sync."))
+  }
+
   func testEditAndDeleteSpendingEntry() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
