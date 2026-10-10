@@ -23,6 +23,15 @@ public struct MonthlyReport: Equatable, Sendable {
 }
 
 public enum BudgetReporting {
+  public static func remaining(for category: BudgetCategory, from report: MonthlyReport) throws
+    -> Money
+  {
+    guard let result = report.categories.first(where: { $0.category == category }) else {
+      throw BudgetError.invalidTransaction
+    }
+    return result.remaining
+  }
+
   public static func overallSpent(from report: MonthlyReport) throws -> Money {
     var total: Int64 = 0
     for category in report.categories {

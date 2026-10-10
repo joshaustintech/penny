@@ -35,6 +35,48 @@ struct SpentBudgetIntent: AppIntent {
   }
 }
 
+enum BudgetCategoryParameter: String, AppEnum {
+  case housing, needs, wants, giving, debt, savings
+
+  static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Budget category")
+  static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
+    .housing: "Housing", .needs: "Needs", .wants: "Wants", .giving: "Giving",
+    .debt: "Debt", .savings: "Savings",
+  ]
+}
+
+struct CategoryRemainingIntent: AppIntent {
+  static let title: LocalizedStringResource = "Get category remaining amount"
+  static let description = IntentDescription(
+    "Reports remaining amount for a Penny budget category.")
+  @Parameter(title: "Category") var category: BudgetCategoryParameter
+  static var parameterSummary: some ParameterSummary {
+    Summary("Get remaining amount for \(\.$category)")
+  }
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let report = try CurrentMonthReport.load() else {
+      return .result(
+        value: CurrentMonthReport.noBudget,
+        dialog: IntentDialog(stringLiteral: CurrentMonthReport.noBudget))
+    }
+    guard var selected = BudgetCategory(rawValue: category.rawValue) else {
+      throw BudgetError.invalidTransaction
+    }
+    let combinedHousing =
+      selected == .housing
+      && !report.categories.contains {
+        $0.category == .housing
+      }
+    if combinedHousing { selected = .needs }
+    let amount = CurrentMonthReport.amount(
+      try BudgetReporting.remaining(for: selected, from: report))
+    let label = combinedHousing ? "needs, including housing" : category.rawValue
+    let answer = "You have \(amount) left for \(label) this month."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
 private enum CurrentMonthReport {
   static let noBudget = "No Penny budget is set up for this month."
 
@@ -76,5 +118,9 @@ struct PennyShortcuts: AppShortcutsProvider {
       intent: SpentBudgetIntent(),
       phrases: ["How much have I spent in \(.applicationName) this month?"],
       shortTitle: "Monthly spending", systemImageName: "dollarsign.circle")
+    AppShortcut(
+      intent: CategoryRemainingIntent(),
+      phrases: ["How much is left for \(\.$category) in \(.applicationName) this month?"],
+      shortTitle: "Category remaining", systemImageName: "chart.pie")
   }
 }
