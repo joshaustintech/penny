@@ -1,8 +1,17 @@
+import Foundation
 import Testing
 
 @testable import PennyCore
 
 struct BudgetTests {
+  @Test func convertsVoiceAmountExactlyToMinorUnits() throws {
+    #expect(try Money.minorUnits(for: Decimal(string: "12.34")!, fractionDigits: 2) == 1_234)
+    #expect(try Money.minorUnits(for: Decimal(12), fractionDigits: 0) == 12)
+    #expect(throws: BudgetError.invalidTransaction) {
+      try Money.minorUnits(for: Decimal(string: "1.001")!, fractionDigits: 2)
+    }
+  }
+
   @Test func modesAllocateAllIncomeWithDeterministicRounding() throws {
     let income = [Money(minorUnits: 10_001, currency: "USD", fractionDigits: 2)]
     for mode in BudgetMode.allCases {

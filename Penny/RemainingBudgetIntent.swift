@@ -155,6 +155,47 @@ struct CategorySpentIntent: AppIntent {
   }
 }
 
+struct RecordTransactionIntent: AppIntent {
+  static let title: LocalizedStringResource = "Record spending"
+  static let description = IntentDescription("Records a confirmed Penny spending entry.")
+  @Parameter(title: "Amount") var amount: IntentCurrencyAmount
+  @Parameter(title: "What was it for") var note: String
+  @Parameter(title: "Category") var category: SpendingCategoryParameter
+  static var parameterSummary: some ParameterSummary {
+    Summary("Record \(\.$amount) for \(\.$note) in \(\.$category)")
+  }
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let report = try CurrentMonthReport.load() else {
+      return .result(
+        value: CurrentMonthReport.noBudget,
+        dialog: IntentDialog(stringLiteral: CurrentMonthReport.noBudget))
+    }
+    let note = note.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !note.isEmpty, note.count <= 80,
+      let category = BudgetCategory(rawValue: category.rawValue)
+    else { throw BudgetError.invalidTransaction }
+    guard amount.currencyCode == report.income.currency else {
+      throw BudgetError.incompatibleMoney
+    }
+    let minorUnits = try Money.minorUnits(
+      for: amount.amount, fractionDigits: report.income.fractionDigits)
+    let money = Money(
+      minorUnits: minorUnits, currency: report.income.currency,
+      fractionDigits: report.income.fractionDigits)
+    let confirmation =
+      "Record \(CurrentMonthReport.amount(money)) for \(note) under \(category.rawValue)?"
+    if #available(iOS 18, macOS 15, *) {
+      try await requestConfirmation(dialog: IntentDialog(stringLiteral: confirmation))
+    } else {
+      try await requestConfirmation()
+    }
+    try await CurrentMonthReport.save(amount: money, category: category, note: note)
+    let answer = "Recorded \(CurrentMonthReport.amount(money)) for \(note)."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
 private enum CurrentMonthReport {
   static let noBudget = "No Penny budget is set up for this month."
 
@@ -178,6 +219,17 @@ private enum CurrentMonthReport {
       fractionDigits: formatter.maximumFractionDigits,
       mode: BudgetMode(rawValue: month.mode) ?? .balanced)
     return report
+  }
+
+  @MainActor
+  static func save(amount: Money, category: BudgetCategory, note: String) throws {
+    let container = try ModelContainer(for: BudgetMonth.self, LedgerEntry.self)
+    let context = ModelContext(container)
+    try BudgetStore(context: context).save(
+      LedgerEntry(
+        amountMinor: amount.minorUnits, currencyCode: amount.currency,
+        fractionDigits: amount.fractionDigits, kind: TransactionKind.spending.rawValue,
+        category: category.rawValue, note: note))
   }
 
   static func amount(_ money: Money) -> String {
@@ -225,5 +277,9 @@ struct PennyShortcuts: AppShortcutsProvider {
       intent: DebtProgressIntent(),
       phrases: ["How much have I put toward debt with \(.applicationName) this month?"],
       shortTitle: "Debt progress", systemImageName: "creditcard")
+    AppShortcut(
+      intent: RecordTransactionIntent(),
+      phrases: ["Record spending in \(.applicationName)"],
+      shortTitle: "Record spending", systemImageName: "plus.circle")
   }
 }

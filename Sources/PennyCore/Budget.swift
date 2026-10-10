@@ -1,3 +1,5 @@
+import Foundation
+
 public enum BudgetMode: String, CaseIterable, Sendable {
   case balanced, housingFirst
 
@@ -20,6 +22,21 @@ public struct Money: Equatable, Sendable {
     self.minorUnits = minorUnits
     self.currency = currency
     self.fractionDigits = fractionDigits
+  }
+
+  public static func minorUnits(for amount: Decimal, fractionDigits: Int) throws -> Int64 {
+    guard amount > 0, (0...4).contains(fractionDigits) else {
+      throw BudgetError.invalidTransaction
+    }
+    let scaled = amount * Decimal(sign: .plus, exponent: fractionDigits, significand: 1)
+    guard scaled <= NSDecimalNumber(value: Int64.max).decimalValue else {
+      throw BudgetError.overflow
+    }
+    var rounded = Decimal()
+    var value = scaled
+    NSDecimalRound(&rounded, &value, 0, .plain)
+    guard rounded == scaled else { throw BudgetError.invalidTransaction }
+    return NSDecimalNumber(decimal: scaled).int64Value
   }
 }
 
