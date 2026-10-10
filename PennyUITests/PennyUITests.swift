@@ -183,6 +183,9 @@ final class PennyUITests: XCTestCase {
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["$5,000.00"].exists)
+    let allocation = app.descendants(matching: .any)["Budget allocation"]
+    XCTAssertTrue(allocation.waitForExistence(timeout: 5))
+    XCTAssertTrue((allocation.value as? String ?? "").contains("Needs: 50% of income"))
     let actualSpending = app.descendants(matching: .any)["actualSpendingSummary"]
     XCTAssertTrue(actualSpending.label.contains("$0.00"))
     let plannedChart = app.staticTexts["Planned versus actual"]

@@ -352,7 +352,12 @@ struct ContentView: View {
         }
         .chartLegend(position: .bottom, alignment: .leading)
         .frame(height: 220)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("Budget allocation")
+        .accessibilityValue(
+          report.categories.map {
+            "\($0.category.rawValue.capitalized): \($0.percent)% of income, \(amount($0.allocated.minorUnits))"
+          }.joined(separator: ". "))
         plannedVsActual(report)
       }
       ForEach(report?.categories ?? [], id: \.category) { item in
