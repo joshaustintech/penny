@@ -75,8 +75,11 @@ final class PennyUITests: XCTestCase {
     let cloudSync = app.switches["privateCloudSyncToggle"]
     XCTAssertTrue(cloudSync.isHittable)
     XCTAssertEqual(cloudSync.value as? String, "0")
-    XCTAssertFalse(app.buttons["Sync now"].isEnabled)
+    let syncPrompt = app.staticTexts["Turn on iCloud sync to sync now."]
+    for _ in 0..<4 where !syncPrompt.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(syncPrompt.isHittable)
     let watchSharing = app.switches["watchSharingToggle"]
+    for _ in 0..<4 where !watchSharing.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(watchSharing.isHittable)
     XCTAssertEqual(watchSharing.value as? String, "0")
     watchSharing.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()

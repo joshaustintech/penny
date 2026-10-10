@@ -70,10 +70,12 @@ struct PennySettingsView: View {
           "Syncs budgets and entries with your private iCloud database. Turning it off stops this device from syncing; existing cloud copies remain."
         )
         if let cloudSyncError { Text(cloudSyncError).foregroundStyle(.red) }
-        Button("Sync now") {
-          Task { await refreshCloudSync() }
+        if privateCloudSyncEnabled {
+          Button("Sync now") { Task { await refreshCloudSync() } }
+        } else {
+          Text("Turn on iCloud sync to sync now.")
+            .foregroundStyle(.primary)
         }
-        .disabled(!privateCloudSyncEnabled)
         #if os(iOS)
           Toggle("Share current budget with Apple Watch", isOn: $watchSharingEnabled)
             .accessibilityIdentifier("watchSharingToggle")
