@@ -27,6 +27,17 @@ final class PennyTVUITests: XCTestCase {
     XCTAssertTrue(wants.hasFocus)
   }
 
+  func testStorageOpenFailureShowsRecoveryMessage() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--ui-testing-storage-error"]
+    app.launchEnvironment["PENNY_UI_TESTING"] = "1"
+    app.launch()
+    XCTAssertTrue(app.staticTexts["Budget Data Unavailable"].waitForExistence(timeout: 5))
+    XCTAssertTrue(
+      app.staticTexts["Penny couldn't open your saved budgets. Restart the app to try again."]
+        .exists)
+  }
+
   func testSyncRecoveryGuidanceAppearsInSettings() {
     let app = XCUIApplication()
     app.launchArguments = [
