@@ -34,6 +34,13 @@ final class PennyUITests: XCTestCase {
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["$5,000.00"].exists)
+    let plannedChart = app.staticTexts["Planned versus actual"]
+    for _ in 0..<3 where !plannedChart.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(plannedChart.isHittable)
+    let chartScreenshot = XCTAttachment(screenshot: app.screenshot())
+    chartScreenshot.name = "Penny planned versus actual"
+    chartScreenshot.lifetime = .keepAlways
+    add(chartScreenshot)
 
     app.buttons["addEntryButton"].tap()
     let entryAmount = app.textFields["entryAmountField"]

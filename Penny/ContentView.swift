@@ -278,6 +278,7 @@ struct ContentView: View {
         .chartLegend(position: .bottom, alignment: .leading)
         .frame(height: 220)
         .accessibilityLabel("Budget allocation")
+        plannedVsActual(report)
       }
       ForEach(report?.categories ?? [], id: \.category) { item in
         VStack(alignment: .leading, spacing: 8) {
@@ -355,6 +356,44 @@ struct ContentView: View {
           description: Text("Add another budget month to compare spending.")
         )
       }
+    }
+  }
+
+  private func plannedVsActual(_ report: MonthlyReport) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("Planned versus actual").font(.title2.bold())
+      Text("Bars show actual use; square marks show each plan.")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+      Chart(report.categories, id: \.category) { item in
+        let planned = Double(item.allocated.minorUnits) / pow(10, Double(fractionDigits))
+        let actualAmount =
+          item.category == .debt || item.category == .savings
+          ? item.contributed.minorUnits : item.spent.minorUnits
+        let actual = Double(actualAmount) / pow(10, Double(fractionDigits))
+        BarMark(
+          x: .value("Actual", actual),
+          y: .value("Category", item.category.rawValue.capitalized)
+        )
+        .foregroundStyle(item.remaining.minorUnits < 0 ? Color.red : Color.green)
+        .accessibilityLabel("\(item.category.rawValue.capitalized) actual")
+        .accessibilityValue(amount(actualAmount))
+        PointMark(
+          x: .value("Planned", planned),
+          y: .value("Category", item.category.rawValue.capitalized)
+        )
+        .symbol(.square)
+        .foregroundStyle(.primary)
+        .accessibilityLabel("\(item.category.rawValue.capitalized) planned")
+        .accessibilityValue(amount(item.allocated.minorUnits))
+      }
+      .chartXAxis { AxisMarks(format: .currency(code: currency)) }
+      .frame(height: CGFloat(report.categories.count * 34))
+      .accessibilityLabel("Planned versus actual")
+      .accessibilityValue(
+        report.categories.map {
+          "\($0.category.rawValue.capitalized): actual \(amount($0.category == .debt || $0.category == .savings ? $0.contributed.minorUnits : $0.spent.minorUnits)), planned \(amount($0.allocated.minorUnits))"
+        }.joined(separator: ". "))
     }
   }
 
