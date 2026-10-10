@@ -105,6 +105,9 @@ struct ContentView: View {
               selectedEntry = nil
               showingEntry = true
             }
+            #if os(macOS)
+              .keyboardShortcut("n", modifiers: .command)
+            #endif
             .accessibilityIdentifier("addEntryButton")
           }
           #if os(macOS)
