@@ -9,6 +9,37 @@ struct ReportingTests {
     #expect(WatchBudgetSnapshot.total([Int64.max, -1]) == Int64.max - 1)
   }
 
+  @Test func watchSnapshotAnswersCategoryQueriesForBothModes() throws {
+    let balancedEntries = [
+      LedgerEntry(
+        amountMinor: 10_000, currencyCode: "USD", fractionDigits: 2,
+        kind: "income", category: "income"),
+      LedgerEntry(
+        amountMinor: 500, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs"),
+    ]
+    let balanced = try BudgetReporting.make(
+      entries: balancedEntries, currencyCode: "USD", fractionDigits: 2, mode: .balanced)
+    let balancedSnapshot = try WatchBudgetSnapshot(
+      report: balanced, entries: balancedEntries, year: 2026, month: 10)
+    #expect(balancedSnapshot.remainingMinor(for: "housing") == 4_500)
+    #expect(balancedSnapshot.spentMinor(for: "housing") == 500)
+    #expect(balancedSnapshot.spentMinor(for: "savings") == nil)
+
+    let housingEntries = [
+      balancedEntries[0],
+      LedgerEntry(
+        amountMinor: 700, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "housing"),
+    ]
+    let housingReport = try BudgetReporting.make(
+      entries: housingEntries, currencyCode: "USD", fractionDigits: 2, mode: .housingFirst)
+    let housingSnapshot = try WatchBudgetSnapshot(
+      report: housingReport, entries: housingEntries, year: 2026, month: 10)
+    #expect(housingSnapshot.remainingMinor(for: "housing") == 4_300)
+    #expect(housingSnapshot.spentMinor(for: "housing") == 700)
+  }
+
   @Test func reportsNetSpendingAndSeparateSavingsAndDebtProgress() throws {
     let entries = [
       LedgerEntry(

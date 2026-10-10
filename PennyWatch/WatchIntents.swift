@@ -21,6 +21,30 @@ private enum WatchBudgetQuery {
     else { return "\(snapshot.month)/\(snapshot.year)" }
     return date.formatted(.dateTime.month(.wide).year())
   }
+
+  static func categoryLabel(_ category: String, _ snapshot: WatchBudgetSnapshot) -> String {
+    category == "housing" && !snapshot.categories.contains { $0.category == "housing" }
+      ? "needs" : category
+  }
+}
+
+enum WatchRemainingCategory: String, AppEnum {
+  case housing, needs, wants, giving, debt, savings
+
+  static let typeDisplayRepresentation: TypeDisplayRepresentation = "Budget category"
+  static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
+    .housing: "housing", .needs: "needs", .wants: "wants", .giving: "giving",
+    .debt: "debt", .savings: "savings",
+  ]
+}
+
+enum WatchSpendingCategory: String, AppEnum {
+  case housing, needs, wants, giving
+
+  static let typeDisplayRepresentation: TypeDisplayRepresentation = "Spending category"
+  static let caseDisplayRepresentations: [Self: DisplayRepresentation] = [
+    .housing: "housing", .needs: "needs", .wants: "wants", .giving: "giving",
+  ]
 }
 
 struct WatchRemainingIntent: AppIntent {
@@ -65,6 +89,52 @@ struct WatchSpendingIntent: AppIntent {
   }
 }
 
+struct WatchCategoryRemainingIntent: AppIntent {
+  static let title: LocalizedStringResource = "Get category budget remaining"
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+  @Parameter(title: "Category") var category: WatchRemainingCategory
+  static var parameterSummary: some ParameterSummary { Summary("Get remaining for \(\.$category)") }
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let snapshot = WatchBudgetQuery.snapshot() else {
+      return .result(
+        value: WatchBudgetQuery.noBudget,
+        dialog: IntentDialog(stringLiteral: WatchBudgetQuery.noBudget))
+    }
+    guard let minor = snapshot.remainingMinor(for: category.rawValue) else {
+      let answer = "Penny has no budget for \(category.rawValue)."
+      return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+    }
+    let label = WatchBudgetQuery.categoryLabel(category.rawValue, snapshot)
+    let answer =
+      "You have \(WatchBudgetQuery.amount(minor, snapshot)) left in \(label) for \(WatchBudgetQuery.period(snapshot))."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
+struct WatchCategorySpentIntent: AppIntent {
+  static let title: LocalizedStringResource = "Get category spending"
+  static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+  @Parameter(title: "Category") var category: WatchSpendingCategory
+  static var parameterSummary: some ParameterSummary { Summary("Get spending for \(\.$category)") }
+
+  func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+    guard let snapshot = WatchBudgetQuery.snapshot() else {
+      return .result(
+        value: WatchBudgetQuery.noBudget,
+        dialog: IntentDialog(stringLiteral: WatchBudgetQuery.noBudget))
+    }
+    guard let minor = snapshot.spentMinor(for: category.rawValue) else {
+      let answer = "Penny has no spending for \(category.rawValue)."
+      return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+    }
+    let label = WatchBudgetQuery.categoryLabel(category.rawValue, snapshot)
+    let answer =
+      "You've spent \(WatchBudgetQuery.amount(minor, snapshot)) in \(label) for \(WatchBudgetQuery.period(snapshot))."
+    return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+  }
+}
+
 struct WatchPennyShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(
@@ -75,5 +145,13 @@ struct WatchPennyShortcuts: AppShortcutsProvider {
       intent: WatchSpendingIntent(),
       phrases: ["How much have I spent in \(.applicationName)?"],
       shortTitle: "Monthly spending", systemImageName: "dollarsign.circle")
+    AppShortcut(
+      intent: WatchCategoryRemainingIntent(),
+      phrases: ["How much is left in my \(\.$category) budget in \(.applicationName)?"],
+      shortTitle: "Category remaining", systemImageName: "chart.bar")
+    AppShortcut(
+      intent: WatchCategorySpentIntent(),
+      phrases: ["How much have I spent on \(\.$category) in \(.applicationName)?"],
+      shortTitle: "Category spending", systemImageName: "dollarsign.circle")
   }
 }

@@ -43,6 +43,22 @@ public struct WatchBudgetSnapshot: Codable, Equatable, Sendable {
     Self.total(categories.filter { !["debt", "savings"].contains($0.category) }.map(\.usedMinor))
   }
 
+  public func remainingMinor(for category: String) -> Int64? {
+    categorySnapshot(for: category)?.remainingMinor
+  }
+
+  public func spentMinor(for category: String) -> Int64? {
+    guard !["debt", "savings"].contains(category) else { return nil }
+    return categorySnapshot(for: category)?.usedMinor
+  }
+
+  private func categorySnapshot(for category: String) -> WatchCategorySnapshot? {
+    let selected =
+      category == "housing" && !categories.contains { $0.category == "housing" }
+      ? "needs" : category
+    return categories.first { $0.category == selected }
+  }
+
   public static func total(_ values: [Int64]) -> Int64? {
     var sum: Int64 = 0
     for value in values {
