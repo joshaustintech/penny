@@ -32,12 +32,21 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Groceries"].exists)
     app.buttons["Change budget style"].tap()
     app.buttons["Balanced"].tap()
+    app.buttons["Next month"].tap()
+    let nextIncome = app.textFields["incomeField"]
+    XCTAssertTrue(nextIncome.waitForExistence(timeout: 5))
+    enter("6000", in: nextIncome, app: app)
+    app.buttons["createBudgetButton"].tap()
+    XCTAssertTrue(
+      app.descendants(matching: .any)["Monthly spending history"].waitForExistence(timeout: 5))
 
     app.terminate()
     app.launch()
     app.buttons["Previous month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 10))
     XCTAssertTrue(app.staticTexts["$2,400.00"].exists)
+    for _ in 0..<4 { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(app.descendants(matching: .any)["Monthly spending history"].isHittable)
     let screenshot = XCTAttachment(screenshot: app.screenshot())
     screenshot.name = "Penny budget overview"
     screenshot.lifetime = .keepAlways

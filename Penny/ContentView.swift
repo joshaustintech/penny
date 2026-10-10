@@ -226,7 +226,62 @@ struct ContentView: View {
           Button("Delete", systemImage: "trash", role: .destructive) { pendingDelete = entry }
         }
       }
+      Text("Monthly spending")
+        .font(.title2.bold())
+      let history = spendingHistory(currencyCode: budget.currencyCode)
+      if history.count > 1 {
+        Chart(history) { point in
+          LineMark(
+            x: .value("Month", point.date), y: .value("Spent", point.spent)
+          )
+          .symbol(.circle)
+          PointMark(x: .value("Month", point.date), y: .value("Spent", point.spent))
+        }
+        .chartXScale(
+          domain: history[0].date...history[history.count - 1].date.addingTimeInterval(1_209_600)
+        )
+        .chartXAxis {
+          AxisMarks(values: history.map(\.date)) {
+            AxisValueLabel(format: .dateTime.month(.abbreviated))
+          }
+        }
+        .chartYAxis { AxisMarks(format: .currency(code: currency)) }
+        .frame(height: 200)
+        .accessibilityLabel("Monthly spending history")
+        .accessibilityValue(
+          history.map {
+            "\($0.date.formatted(.dateTime.month(.wide))): \($0.spent.formatted(.currency(code: currency)))"
+          }.joined(separator: ", "))
+      } else {
+        ContentUnavailableView(
+          "History starts next month", systemImage: "chart.xyaxis.line",
+          description: Text("Add another budget month to compare spending.")
+        )
+      }
     }
+  }
+
+  private func spendingHistory(currencyCode: String) -> [MonthSpending] {
+    months.compactMap { month in
+      guard month.currencyCode == currencyCode,
+        let mode = BudgetMode(rawValue: month.mode),
+        let date = Calendar.current.date(
+          from: DateComponents(year: month.year, month: month.month)),
+        let report = try? BudgetReporting.make(
+          entries: entries.filter {
+            $0.dateComponents?.year == month.year && $0.dateComponents?.month == month.month
+          }, currencyCode: currencyCode, fractionDigits: fractionDigits, mode: mode)
+      else { return nil }
+      var total: Int64 = 0
+      for category in report.categories {
+        let (sum, overflow) = total.addingReportingOverflow(category.spent.minorUnits)
+        guard !overflow else { return nil }
+        total = sum
+      }
+      return MonthSpending(
+        date: date, spent: Double(total) / pow(10, Double(fractionDigits)))
+    }
+    .sorted { $0.date < $1.date }
   }
 
   private var fractionDigits: Int {
@@ -302,4 +357,10 @@ struct ContentView: View {
       saveError = error.localizedDescription
     }
   }
+}
+
+private struct MonthSpending: Identifiable {
+  let date: Date
+  let spent: Double
+  var id: Date { date }
 }
