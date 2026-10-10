@@ -4,6 +4,7 @@ import SwiftUI
 struct EntryForm: View {
   @Environment(\.modelContext) private var context
   @Environment(\.dismiss) private var dismiss
+  @FocusState private var amountFocused: Bool
   @State private var kind = TransactionKind.spending
   @State private var category = BudgetCategory.needs
   @State private var amount: Decimal = 0
@@ -96,6 +97,7 @@ struct EntryForm: View {
         #if os(iOS)
           .keyboardType(.decimalPad)
         #endif
+        .focused($amountFocused)
         .accessibilityIdentifier("entryAmountField")
         DatePicker("Date", selection: $date, in: monthRange, displayedComponents: .date)
           .accessibilityHint("Choose a date in the selected budget month")
@@ -111,6 +113,12 @@ struct EntryForm: View {
             .disabled(minorAmount == nil)
             .accessibilityIdentifier("saveEntryButton")
         }
+        #if os(iOS)
+          ToolbarItemGroup(placement: .keyboard) {
+            Spacer()
+            Button("Done") { amountFocused = false }
+          }
+        #endif
       }
     }
     .onChange(of: kind) { category = categories.first ?? .needs }

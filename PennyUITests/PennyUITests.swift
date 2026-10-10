@@ -209,19 +209,22 @@ final class PennyUITests: XCTestCase {
     let overspendAmount = app.textFields["entryAmountField"]
     XCTAssertTrue(overspendAmount.waitForExistence(timeout: 5))
     enter("2500", in: overspendAmount, app: app)
+    app.buttons["Done"].tap()
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.staticTexts["Over budget"].waitForExistence(timeout: 5))
     XCTAssertTrue(actualSpending.label.contains("$2,600.00"))
     let trendHeading = app.staticTexts["Spending through month"]
-    for _ in 0..<4 where !trendHeading.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    for _ in 0..<16 where !trendHeading.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(trendHeading.isHittable)
     XCTAssertTrue(app.descendants(matching: .any)["Spending against monthly plan"].exists)
     let trendScreenshot = XCTAttachment(screenshot: app.screenshot())
     trendScreenshot.name = "Penny spending trend"
     trendScreenshot.lifetime = .keepAlways
     add(trendScreenshot)
-    for _ in 0..<4 { app.scrollViews.firstMatch.swipeDown() }
-    app.buttons["Previous month"].tap()
+    let scrollView = app.scrollViews.firstMatch
+    let previousMonth = app.buttons["Previous month"]
+    for _ in 0..<12 where !previousMonth.isHittable { scrollView.swipeDown() }
+    previousMonth.tap()
     XCTAssertFalse(app.staticTexts["Groceries"].exists)
     app.buttons["Next month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
@@ -239,7 +242,12 @@ final class PennyUITests: XCTestCase {
     let nextIncome = app.textFields["incomeField"]
     XCTAssertTrue(nextIncome.waitForExistence(timeout: 5))
     enter("6000", in: nextIncome, app: app)
-    app.buttons["createBudgetButton"].tap()
+    let savedBudgetTitle = app.staticTexts["Your monthly budget"]
+    app.buttons["Create budget"].tap()
+    if !savedBudgetTitle.waitForExistence(timeout: 2) {
+      app.buttons["createBudgetButton"].tap()
+    }
+    XCTAssertTrue(savedBudgetTitle.waitForExistence(timeout: 5))
     XCTAssertTrue(
       app.descendants(matching: .any)["Monthly spending history"].waitForExistence(timeout: 5))
 
@@ -249,8 +257,9 @@ final class PennyUITests: XCTestCase {
     app.buttons["Previous month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 10))
     XCTAssertTrue(app.staticTexts["$2,400.00"].exists)
-    for _ in 0..<4 { app.scrollViews.firstMatch.swipeUp() }
-    XCTAssertTrue(app.descendants(matching: .any)["Monthly spending history"].isHittable)
+    let history = app.descendants(matching: .any)["Monthly spending history"]
+    for _ in 0..<20 where !history.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(history.isHittable)
     let screenshot = XCTAttachment(screenshot: app.screenshot())
     screenshot.name = "Penny budget overview"
     screenshot.lifetime = .keepAlways

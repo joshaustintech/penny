@@ -12,6 +12,7 @@ import SwiftUI
 struct ContentView: View {
   @Environment(\.modelContext) private var context
   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
   @AppStorage("preferredCurrency") private var preferredCurrency =
     Locale.current.currency?.identifier ?? "USD"
   #if os(iOS)
@@ -106,13 +107,35 @@ struct ContentView: View {
           Text("Every penny has a purpose.")
             .font(.largeTitle.bold())
             .accessibilityAddTraits(.isHeader)
-          monthSwitcher
+          #if !os(iOS)
+            monthSwitcher
+          #endif
           if let currentBudget { overview(currentBudget) } else { setup }
         }
         .frame(maxWidth: 620, alignment: .leading)
         .padding()
         .frame(maxWidth: .infinity, alignment: .top)
       }
+      #if os(iOS)
+        .safeAreaInset(edge: .top, spacing: 0) {
+          monthSwitcher.background(.bar)
+        }
+      #endif
+      #if os(iOS)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+          if currentBudget == nil {
+            Button("Create my budget", action: saveBudget)
+              .buttonStyle(.borderedProminent)
+              .tint(.primary)
+              .disabled(minorIncome == nil)
+              .frame(maxWidth: 620)
+              .padding()
+              .frame(maxWidth: .infinity)
+              .background(.bar)
+              .accessibilityIdentifier("createBudgetButton")
+          }
+        }
+      #endif
       .navigationTitle("Penny")
       .tint(.accentColor)
       .task { loadBudget() }
@@ -286,6 +309,12 @@ struct ContentView: View {
         .focused($incomeFieldFocused)
         #if os(iOS)
           .keyboardType(.decimalPad)
+          .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+              Spacer()
+              Button("Create budget", action: saveBudget)
+            }
+          }
         #endif
         .accessibilityHint("Enter income after taxes")
         .accessibilityIdentifier("incomeField")
@@ -293,11 +322,13 @@ struct ContentView: View {
       .padding(18)
       .frame(maxWidth: .infinity, alignment: .leading)
       .background(cardBackground, in: RoundedRectangle(cornerRadius: 20))
-      Button("Create my budget", action: saveBudget)
-        .buttonStyle(.borderedProminent)
-        .tint(.primary)
-        .disabled(minorIncome == nil)
-        .accessibilityIdentifier("createBudgetButton")
+      #if !os(iOS)
+        Button("Create my budget", action: saveBudget)
+          .buttonStyle(.borderedProminent)
+          .tint(.primary)
+          .disabled(minorIncome == nil)
+          .accessibilityIdentifier("createBudgetButton")
+      #endif
     }
   }
 
@@ -398,7 +429,7 @@ struct ContentView: View {
             Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
           }
           Spacer()
-          Text(amount(entry.amountMinor)).monospacedDigit()
+          Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
           Button {
             entryPresentation = .edit(entry)
           } label: {
@@ -421,6 +452,12 @@ struct ContentView: View {
         .font(.title2.bold())
       let history = spendingHistory(currencyCode: budget.currencyCode)
       if history.count > 1 {
+        if dynamicTypeSize.isAccessibilitySize {
+          Text(
+            history.map {
+              "\($0.date.formatted(.dateTime.month(.wide).year())): \($0.spent.formatted(.currency(code: currency)))"
+            }.joined(separator: "\n"))
+        }
         Chart(history) { point in
           LineMark(
             x: .value("Month", point.date), y: .value("Spent", point.spent)
@@ -435,18 +472,22 @@ struct ContentView: View {
           AxisMarks(values: history.map(\.date)) {
             AxisGridLine()
             AxisTick()
-            AxisValueLabel(format: .dateTime.month(.abbreviated))
-              .font(.body)
-              .foregroundStyle(.primary)
+            if !dynamicTypeSize.isAccessibilitySize {
+              AxisValueLabel(format: .dateTime.month(.abbreviated))
+                .font(.body)
+                .foregroundStyle(.primary)
+            }
           }
         }
         .chartYAxis {
           AxisMarks { _ in
             AxisGridLine()
             AxisTick()
-            AxisValueLabel(format: .currency(code: currency))
-              .font(.body)
-              .foregroundStyle(.primary)
+            if !dynamicTypeSize.isAccessibilitySize {
+              AxisValueLabel(format: .currency(code: currency))
+                .font(.body)
+                .foregroundStyle(.primary)
+            }
           }
         }
         .frame(height: 200)
@@ -509,7 +550,7 @@ struct ContentView: View {
   private func allocationLegend(_ categories: [CategoryResult]) -> some View {
     ViewThatFits(in: .horizontal) {
       HStack(spacing: 12) { allocationLegendItems(categories) }
-      LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), alignment: .leading)]) {
+      LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 220 : 100), alignment: .leading)]) {
         allocationLegendItems(categories)
       }
     }
@@ -527,56 +568,77 @@ struct ContentView: View {
     }
   }
 
-  private func plannedVsActual(_ report: MonthlyReport) -> some View {
+  @ViewBuilder private func plannedVsActual(_ report: MonthlyReport) -> some View {
     VStack(alignment: .leading, spacing: 8) {
       Text("Planned versus actual").font(.title2.bold())
-      Text("Bars show actual use; square marks show each plan.")
+      Text(dynamicTypeSize.isAccessibilitySize ? "Actual and planned amounts by category." : "Bars show actual use; square marks show each plan.")
         .font(.caption)
         .foregroundStyle(.primary)
-      Chart(report.categories, id: \.category) { item in
-        let planned = Double(item.allocated.minorUnits) / pow(10, Double(fractionDigits))
-        let actualAmount =
-          item.category == .debt || item.category == .savings
-          ? item.contributed.minorUnits : item.spent.minorUnits
-        let actual = Double(actualAmount) / pow(10, Double(fractionDigits))
-        BarMark(
-          x: .value("Actual", actual),
-          y: .value("Category", item.category.rawValue.capitalized)
-        )
-        .foregroundStyle(item.remaining.minorUnits < 0 ? Color.red : Color.green)
-        .accessibilityLabel("\(item.category.rawValue.capitalized) actual")
-        .accessibilityValue(amount(actualAmount))
-        PointMark(
-          x: .value("Planned", planned),
-          y: .value("Category", item.category.rawValue.capitalized)
-        )
-        .symbol(.square)
-        .foregroundStyle(.primary)
-        .accessibilityLabel("\(item.category.rawValue.capitalized) planned")
-        .accessibilityValue(amount(item.allocated.minorUnits))
-      }
-      .chartXAxis {
-        AxisMarks { _ in
-          AxisGridLine()
-          AxisTick()
-          AxisValueLabel(format: .currency(code: currency))
-            .font(.body)
-            .foregroundStyle(.primary)
+      if dynamicTypeSize.isAccessibilitySize {
+        ForEach(report.categories, id: \.category) { item in
+          let actual =
+            item.category == .debt || item.category == .savings
+            ? item.contributed.minorUnits : item.spent.minorUnits
+          VStack(alignment: .leading, spacing: 2) {
+            Text(item.category.rawValue.capitalized).font(.headline)
+            Text("Actual \(amount(actual))")
+            Text("Planned \(amount(item.allocated.minorUnits))")
+          }
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding(12)
+          .background(cardBackground, in: RoundedRectangle(cornerRadius: 14))
+          .accessibilityElement(children: .combine)
         }
-      }
-      .chartYAxis {
-        AxisMarks { _ in
-          AxisGridLine()
-          AxisTick()
-          AxisValueLabel().font(.body).foregroundStyle(.primary)
+      } else {
+        Chart(report.categories, id: \.category) { item in
+          let planned = Double(item.allocated.minorUnits) / pow(10, Double(fractionDigits))
+          let actualAmount =
+            item.category == .debt || item.category == .savings
+            ? item.contributed.minorUnits : item.spent.minorUnits
+          let actual = Double(actualAmount) / pow(10, Double(fractionDigits))
+          BarMark(
+            x: .value("Actual", actual),
+            y: .value("Category", item.category.rawValue.capitalized)
+          )
+          .foregroundStyle(item.remaining.minorUnits < 0 ? Color.red : Color.green)
+          .accessibilityLabel("\(item.category.rawValue.capitalized) actual")
+          .accessibilityValue(amount(actualAmount))
+          PointMark(
+            x: .value("Planned", planned),
+            y: .value("Category", item.category.rawValue.capitalized)
+          )
+          .symbol(.square)
+          .foregroundStyle(.primary)
+          .accessibilityLabel("\(item.category.rawValue.capitalized) planned")
+          .accessibilityValue(amount(item.allocated.minorUnits))
         }
+        .chartXAxis {
+          AxisMarks { _ in
+            AxisGridLine()
+            AxisTick()
+            AxisValueLabel(format: .currency(code: currency))
+              .font(.body)
+              .foregroundStyle(.primary)
+          }
+        }
+        .chartYAxis {
+          AxisMarks { _ in
+            AxisGridLine()
+            AxisTick()
+            AxisValueLabel().font(.body).foregroundStyle(.primary)
+          }
+        }
+        .frame(height: CGFloat(report.categories.count * 34))
+        .accessibilityLabel("Planned versus actual")
+        .accessibilityValue(
+          report.categories.map {
+            let actual =
+              $0.category == .debt || $0.category == .savings
+              ? $0.contributed.minorUnits : $0.spent.minorUnits
+            return
+              "\($0.category.rawValue.capitalized): actual \(amount(actual)), planned \(amount($0.allocated.minorUnits))"
+          }.joined(separator: ". "))
       }
-      .frame(height: CGFloat(report.categories.count * 34))
-      .accessibilityLabel("Planned versus actual")
-      .accessibilityValue(
-        report.categories.map {
-          "\($0.category.rawValue.capitalized): actual \(amount($0.category == .debt || $0.category == .savings ? $0.contributed.minorUnits : $0.spent.minorUnits)), planned \(amount($0.allocated.minorUnits))"
-        }.joined(separator: ". "))
     }
   }
 
@@ -608,6 +670,10 @@ struct ContentView: View {
         .font(.caption)
         .foregroundStyle(.primary)
       if !days.isEmpty {
+        if dynamicTypeSize.isAccessibilitySize {
+          Text(actualSummary)
+            .accessibilityIdentifier("Spending against monthly plan")
+        }
         Chart {
           ForEach(days, id: \.day) { point in
             LineMark(
@@ -623,16 +689,20 @@ struct ContentView: View {
           AxisMarks(values: .stride(by: 5)) { _ in
             AxisGridLine()
             AxisTick()
-            AxisValueLabel().font(.body).foregroundStyle(.primary)
+            if !dynamicTypeSize.isAccessibilitySize {
+              AxisValueLabel().font(.body).foregroundStyle(.primary)
+            }
           }
         }
         .chartYAxis {
           AxisMarks { _ in
             AxisGridLine()
             AxisTick()
-            AxisValueLabel(format: .currency(code: budget.currencyCode))
-              .font(.body)
-              .foregroundStyle(.primary)
+            if !dynamicTypeSize.isAccessibilitySize {
+              AxisValueLabel(format: .currency(code: budget.currencyCode))
+                .font(.body)
+                .foregroundStyle(.primary)
+            }
           }
         }
         .chartXScale(domain: 1...max(1, throughDay))
