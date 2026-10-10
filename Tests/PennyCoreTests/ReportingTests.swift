@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import PennyCore
@@ -65,6 +66,31 @@ struct ReportingTests {
       try BudgetReporting.make(
         entries: [wrong], currencyCode: "JPY", fractionDigits: 0, mode: .balanced)
     }
+  }
+
+  @Test func dailyTrendIncludesQuietDaysAndRefunds() throws {
+    let date = try #require(
+      Calendar.current.date(from: DateComponents(year: 2026, month: 9, day: 1)))
+    let entries = [
+      LedgerEntry(
+        amountMinor: 1_000, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs", occurredAt: date),
+      LedgerEntry(
+        amountMinor: 300, currencyCode: "USD", fractionDigits: 2,
+        kind: "refund", category: "needs",
+        occurredAt: Calendar.current.date(byAdding: .day, value: 1, to: date)!),
+      LedgerEntry(
+        amountMinor: 200, currencyCode: "USD", fractionDigits: 2,
+        kind: "adjustment", category: "needs",
+        occurredAt: Calendar.current.date(byAdding: .day, value: 3, to: date)!),
+    ]
+    let trend = try BudgetReporting.dailySpending(
+      entries: entries, year: 2026, month: 9, currencyCode: "USD", fractionDigits: 2)
+    #expect(trend.count == 30)
+    #expect(trend[0].cumulative.minorUnits == 1_000)
+    #expect(trend[1].cumulative.minorUnits == 700)
+    #expect(trend[2].cumulative.minorUnits == 700)
+    #expect(trend[3].cumulative.minorUnits == 900)
   }
 
   @Test func rejectsInvalidCurrencyPrecisionWithoutCrashing() {

@@ -50,6 +50,15 @@ final class PennyUITests: XCTestCase {
     app.textFields["Note (optional)"].typeText("Groceries")
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
+    let trendHeading = app.staticTexts["Spending through month"]
+    for _ in 0..<4 where !trendHeading.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(trendHeading.isHittable)
+    XCTAssertTrue(app.descendants(matching: .any)["Spending against monthly plan"].exists)
+    let trendScreenshot = XCTAttachment(screenshot: app.screenshot())
+    trendScreenshot.name = "Penny spending trend"
+    trendScreenshot.lifetime = .keepAlways
+    add(trendScreenshot)
+    for _ in 0..<4 { app.scrollViews.firstMatch.swipeDown() }
     app.buttons["Previous month"].tap()
     XCTAssertFalse(app.staticTexts["Groceries"].exists)
     app.buttons["Next month"].tap()

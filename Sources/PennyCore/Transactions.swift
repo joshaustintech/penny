@@ -22,7 +22,48 @@ public struct MonthlyReport: Equatable, Sendable {
   public let categories: [CategoryResult]
 }
 
+public struct SpendingTrendPoint: Equatable, Sendable {
+  public let day: Int
+  public let cumulative: Money
+}
+
 public enum BudgetReporting {
+  public static func dailySpending(
+    entries: [LedgerEntry], year: Int, month: Int, currencyCode: String, fractionDigits: Int
+  ) throws -> [SpendingTrendPoint] {
+    _ = try make(
+      entries: entries, currencyCode: currencyCode, fractionDigits: fractionDigits,
+      mode: .balanced)
+    guard let first = Calendar.current.date(from: DateComponents(year: year, month: month, day: 1)),
+      let days = Calendar.current.range(of: .day, in: .month, for: first)
+    else { throw BudgetError.invalidTransaction }
+    var daily: [Int: Int64] = [:]
+    for entry in entries {
+      guard let date = entry.dateComponents, date.year == year, date.month == month,
+        let day = date.day
+      else { continue }
+      let delta: Int64
+      switch TransactionKind(rawValue: entry.kind) {
+      case .spending, .adjustment: delta = entry.amountMinor
+      case .refund: delta = -entry.amountMinor
+      default: continue
+      }
+      let (sum, overflow) = daily[day, default: 0].addingReportingOverflow(delta)
+      guard !overflow else { throw BudgetError.overflow }
+      daily[day] = sum
+    }
+    var total: Int64 = 0
+    return try days.map { day in
+      let (sum, overflow) = total.addingReportingOverflow(daily[day, default: 0])
+      guard !overflow else { throw BudgetError.overflow }
+      total = sum
+      return SpendingTrendPoint(
+        day: day,
+        cumulative: Money(minorUnits: total, currency: currencyCode, fractionDigits: fractionDigits)
+      )
+    }
+  }
+
   public static func contributed(for category: BudgetCategory, from report: MonthlyReport) throws
     -> Money
   {

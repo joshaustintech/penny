@@ -327,6 +327,9 @@ struct ContentView: View {
           Button("Delete", systemImage: "trash", role: .destructive) { pendingDelete = entry }
         }
       }
+      if let report {
+        spendingTrend(report: report, budget: budget, entries: monthEntries)
+      }
       Text("Monthly spending")
         .font(.title2.bold())
       let history = spendingHistory(currencyCode: budget.currencyCode)
@@ -397,6 +400,58 @@ struct ContentView: View {
         report.categories.map {
           "\($0.category.rawValue.capitalized): actual \(amount($0.category == .debt || $0.category == .savings ? $0.contributed.minorUnits : $0.spent.minorUnits)), planned \(amount($0.allocated.minorUnits))"
         }.joined(separator: ". "))
+    }
+  }
+
+  private func spendingTrend(
+    report: MonthlyReport, budget: BudgetMonth, entries: [LedgerEntry]
+  ) -> some View {
+    let allDays =
+      (try? BudgetReporting.dailySpending(
+        entries: entries, year: budget.year, month: budget.month,
+        currencyCode: budget.currencyCode, fractionDigits: fractionDigits)) ?? []
+    let now = Calendar.current.dateComponents([.year, .month, .day], from: .now)
+    let future =
+      budget.year > (now.year ?? budget.year)
+      || (budget.year == now.year && budget.month > (now.month ?? budget.month))
+    let throughDay =
+      future
+      ? 0
+      : budget.year == now.year && budget.month == now.month
+        ? (now.day ?? allDays.count) : allDays.count
+    let days = allDays.filter { $0.day <= throughDay }
+    let planned = report.categories.filter { ![.debt, .savings].contains($0.category) }
+      .reduce(Int64(0)) { $0 + $1.allocated.minorUnits }
+    let scale = pow(10, Double(fractionDigits))
+    let actualSummary =
+      "Actual " + amount(days.last?.cumulative.minorUnits ?? 0) + "; plan " + amount(planned)
+    return VStack(alignment: .leading, spacing: 8) {
+      Text("Spending through month").font(.title2.bold())
+      Text("Actual spending accumulates daily; dashed line marks the plan.")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+      if !days.isEmpty {
+        Chart {
+          ForEach(days, id: \.day) { point in
+            LineMark(
+              x: .value("Day", point.day),
+              y: .value("Actual spending", Double(point.cumulative.minorUnits) / scale)
+            )
+          }
+          RuleMark(y: .value("Monthly plan", Double(planned) / scale))
+            .lineStyle(StrokeStyle(lineWidth: 2, dash: [6, 4]))
+            .foregroundStyle(.secondary)
+        }
+        .chartXAxis { AxisMarks(values: .stride(by: 5)) }
+        .chartYAxis { AxisMarks(format: .currency(code: budget.currencyCode)) }
+        .chartXScale(domain: 1...max(1, throughDay))
+        .frame(height: 190)
+        .accessibilityLabel("Spending against monthly plan")
+        .accessibilityValue(actualSummary)
+      } else {
+        Text("Spending trend starts when this month begins.")
+          .foregroundStyle(.secondary)
+      }
     }
   }
 
