@@ -102,4 +102,23 @@ struct ReportingTests {
         entries: [entry], currencyCode: "USD", fractionDigits: 2, mode: .balanced)
     }
   }
+
+  @Test func watchSnapshotCarriesBudgetAndNewestFiveTransactions() throws {
+    let entries = (1...6).map { day in
+      LedgerEntry(
+        amountMinor: Int64(day * 100), currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs",
+        occurredAt: Calendar.current.date(from: DateComponents(year: 2026, month: 9, day: day))!)
+    }
+    let report = try BudgetReporting.make(
+      entries: entries, currencyCode: "USD", fractionDigits: 2, mode: .balanced)
+    let snapshot = try WatchBudgetSnapshot(report: report, entries: entries, year: 2026, month: 9)
+    let decoded = try JSONDecoder().decode(
+      WatchBudgetSnapshot.self, from: JSONEncoder().encode(snapshot))
+
+    #expect(decoded == snapshot)
+    #expect(snapshot.incomeMinor == 0)
+    #expect(snapshot.categories[0].usedMinor == 2_100)
+    #expect(snapshot.recentTransactions.map(\.day) == [6, 5, 4, 3, 2])
+  }
 }
