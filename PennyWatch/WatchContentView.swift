@@ -31,12 +31,14 @@ struct WatchContentView: View {
   }
 
   private func dashboard(_ snapshot: WatchBudgetSnapshot) -> some View {
-    let remaining = snapshot.categories.reduce(Int64.zero) { $0 + $1.remainingMinor }
     return List {
       Section {
         if let entryStatus { Text(entryStatus).font(.caption).foregroundStyle(.secondary) }
-        Text(money(remaining, snapshot))
-          .font(.title2.bold().monospacedDigit())
+        if let remaining = snapshot.overallRemainingMinor {
+          Text(money(remaining, snapshot)).font(.title2.bold().monospacedDigit())
+        } else {
+          Text("Remaining amount unavailable")
+        }
         Text("Left in plan")
           .font(.caption)
           .foregroundStyle(.secondary)

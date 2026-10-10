@@ -34,7 +34,10 @@ struct WatchRemainingIntent: AppIntent {
         value: WatchBudgetQuery.noBudget,
         dialog: IntentDialog(stringLiteral: WatchBudgetQuery.noBudget))
     }
-    let minor = snapshot.categories.reduce(Int64(0)) { $0 + $1.remainingMinor }
+    guard let minor = snapshot.overallRemainingMinor else {
+      let answer = "Penny couldn't calculate the remaining budget from these amounts."
+      return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+    }
     let answer =
       "You have \(WatchBudgetQuery.amount(minor, snapshot)) left in Penny for \(WatchBudgetQuery.period(snapshot))."
     return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
@@ -52,8 +55,10 @@ struct WatchSpendingIntent: AppIntent {
         value: WatchBudgetQuery.noBudget,
         dialog: IntentDialog(stringLiteral: WatchBudgetQuery.noBudget))
     }
-    let minor = snapshot.categories.filter { !["debt", "savings"].contains($0.category) }
-      .reduce(Int64(0)) { $0 + $1.usedMinor }
+    guard let minor = snapshot.overallSpentMinor else {
+      let answer = "Penny couldn't calculate spending from these amounts."
+      return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))
+    }
     let answer =
       "You've spent \(WatchBudgetQuery.amount(minor, snapshot)) in Penny for \(WatchBudgetQuery.period(snapshot))."
     return .result(value: answer, dialog: IntentDialog(stringLiteral: answer))

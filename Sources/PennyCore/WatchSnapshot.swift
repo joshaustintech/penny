@@ -35,6 +35,24 @@ public struct WatchBudgetSnapshot: Codable, Equatable, Sendable {
   public let categories: [WatchCategorySnapshot]
   public let recentTransactions: [WatchTransactionSnapshot]
 
+  public var overallRemainingMinor: Int64? {
+    Self.total(categories.map(\.remainingMinor))
+  }
+
+  public var overallSpentMinor: Int64? {
+    Self.total(categories.filter { !["debt", "savings"].contains($0.category) }.map(\.usedMinor))
+  }
+
+  public static func total(_ values: [Int64]) -> Int64? {
+    var sum: Int64 = 0
+    for value in values {
+      let (next, overflow) = sum.addingReportingOverflow(value)
+      guard !overflow else { return nil }
+      sum = next
+    }
+    return sum
+  }
+
   public init(report: MonthlyReport, entries: [LedgerEntry], year: Int, month: Int) throws {
     guard year > 0, (1...12).contains(month) else { throw BudgetError.invalidTransaction }
     version = 1

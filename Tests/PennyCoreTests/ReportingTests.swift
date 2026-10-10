@@ -4,6 +4,11 @@ import Testing
 @testable import PennyCore
 
 struct ReportingTests {
+  @Test func watchSnapshotTotalsHandleOverflowAndNegativeRefunds() {
+    #expect(WatchBudgetSnapshot.total([Int64.max, 1]) == nil)
+    #expect(WatchBudgetSnapshot.total([Int64.max, -1]) == Int64.max - 1)
+  }
+
   @Test func reportsNetSpendingAndSeparateSavingsAndDebtProgress() throws {
     let entries = [
       LedgerEntry(
