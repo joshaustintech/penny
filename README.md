@@ -1,5 +1,6 @@
 # penny
-Simple local-first money budgeting app across the Apple ecosystem.
+Native local-first budgeting app for iPhone, iPad, and Mac.
+Watch, Apple TV, and iCloud sync are not configured yet.
 
 ## Export format
 
