@@ -15,9 +15,9 @@ app.
 | Native file export | — | Markdown and CSV | — | — | Penny uses the macOS file exporter. |
 
 CloudKit stays off until a safe local-to-private migration, conflict policy,
-disable path, and status/recovery UI are implemented. The current host has the
-tvOS SDK but no tvOS Simulator runtime, so a TV build is possible here while
-rendered and focus-navigation evidence requires a runtime or Apple TV.
+disable path, and status/recovery UI are implemented. A tvOS 27 simulator is
+installed here; its native launch and no-budget empty state are verified. A
+seeded dashboard and remote focus navigation still need runtime validation.
 
 ## Apple references
 
