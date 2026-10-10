@@ -3,6 +3,7 @@ import SwiftData
 
 extension Notification.Name {
   static let budgetStoreDidChange = Notification.Name("Penny.budgetStoreDidChange")
+  static let cloudBudgetDidChange = Notification.Name("Penny.cloudBudgetDidChange")
 }
 
 @Model

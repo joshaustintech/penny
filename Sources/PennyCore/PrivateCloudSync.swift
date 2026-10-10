@@ -90,7 +90,7 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
       records[id] = resolved
       if recordDate(resolved) > recordDate(server) {
         engine?.state.add(pendingRecordZoneChanges: [.saveRecord(id)])
-      } else if recordDate(server) > recordDate(client) {
+      } else if recordDate(server) >= recordDate(client) {
         try apply(resolved)
       }
     }
@@ -138,6 +138,7 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
           }
         }
       }
+      NotificationCenter.default.post(name: .cloudBudgetDidChange, object: nil)
     case .sentRecordZoneChanges(let changes):
       for failure in changes.failedRecordSaves
       where failure.error.code == .serverRecordChanged {
@@ -184,7 +185,7 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
       let remote = try CloudRecordCodec.entry(from: record)
       guard try !store.tombstones().contains(where: { $0.id == remote.id }) else { return }
       if let local = try store.entries().first(where: { $0.id == remote.id }) {
-        guard remote.updatedAt > local.updatedAt else { return }
+        guard remote.updatedAt >= local.updatedAt else { return }
         local.amountMinor = remote.amountMinor
         local.currencyCode = remote.currencyCode
         local.fractionDigits = remote.fractionDigits
@@ -203,7 +204,7 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
     case CloudRecordCodec.budgetType:
       let remote = try CloudRecordCodec.budget(from: record)
       if let local = try store.months().first(where: { $0.id == remote.id }) {
-        guard remote.updatedAt > local.updatedAt else { return }
+        guard remote.updatedAt >= local.updatedAt else { return }
         local.mode = remote.mode
         local.currencyCode = remote.currencyCode
         local.updatedAt = remote.updatedAt

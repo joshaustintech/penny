@@ -116,6 +116,9 @@ struct ContentView: View {
       .tint(.accentColor)
       .task { loadBudget() }
       .onChange(of: selectedMonth) { _, _ in income = 0 }
+      .onReceive(NotificationCenter.default.publisher(for: .cloudBudgetDidChange)) { _ in
+        loadBudget()
+      }
       #if os(iOS)
         .onChange(of: watchSharingEnabled) { _, _ in loadBudget() }
         .onReceive(NotificationCenter.default.publisher(for: .watchBudgetChanged)) { _ in
