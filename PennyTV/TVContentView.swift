@@ -7,7 +7,7 @@ struct TVContentView: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(\.scenePhase) private var scenePhase
   @AppStorage("privateCloudSyncEnabled") private var privateCloudSyncEnabled = false
-  @State private var cloudSyncError: String?
+  @AppStorage("privateCloudSyncError") private var cloudSyncError = ""
   @Query(sort: \BudgetMonth.year, order: .reverse) private var months: [BudgetMonth]
   @Query private var entries: [LedgerEntry]
   @FocusState private var focusedCategory: String?
@@ -56,7 +56,7 @@ struct TVContentView: View {
           await refreshCloudSync()
         } else {
           await PrivateCloudSync.shared.stop()
-          cloudSyncError = nil
+          cloudSyncError = ""
         }
       }
     }
@@ -73,7 +73,11 @@ struct TVContentView: View {
         Text(
           "Syncs budgets and entries with your private iCloud database. Turning it off stops this device from syncing; existing cloud copies remain."
         )
-        if let cloudSyncError { Text(cloudSyncError).foregroundStyle(.red) }
+        if !cloudSyncError.isEmpty {
+          Text(cloudSyncError)
+            .foregroundStyle(.red)
+            .accessibilityIdentifier("privateCloudSyncError")
+        }
         Button("Sync now") { Task { await refreshCloudSync() } }
           .disabled(!privateCloudSyncEnabled)
       }
@@ -85,9 +89,9 @@ struct TVContentView: View {
     guard privateCloudSyncEnabled else { return }
     do {
       try await PrivateCloudSync.shared.refresh(context: modelContext)
-      cloudSyncError = nil
+      cloudSyncError = ""
     } catch {
-      cloudSyncError = "iCloud sync failed: \(error.localizedDescription)"
+      cloudSyncError = PrivateCloudSync.recoveryGuidance
     }
   }
 

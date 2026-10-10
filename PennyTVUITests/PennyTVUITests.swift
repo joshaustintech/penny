@@ -26,4 +26,20 @@ final class PennyTVUITests: XCTestCase {
     XCTAssertTrue(wants.waitForExistence(timeout: 5))
     XCTAssertTrue(wants.hasFocus)
   }
+
+  func testSyncRecoveryGuidanceAppearsInSettings() {
+    let app = XCUIApplication()
+    app.launchArguments = [
+      "--ui-testing", "--reset-store", "-privateCloudSyncError",
+      "Penny could not sync. Check your Apple Account and iCloud settings.",
+    ]
+    app.launchEnvironment["PENNY_UI_TESTING"] = "1"
+    app.launch()
+    let settings = app.buttons["Settings"]
+    XCTAssertTrue(settings.waitForExistence(timeout: 5))
+    for _ in 0..<8 where !settings.hasFocus { XCUIRemote.shared.press(.up) }
+    XCTAssertTrue(settings.hasFocus)
+    XCUIRemote.shared.press(.select)
+    XCTAssertTrue(app.staticTexts["privateCloudSyncError"].waitForExistence(timeout: 5))
+  }
 }
