@@ -6,11 +6,13 @@ final class PennyUITests: XCTestCase {
     let app = XCUIApplication()
     app.launch()
 
+    app.buttons["Previous month"].tap()
     let income = app.textFields["incomeField"]
     XCTAssertTrue(income.waitForExistence(timeout: 10))
     enter("5000", in: income, app: app)
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["$5,000.00"].exists)
 
     app.buttons["addEntryButton"].tap()
     let entryAmount = app.textFields["entryAmountField"]
@@ -33,6 +35,7 @@ final class PennyUITests: XCTestCase {
 
     app.terminate()
     app.launch()
+    app.buttons["Previous month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 10))
     XCTAssertTrue(app.staticTexts["$2,400.00"].exists)
   }

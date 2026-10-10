@@ -248,7 +248,7 @@ struct ContentView: View {
       year: year, month: month, mode: selectedMode.rawValue, currencyCode: currency)
     let initialIncome = LedgerEntry(
       amountMinor: minorIncome, currencyCode: currency, fractionDigits: fractionDigits,
-      kind: "income", category: "income")
+      kind: "income", category: "income", occurredAt: selectedMonth)
     do {
       try BudgetStore(context: context).createBudget(budget, income: initialIncome)
       loadBudget()
