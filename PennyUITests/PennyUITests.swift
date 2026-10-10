@@ -26,6 +26,7 @@ final class PennyUITests: XCTestCase {
     let privacy = app.staticTexts["Budget data stays on this device."]
     for _ in 0..<4 where !privacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(privacy.isHittable)
+    XCTAssertTrue(app.staticTexts["iCloud sync isn't configured yet."].isHittable)
     app.buttons["settingsDoneButton"].tap()
 
     app.terminate()
@@ -40,6 +41,9 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(savedPrivacy.isHittable)
     app.buttons["settingsDoneButton"].tap()
     app.buttons["Previous month"].tap()
+    XCTAssertTrue(
+      app.staticTexts["This budget stays on this device. iCloud sync isn't configured yet."]
+        .waitForExistence(timeout: 5))
     let income = app.textFields["incomeField"]
     XCTAssertTrue(income.waitForExistence(timeout: 5))
     enter("1000", in: income, app: app)

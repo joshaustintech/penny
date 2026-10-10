@@ -214,6 +214,12 @@ struct ContentView: View {
     VStack(alignment: .leading, spacing: 18) {
       Text("Start with take-home income. Penny will give every dollar a clear place.")
         .foregroundStyle(.secondary)
+      Label(
+        "This budget stays on this device. iCloud sync isn't configured yet.",
+        systemImage: "lock.shield"
+      )
+      .font(.footnote)
+      .foregroundStyle(.secondary)
       Picker(
         "Budget style",
         selection: selectedModeBinding

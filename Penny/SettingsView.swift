@@ -41,6 +41,7 @@ struct PennySettingsView: View {
       }
       Section("Privacy") {
         Label("Budget data stays on this device.", systemImage: "lock.shield")
+        Text("iCloud sync isn't configured yet.")
         Text("Penny uses no accounts, bank connections, ads, or analytics.")
           .foregroundStyle(.secondary)
       }
