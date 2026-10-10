@@ -1,6 +1,10 @@
 import Foundation
 import SwiftData
 
+extension Notification.Name {
+  static let budgetStoreDidChange = Notification.Name("Penny.budgetStoreDidChange")
+}
+
 @Model
 public final class BudgetMonth {
   public var id: UUID = UUID()
@@ -115,7 +119,7 @@ public struct BudgetStore {
     context.insert(month)
     context.insert(income)
     do {
-      try context.save()
+      try saveContext()
     } catch {
       context.rollback()
       throw error
@@ -131,7 +135,7 @@ public struct BudgetStore {
     try validate(entry)
     context.insert(entry)
     do {
-      try context.save()
+      try saveContext()
     } catch {
       context.rollback()
       throw error
@@ -182,7 +186,7 @@ public struct BudgetStore {
     try validate(entry)
     entry.updatedAt = .now
     do {
-      try context.save()
+      try saveContext()
     } catch {
       context.rollback()
       throw error
@@ -196,7 +200,7 @@ public struct BudgetStore {
     month.mode = mode.rawValue
     month.updatedAt = .now
     do {
-      try context.save()
+      try saveContext()
     } catch {
       context.rollback()
       throw error
@@ -228,7 +232,7 @@ public struct BudgetStore {
     context.insert(CloudTombstone(id: entry.id))
     context.delete(entry)
     do {
-      try context.save()
+      try saveContext()
     } catch {
       context.rollback()
       throw error
@@ -238,6 +242,11 @@ public struct BudgetStore {
   private func validCurrency(_ code: String) -> Bool {
     let bytes = code.utf8
     return bytes.count == 3 && bytes.allSatisfy { (65...90).contains($0) }
+  }
+
+  private func saveContext() throws {
+    try context.save()
+    NotificationCenter.default.post(name: .budgetStoreDidChange, object: nil)
   }
 }
 

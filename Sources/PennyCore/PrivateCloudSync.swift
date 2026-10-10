@@ -8,6 +8,7 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
   private let zoneID = CKRecordZone.default().zoneID
   private var context: ModelContext?
   private var engine: CKSyncEngine?
+  private var observer: NSObjectProtocol?
   private var records: [CKRecord.ID: CKRecord] = [:]
 
   private init() {}
@@ -31,6 +32,11 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
       delegate: self)
     let engine = CKSyncEngine(configuration)
     self.engine = engine
+    observer = NotificationCenter.default.addObserver(
+      forName: .budgetStoreDidChange, object: nil, queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor [weak self] in await self?.refreshAfterLocalChange() }
+    }
     let changes = records.keys.map(CKSyncEngine.PendingRecordZoneChange.saveRecord)
     engine.state.add(pendingRecordZoneChanges: changes)
     do {
@@ -38,6 +44,8 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
       try await engine.sendChanges()
     } catch {
       await engine.cancelOperations()
+      if let observer { NotificationCenter.default.removeObserver(observer) }
+      observer = nil
       self.engine = nil
       self.context = nil
       throw error
@@ -46,6 +54,8 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
 
   public func stop() async {
     await engine?.cancelOperations()
+    if let observer { NotificationCenter.default.removeObserver(observer) }
+    observer = nil
     engine = nil
     context = nil
     records.removeAll()
@@ -207,6 +217,11 @@ public final class PrivateCloudSync: CKSyncEngineDelegate, Sendable {
 
   private func recordDate(_ record: CKRecord) -> Date {
     (record["updatedAt"] as? Date) ?? (record["deletedAt"] as? Date) ?? .distantPast
+  }
+
+  private func refreshAfterLocalChange() async {
+    guard engine != nil, let context else { return }
+    try? await refresh(context: context)
   }
 
   private func cache(_ record: CKRecord) { records[record.recordID] = record }

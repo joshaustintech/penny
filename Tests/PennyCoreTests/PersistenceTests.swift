@@ -4,7 +4,42 @@ import Testing
 
 @testable import PennyCore
 
+private final class ChangeCounter: @unchecked Sendable {
+  private let lock = NSLock()
+  private var count = 0
+
+  func increment() {
+    lock.lock()
+    count += 1
+    lock.unlock()
+  }
+
+  func value() -> Int {
+    lock.lock()
+    defer { lock.unlock() }
+    return count
+  }
+}
+
 struct PersistenceTests {
+  @MainActor @Test func savedEntryNotifiesActiveSync() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
+    let container = try ModelContainer(
+      for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+    let store = BudgetStore(context: ModelContext(container))
+    let counter = ChangeCounter()
+    let observer = NotificationCenter.default.addObserver(
+      forName: .budgetStoreDidChange, object: nil, queue: nil
+    ) { _ in counter.increment() }
+    defer { NotificationCenter.default.removeObserver(observer) }
+    let entry = LedgerEntry(
+      amountMinor: 100, currencyCode: "USD", fractionDigits: 2,
+      kind: "spending", category: "needs")
+
+    try store.save(entry)
+    #expect(counter.value() == 1)
+  }
+
   @Test func transactionMonthUsesStoredCalendarDate() throws {
     let entry = LedgerEntry(
       amountMinor: 100, currencyCode: "USD", fractionDigits: 2,
