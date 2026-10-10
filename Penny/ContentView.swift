@@ -577,13 +577,13 @@ struct ContentView: View {
 
   private func categoryColor(_ category: BudgetCategory) -> Color {
     switch category {
-    case .needs: .blue
-    case .wants: .green
-    case .giving: .orange
-    case .debt: .purple
-    case .savings: .red
-    case .housing: .brown
-    case .income: .gray
+    case .needs: Color(red: 0.02, green: 0.40, blue: 0.80)
+    case .wants: Color(red: 0.15, green: 0.47, blue: 0.23)
+    case .giving: Color(red: 0.68, green: 0.28, blue: 0.00)
+    case .debt: Color(red: 0.52, green: 0.32, blue: 0.67)
+    case .savings: Color(red: 0.74, green: 0.22, blue: 0.22)
+    case .housing: Color(red: 0.52, green: 0.38, blue: 0.24)
+    case .income: Color(red: 0.40, green: 0.45, blue: 0.50)
     }
   }
 
@@ -593,7 +593,7 @@ struct ContentView: View {
         HStack(spacing: 8) {
           Circle().fill(categoryColor(item.category)).frame(width: 10, height: 10)
             .accessibilityHidden(true)
-          Text(item.category.rawValue.capitalized).font(.body).foregroundStyle(.primary)
+          Text(item.category.rawValue.capitalized).font(.title3).foregroundStyle(.primary)
         }
         .accessibilityElement(children: .combine)
       }
