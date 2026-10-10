@@ -194,25 +194,10 @@ struct ContentView: View {
         }
       }
       #if os(iOS)
-        .sheet(isPresented: $showingSettings) {
-          NavigationStack {
-            PennySettingsView()
-            .toolbar {
-              ToolbarItem(placement: .confirmationAction) {
-                Button {
-                  showingSettings = false
-                } label: {
-                  Image(systemName: "xmark").foregroundStyle(.primary)
-                }
-                .frame(minWidth: 44, minHeight: 44)
-                .contentShape(Rectangle())
-                .accessibilityLabel("Close settings")
-                .accessibilityIdentifier("settingsDoneButton")
-              }
-            }
-          }
-          .presentationDetents([.large])
+        .sheet(isPresented: settingsSheetPresented) {
+          settingsScreen.presentationDetents([.large])
         }
+        .fullScreenCover(isPresented: settingsFullScreenPresented) { settingsScreen }
       #endif
       .alert("Delete this entry?", isPresented: $showingDeleteConfirmation) {
         Button("Delete", role: .destructive, action: deletePendingEntry)
@@ -231,24 +216,61 @@ struct ContentView: View {
     }
   }
 
-  private var monthSidebar: some View {
-    List {
-      ForEach(months.reversed(), id: \.id) { month in
-        Button {
-          if let date = Calendar.current.date(
-            from: DateComponents(year: month.year, month: month.month, day: 1))
-          {
-            selectedMonth = date
+  #if os(iOS)
+    private var settingsSheetPresented: Binding<Bool> {
+      Binding(
+        get: { showingSettings && horizontalSizeClass != .regular },
+        set: { if !$0 { showingSettings = false } })
+    }
+
+    private var settingsFullScreenPresented: Binding<Bool> {
+      Binding(
+        get: { showingSettings && horizontalSizeClass == .regular },
+        set: { if !$0 { showingSettings = false } })
+    }
+
+    private var settingsScreen: some View {
+      NavigationStack {
+        PennySettingsView()
+          .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+              Button { showingSettings = false } label: {
+                Image(systemName: "xmark").foregroundStyle(.primary)
+              }
+              .frame(minWidth: 44, minHeight: 44)
+              .contentShape(Rectangle())
+              .accessibilityLabel("Close settings")
+              .accessibilityIdentifier("settingsDoneButton")
+            }
           }
-        } label: {
-          Text(
-            Calendar.current.date(from: DateComponents(year: month.year, month: month.month))?
-              .formatted(.dateTime.month(.wide).year()) ?? "\(month.year)-\(month.month)")
+      }
+    }
+  #endif
+
+  private var monthSidebar: some View {
+    List(selection: Binding(
+      get: {
+        Calendar.current.date(
+          from: DateComponents(
+            year: currentComponents.year, month: currentComponents.month, day: 1)) ?? selectedMonth
+      }, set: { month in
+        if let month { selectedMonth = month }
+      })) {
+      ForEach(months.reversed(), id: \.id) { month in
+        if let date = Calendar.current.date(
+          from: DateComponents(year: month.year, month: month.month, day: 1))
+        {
+          NavigationLink(value: date) {
+            Text(
+              Calendar.current.date(from: DateComponents(year: month.year, month: month.month))?
+                .formatted(.dateTime.month(.wide).year()) ?? "\(month.year)-\(month.month)")
+              .foregroundStyle(.primary)
+          }
         }
-        .buttonStyle(.plain)
       }
     }
     .listStyle(.sidebar)
+    .tint(Color(red: 0, green: 0.34, blue: 0.68))
     .navigationTitle("Months")
   }
 

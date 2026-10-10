@@ -53,8 +53,9 @@ struct PennySettingsView: View {
         .foregroundStyle(.primary)
         .accessibilityIdentifier("preferredCurrencyPicker")
         .accessibilityValue(preferredCurrency)
-        .accessibilityHint("Saved months keep their current currency.")
-        Text("Saved months keep their current currency.")
+        .accessibilityHint("Saved months keep their currency.")
+        Text("Saved months keep their currency.")
+          .font(.body)
           .foregroundStyle(.primary)
           .fixedSize(horizontal: false, vertical: true)
       }
@@ -68,11 +69,10 @@ struct PennySettingsView: View {
           systemImage: "lock.shield")
         Toggle("Sync with iCloud", isOn: $privateCloudSyncEnabled)
           .accessibilityIdentifier("privateCloudSyncToggle")
-        Text(
-          "Syncs budgets and entries with your private iCloud database. Turning it off stops this device from syncing; existing cloud copies remain."
-        )
-        .foregroundStyle(.primary)
-        .fixedSize(horizontal: false, vertical: true)
+        Text("Syncs budgets and entries to your private iCloud database. Turning sync off keeps cloud copies.")
+          .font(.body)
+          .foregroundStyle(.primary)
+          .fixedSize(horizontal: false, vertical: true)
         if !cloudSyncError.isEmpty {
           Text(cloudSyncError)
             .foregroundStyle(.red)
@@ -82,15 +82,24 @@ struct PennySettingsView: View {
           Button("Sync now") { Task { await refreshCloudSync() } }
         } else {
           Text("Turn on iCloud sync to sync now.")
+            .font(.body)
             .foregroundStyle(.primary)
         }
         #if os(iOS)
-          Toggle("Share current budget with Apple Watch", isOn: $watchSharingEnabled)
+          Toggle(isOn: $watchSharingEnabled) {
+            Text("Share current budget with Apple Watch").font(.body)
+              .lineLimit(nil)
+              .fixedSize(horizontal: false, vertical: true)
+          }
             .accessibilityIdentifier("watchSharingToggle")
           Text("Shares category balances and the five latest entries with your paired Watch.")
+            .font(.body)
+            .fixedSize(horizontal: false, vertical: true)
         #endif
         Text("Penny uses no accounts, bank connections, ads, or analytics.")
+          .font(.body)
           .foregroundStyle(.primary)
+          .fixedSize(horizontal: false, vertical: true)
       }
     }
     .formStyle(.grouped)

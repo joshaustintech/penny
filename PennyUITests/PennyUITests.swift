@@ -38,6 +38,26 @@ final class PennyUITests: XCTestCase {
     try audit(app)
   }
 
+  func testSettingsAtLargestDynamicType() {
+    let app = XCUIApplication()
+    app.launchArguments = [
+      "--ui-testing", "--reset-store", "-UIPreferredContentSizeCategoryName",
+      "UICTContentSizeCategoryAccessibilityXXXL",
+    ]
+    app.launch()
+    app.buttons["settingsButton"].tap()
+    for label in [
+      "Shares category balances and the five latest entries with your paired Watch.",
+      "Turn on iCloud sync to sync now.", "Share current budget with Apple Watch",
+      "Penny uses no accounts, bank connections, ads, or analytics.",
+    ] {
+      let text = app.staticTexts[label]
+      for _ in 0..<8 where !text.exists { app.scrollViews.firstMatch.swipeUp() }
+      XCTAssertTrue(text.waitForExistence(timeout: 5), label)
+      XCTAssertGreaterThan(text.frame.height, 30, label)
+    }
+  }
+
   private func audit(_ app: XCUIApplication) throws {
     try app.performAccessibilityAudit { issue in
       print("AUDIT ISSUE: \(issue.detailedDescription)\n\(issue.element?.debugDescription ?? "")")
@@ -141,6 +161,7 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     let error = app.staticTexts["privateCloudSyncError"]
+    for _ in 0..<4 where !error.exists { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(error.waitForExistence(timeout: 5))
     XCTAssertTrue(error.label.contains("Penny could not sync."))
   }
