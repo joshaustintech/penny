@@ -20,6 +20,11 @@ struct PennySettingsView: View {
           Text("Light").tag("light")
           Text("Dark").tag("dark")
         }
+        #if os(iOS)
+          .pickerStyle(.navigationLink)
+        #else
+          .pickerStyle(.menu)
+        #endif
         .accessibilityIdentifier("appearancePicker")
         .accessibilityValue(appearance.capitalized)
       }
@@ -29,7 +34,11 @@ struct PennySettingsView: View {
           Text("Balanced").tag(BudgetMode.balanced.rawValue)
           Text("Housing First").tag(BudgetMode.housingFirst.rawValue)
         }
-        .pickerStyle(.menu)
+        #if os(iOS)
+          .pickerStyle(.navigationLink)
+        #else
+          .pickerStyle(.menu)
+        #endif
         .foregroundStyle(.primary)
         .accessibilityIdentifier("defaultBudgetModePicker")
         .accessibilityValue(
