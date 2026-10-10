@@ -18,6 +18,7 @@
 		A00000000000000000000010 /* Transactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* Transactions.swift */; };
 		A00000000000000000000011 /* EntryForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000008 /* EntryForm.swift */; };
 		A00000000000000000000012 /* EntryForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000008 /* EntryForm.swift */; };
+		A00000000000000000000013 /* PennyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000009 /* PennyUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,27 +30,32 @@
 		B00000000000000000000006 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		B00000000000000000000007 /* Transactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transactions.swift; sourceTree = "<group>"; };
 		B00000000000000000000008 /* EntryForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryForm.swift; sourceTree = "<group>"; };
+		B00000000000000000000009 /* PennyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PennyUITests.swift; sourceTree = "<group>"; };
+		B00000000000000000000010 /* PennyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PennyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C00000000000000000000001 /* Frameworks iOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000002 /* Frameworks macOS */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000007 /* Frameworks UI tests */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* Penny */, D00000000000000000000003 /* PennyCore */, D00000000000000000000004 /* Products */, ); sourceTree = "<group>"; };
+		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* Penny */, D00000000000000000000003 /* PennyCore */, D00000000000000000000005 /* PennyUITests */, D00000000000000000000004 /* Products */, ); sourceTree = "<group>"; };
 		D00000000000000000000002 /* Penny */ = {isa = PBXGroup; children = (B00000000000000000000001 /* PennyApp.swift */, B00000000000000000000002 /* ContentView.swift */, B00000000000000000000008 /* EntryForm.swift */, ); path = Penny; sourceTree = "<group>"; };
 		D00000000000000000000003 /* PennyCore */ = {isa = PBXGroup; children = (B00000000000000000000003 /* Budget.swift */, B00000000000000000000006 /* Persistence.swift */, B00000000000000000000007 /* Transactions.swift */, ); path = Sources/PennyCore; sourceTree = "<group>"; };
-		D00000000000000000000004 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000004 /* Penny-iOS.app */, B00000000000000000000005 /* Penny-macOS.app */, ); name = Products; sourceTree = "<group>"; };
+		D00000000000000000000004 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000004 /* Penny-iOS.app */, B00000000000000000000005 /* Penny-macOS.app */, B00000000000000000000010 /* PennyUITests.xctest */, ); name = Products; sourceTree = "<group>"; };
+		D00000000000000000000005 /* PennyUITests */ = {isa = PBXGroup; children = (B00000000000000000000009 /* PennyUITests.swift */, ); path = PennyUITests; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		E00000000000000000000001 /* Penny-iOS */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000008; buildPhases = (C00000000000000000000001, C00000000000000000000003, C00000000000000000000004, ); buildRules = (); dependencies = (); name = "Penny-iOS"; productName = "Penny-iOS"; productReference = B00000000000000000000004; productType = "com.apple.product-type.application"; };
 		E00000000000000000000002 /* Penny-macOS */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000009; buildPhases = (C00000000000000000000002, C00000000000000000000005, C00000000000000000000006, ); buildRules = (); dependencies = (); name = "Penny-macOS"; productName = "Penny-macOS"; productReference = B00000000000000000000005; productType = "com.apple.product-type.application"; };
+		E00000000000000000000004 /* PennyUITests */ = {isa = PBXNativeTarget; buildConfigurationList = F00000000000000000000012; buildPhases = (C00000000000000000000007, C00000000000000000000008, C00000000000000000000009, ); buildRules = (); dependencies = (E00000000000000000000006, ); name = PennyUITests; productName = PennyUITests; productReference = B00000000000000000000010; productType = "com.apple.product-type.bundle.ui-testing"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		E00000000000000000000003 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2700; TargetAttributes = {E00000000000000000000001 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000002 = {CreatedOnToolsVersion = 27.0; }; }; }; buildConfigurationList = F00000000000000000000007; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base, ); mainGroup = D00000000000000000000001; productRefGroup = D00000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (E00000000000000000000001, E00000000000000000000002, ); };
+		E00000000000000000000003 /* Project object */ = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2700; TargetAttributes = {E00000000000000000000001 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000002 = {CreatedOnToolsVersion = 27.0; }; E00000000000000000000004 = {CreatedOnToolsVersion = 27.0; TestTargetID = E00000000000000000000001; }; }; }; buildConfigurationList = F00000000000000000000007; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base, ); mainGroup = D00000000000000000000001; productRefGroup = D00000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (E00000000000000000000001, E00000000000000000000002, E00000000000000000000004, ); };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -57,6 +63,8 @@
 		C00000000000000000000004 /* Resources iOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000005 /* Sources macOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000008, A00000000000000000000010, A00000000000000000000012, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000006 /* Resources macOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000008 /* Sources UI tests */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000013, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000009 /* Resources UI tests */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -66,13 +74,18 @@
 		F00000000000000000000004 /* iOS target Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = Penny; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.ios; PRODUCT_NAME = Penny; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
 		F00000000000000000000005 /* macOS target Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.macos; PRODUCT_NAME = Penny; SDKROOT = macosx; SUPPORTED_PLATFORMS = macosx; }; name = Debug; };
 		F00000000000000000000006 /* macOS target Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.macos; PRODUCT_NAME = Penny; SDKROOT = macosx; SUPPORTED_PLATFORMS = macosx; }; name = Release; };
+		F00000000000000000000010 /* UI tests Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.uitests; PRODUCT_NAME = PennyUITests; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = "Penny-iOS"; }; name = Debug; };
+		F00000000000000000000011 /* UI tests Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.joshaustintech.penny.uitests; PRODUCT_NAME = PennyUITests; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = "Penny-iOS"; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 		F00000000000000000000007 /* Project Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000001, F00000000000000000000002, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		F00000000000000000000008 /* iOS Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000003, F00000000000000000000004, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		F00000000000000000000009 /* macOS Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000005, F00000000000000000000006, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		F00000000000000000000012 /* UI tests Configurations */ = {isa = XCConfigurationList; buildConfigurations = (F00000000000000000000010, F00000000000000000000011, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
+		E00000000000000000000005 /* App test dependency proxy */ = {isa = PBXContainerItemProxy; containerPortal = E00000000000000000000003; proxyType = 1; remoteGlobalIDString = E00000000000000000000001; remoteInfo = "Penny-iOS"; };
+		E00000000000000000000006 /* App test dependency */ = {isa = PBXTargetDependency; target = E00000000000000000000001; targetProxy = E00000000000000000000005; };
 
 	};
 	rootObject = E00000000000000000000003 /* Project object */;

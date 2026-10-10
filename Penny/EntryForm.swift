@@ -55,6 +55,7 @@ struct EntryForm: View {
           #if os(iOS)
             .keyboardType(.decimalPad)
           #endif
+          .accessibilityIdentifier("entryAmountField")
         DatePicker("Date", selection: $date, displayedComponents: .date)
         TextField("Note (optional)", text: $note)
       }
