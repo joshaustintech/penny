@@ -17,7 +17,9 @@ versioned records to the user's private database with timestamp conflict rules
 and deletion tombstones. Turning sync off stops this device and leaves existing
 cloud copies intact. A valid signed build and registered iCloud container are
 required; provider setup is unverified, and no local provisioning profiles were
-found, so live sync has not been verified. A tvOS 27 simulator UI test verifies
+found. An automatic-signing build also failed because Xcode rejected the
+configured developer-account credentials, so live sync has not been verified.
+A tvOS 27 simulator UI test verifies
 the seeded $2,930 remaining total, both charts, and remote focus movement. On a
 paired iPhone 16 Pro (iOS 18.4) and Apple Watch Series 10 (watchOS 11)
 simulator, Penny delivered and rendered the shared $1,000 budget and categories.
