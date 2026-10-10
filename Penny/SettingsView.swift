@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PennySettingsView: View {
   @AppStorage("appearance") private var appearance = "system"
+  @AppStorage("preferredCurrency") private var preferredCurrency =
+    Locale.current.currency?.identifier ?? "USD"
 
   var body: some View {
     Form {
@@ -13,6 +15,20 @@ struct PennySettingsView: View {
         }
         .accessibilityIdentifier("appearancePicker")
         .accessibilityValue(appearance.capitalized)
+      }
+      Section("New budgets") {
+        Picker("Preferred currency", selection: $preferredCurrency) {
+          ForEach(Locale.commonISOCurrencyCodes, id: \.self) { code in
+            Text("\(code) — \(Locale.current.localizedString(forCurrencyCode: code) ?? code)")
+              .tag(code)
+          }
+        }
+        .pickerStyle(.menu)
+        .accessibilityIdentifier("preferredCurrencyPicker")
+        .accessibilityValue(preferredCurrency)
+        Text("Saved months keep their current currency.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
       Section("Privacy") {
         Label("Budget data stays on this device.", systemImage: "lock.shield")

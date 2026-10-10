@@ -9,6 +9,8 @@ import SwiftUI
 struct ContentView: View {
   @Environment(\.modelContext) private var context
   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+  @AppStorage("preferredCurrency") private var preferredCurrency =
+    Locale.current.currency?.identifier ?? "USD"
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
   @State private var selectedMode = BudgetMode.balanced
@@ -36,7 +38,7 @@ struct ContentView: View {
   }
 
   private var currency: String {
-    currentBudget?.currencyCode ?? (Locale.current.currency?.identifier ?? "USD")
+    currentBudget?.currencyCode ?? preferredCurrency
   }
 
   var body: some View {

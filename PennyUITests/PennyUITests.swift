@@ -8,6 +8,9 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     XCTAssertTrue(app.staticTexts["Budget data stays on this device."].waitForExistence(timeout: 5))
+    let currency = app.buttons["preferredCurrencyPicker"]
+    XCTAssertTrue(currency.waitForExistence(timeout: 5))
+    XCTAssertEqual(currency.value as? String, "USD")
     let appearance = app.buttons["appearancePicker"]
     XCTAssertTrue(appearance.waitForExistence(timeout: 5))
     appearance.tap()
@@ -19,6 +22,7 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     XCTAssertEqual(app.buttons["appearancePicker"].value as? String, "Dark")
+    XCTAssertEqual(app.buttons["preferredCurrencyPicker"].value as? String, "USD")
     XCTAssertTrue(app.staticTexts["Budget data stays on this device."].exists)
   }
 
