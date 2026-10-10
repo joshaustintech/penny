@@ -8,6 +8,7 @@ import SwiftUI
 
 struct ContentView: View {
   @Environment(\.modelContext) private var context
+  @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
   @State private var selectedMode = BudgetMode.balanced
@@ -38,6 +39,37 @@ struct ContentView: View {
   }
 
   var body: some View {
+    Group {
+      #if os(macOS)
+        NavigationSplitView {
+          monthSidebar
+        } detail: {
+          dashboard
+        }
+      #else
+        if horizontalSizeClass == .regular {
+          NavigationSplitView {
+            monthSidebar
+          } detail: {
+            dashboard
+          }
+        } else {
+          dashboard
+        }
+      #endif
+    }
+    .alert(
+      "Penny couldn't complete the action",
+      isPresented: Binding(
+        get: { saveError != nil }, set: { if !$0 { saveError = nil } })
+    ) {
+      Button("OK") { saveError = nil }
+    } message: {
+      Text(saveError ?? "Try again.")
+    }
+  }
+
+  private var dashboard: some View {
     NavigationStack {
       ScrollView {
         VStack(alignment: .leading, spacing: 24) {
@@ -102,15 +134,27 @@ struct ContentView: View {
         }
       #endif
     }
-    .alert(
-      "Penny couldn't complete the action",
-      isPresented: Binding(
-        get: { saveError != nil }, set: { if !$0 { saveError = nil } })
-    ) {
-      Button("OK") { saveError = nil }
-    } message: {
-      Text(saveError ?? "Try again.")
+  }
+
+  private var monthSidebar: some View {
+    List {
+      ForEach(months.reversed(), id: \.id) { month in
+        Button {
+          if let date = Calendar.current.date(
+            from: DateComponents(year: month.year, month: month.month, day: 1))
+          {
+            selectedMonth = date
+          }
+        } label: {
+          Text(
+            Calendar.current.date(from: DateComponents(year: month.year, month: month.month))?
+              .formatted(.dateTime.month(.wide).year()) ?? "\(month.year)-\(month.month)")
+        }
+        .buttonStyle(.plain)
+      }
     }
+    .listStyle(.sidebar)
+    .navigationTitle("Months")
   }
 
   private var monthSwitcher: some View {
@@ -148,12 +192,15 @@ struct ContentView: View {
       VStack(alignment: .leading, spacing: 12) {
         Text("Monthly take-home income")
           .font(.headline)
-        TextField("Income", value: $income, format: .currency(code: currency))
-          #if os(iOS)
-            .keyboardType(.decimalPad)
-          #endif
-          .accessibilityHint("Enter income after taxes")
-          .accessibilityIdentifier("incomeField")
+        TextField(
+          "Income (\(currency))", value: $income,
+          format: .number.precision(.fractionLength(0...fractionDigits))
+        )
+        #if os(iOS)
+          .keyboardType(.decimalPad)
+        #endif
+        .accessibilityHint("Enter income after taxes")
+        .accessibilityIdentifier("incomeField")
       }
       .padding(18)
       .frame(maxWidth: .infinity, alignment: .leading)

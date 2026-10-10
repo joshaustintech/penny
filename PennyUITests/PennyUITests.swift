@@ -4,6 +4,7 @@ import XCTest
 final class PennyUITests: XCTestCase {
   func testOnboardAddSpendingAndReload() {
     let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
     app.launch()
 
     app.buttons["Previous month"].tap()
@@ -41,6 +42,7 @@ final class PennyUITests: XCTestCase {
       app.descendants(matching: .any)["Monthly spending history"].waitForExistence(timeout: 5))
 
     app.terminate()
+    app.launchArguments = ["--ui-testing"]
     app.launch()
     app.buttons["Previous month"].tap()
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 10))

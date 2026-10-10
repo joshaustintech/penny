@@ -83,11 +83,14 @@ struct EntryForm: View {
         Picker("Category", selection: $category) {
           ForEach(categories, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
         }
-        TextField("Amount", value: $amount, format: .currency(code: currency))
-          #if os(iOS)
-            .keyboardType(.decimalPad)
-          #endif
-          .accessibilityIdentifier("entryAmountField")
+        TextField(
+          "Amount (\(currency))", value: $amount,
+          format: .number.precision(.fractionLength(0...fractionDigits))
+        )
+        #if os(iOS)
+          .keyboardType(.decimalPad)
+        #endif
+        .accessibilityIdentifier("entryAmountField")
         DatePicker("Date", selection: $date, displayedComponents: .date)
         TextField("Note (optional)", text: $note)
       }
