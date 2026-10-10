@@ -61,8 +61,9 @@ final class PennyUITests: XCTestCase {
     app.launch()
     app.buttons["settingsButton"].tap()
     for label in [
-      "Shares category balances and the five latest entries with your paired Watch.",
+      "Sync is not a backup. Deleting an entry also deletes it from synced devices.",
       "Turn on iCloud sync to sync now.", "Share current budget with Apple Watch",
+      "Shares category balances and the five latest entries with your paired Watch.",
       "Penny uses no accounts, bank connections, ads, or analytics.",
     ] {
       let text = app.staticTexts[label]
@@ -81,6 +82,12 @@ final class PennyUITests: XCTestCase {
       self.add(attachment)
       return false
     }
+  }
+
+  private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication) {
+    let scrollView = app.scrollViews.firstMatch
+    for _ in 0..<6 where !scrollView.frame.contains(element.frame) { scrollView.swipeUp() }
+    XCTAssertTrue(scrollView.frame.contains(element.frame))
   }
 
   func testSettingsPersistAppearanceAndShowPrivacy() {
@@ -113,11 +120,17 @@ final class PennyUITests: XCTestCase {
     let syncPrompt = app.staticTexts["Turn on iCloud sync to sync now."]
     for _ in 0..<4 where !syncPrompt.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(syncPrompt.isHittable)
+    XCTAssertTrue(
+      app.staticTexts[
+        "Sync is not a backup. Deleting an entry also deletes it from synced devices."
+      ].exists)
     let watchSharing = app.switches["watchSharingToggle"]
-    for _ in 0..<4 where !watchSharing.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    scrollIntoView(watchSharing, in: app)
     XCTAssertTrue(watchSharing.isHittable)
     XCTAssertEqual(watchSharing.value as? String, "0")
-    watchSharing.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+    let watchSharingControl = watchSharing.descendants(matching: .switch).firstMatch
+    XCTAssertTrue(watchSharingControl.exists)
+    watchSharingControl.tap()
     XCTAssertEqual(watchSharing.value as? String, "1")
     XCTAssertTrue(
       app.staticTexts["Budget data stays on your devices."].waitForExistence(timeout: 3))
@@ -131,7 +144,7 @@ final class PennyUITests: XCTestCase {
     XCTAssertEqual(app.buttons["defaultBudgetModePicker"].value as? String, "Housing First")
     XCTAssertEqual(app.buttons["preferredCurrencyPicker"].value as? String, "UYU")
     let savedWatchSharing = app.switches["watchSharingToggle"]
-    for _ in 0..<10 where !savedWatchSharing.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    scrollIntoView(savedWatchSharing, in: app)
     XCTAssertEqual(savedWatchSharing.value as? String, "1")
     let savedPrivacy = app.staticTexts["Budget data stays on your devices."]
     for _ in 0..<4 where !savedPrivacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
@@ -160,9 +173,9 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
     app.buttons["settingsButton"].tap()
     let sharing = app.switches["watchSharingToggle"]
-    for _ in 0..<4 where !sharing.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    scrollIntoView(sharing, in: app)
     XCTAssertTrue(sharing.isHittable)
-    sharing.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+    sharing.descendants(matching: .switch).firstMatch.tap()
     XCTAssertEqual(sharing.value as? String, "1")
   }
 

@@ -73,6 +73,10 @@ struct PennySettingsView: View {
           .font(.body)
           .foregroundStyle(.primary)
           .fixedSize(horizontal: false, vertical: true)
+        Text("Sync is not a backup. Deleting an entry also deletes it from synced devices.")
+          .font(.body)
+          .foregroundStyle(.primary)
+          .fixedSize(horizontal: false, vertical: true)
         if !cloudSyncError.isEmpty {
           Text(cloudSyncError)
             .foregroundStyle(.red)
