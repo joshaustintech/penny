@@ -5,6 +5,7 @@ struct PennySettingsView: View {
   @AppStorage("preferredCurrency") private var preferredCurrency =
     Locale.current.currency?.identifier ?? "USD"
   @AppStorage("defaultBudgetMode") private var defaultBudgetMode = BudgetMode.balanced.rawValue
+  @AppStorage("watchSharingEnabled") private var watchSharingEnabled = false
 
   var body: some View {
     Form {
@@ -43,7 +44,16 @@ struct PennySettingsView: View {
       }
       Section {
         Text("Privacy").font(.headline).accessibilityAddTraits(.isHeader)
-        Label("Budget data stays on this device.", systemImage: "lock.shield")
+        Label(
+          watchSharingEnabled
+            ? "Budget data stays on your devices." : "Budget data stays on this device.",
+          systemImage: "lock.shield")
+        #if os(iOS)
+          Toggle("Share current budget with Apple Watch", isOn: $watchSharingEnabled)
+            .accessibilityIdentifier("watchSharingToggle")
+          Text("Shares category balances and the five latest entries with your paired Watch.")
+            .font(.caption)
+        #endif
         Text("iCloud sync isn't configured yet.").foregroundStyle(.primary)
         Text("Penny uses no accounts, bank connections, ads, or analytics.")
           .foregroundStyle(.primary)

@@ -73,6 +73,13 @@ final class PennyUITests: XCTestCase {
     for _ in 0..<4 where !privacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(privacy.isHittable)
     XCTAssertTrue(app.staticTexts["iCloud sync isn't configured yet."].isHittable)
+    let watchSharing = app.switches["watchSharingToggle"]
+    XCTAssertTrue(watchSharing.isHittable)
+    XCTAssertEqual(watchSharing.value as? String, "0")
+    watchSharing.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+    XCTAssertEqual(watchSharing.value as? String, "1")
+    XCTAssertTrue(
+      app.staticTexts["Budget data stays on your devices."].waitForExistence(timeout: 3))
     app.buttons["settingsDoneButton"].tap()
 
     app.terminate()
@@ -82,7 +89,8 @@ final class PennyUITests: XCTestCase {
     XCTAssertEqual(app.buttons["appearancePicker"].value as? String, "Dark")
     XCTAssertEqual(app.buttons["defaultBudgetModePicker"].value as? String, "Housing First")
     XCTAssertEqual(app.buttons["preferredCurrencyPicker"].value as? String, "UYU")
-    let savedPrivacy = app.staticTexts["Budget data stays on this device."]
+    XCTAssertEqual(app.switches["watchSharingToggle"].value as? String, "1")
+    let savedPrivacy = app.staticTexts["Budget data stays on your devices."]
     for _ in 0..<4 where !savedPrivacy.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(savedPrivacy.isHittable)
     app.buttons["settingsDoneButton"].tap()
@@ -95,6 +103,24 @@ final class PennyUITests: XCTestCase {
     enter("1000", in: income, app: app)
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Housing"].waitForExistence(timeout: 5))
+  }
+
+  func testWatchSharingPublishesCurrentBudget() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store"]
+    app.launch()
+    let income = app.textFields["incomeField"]
+    XCTAssertTrue(income.waitForExistence(timeout: 5))
+    enter("1000", in: income, app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    app.buttons["createBudgetButton"].tap()
+    XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
+    app.buttons["settingsButton"].tap()
+    let sharing = app.switches["watchSharingToggle"]
+    for _ in 0..<4 where !sharing.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(sharing.isHittable)
+    sharing.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+    XCTAssertEqual(sharing.value as? String, "1")
   }
 
   func testOnboardAddSpendingAndReload() {

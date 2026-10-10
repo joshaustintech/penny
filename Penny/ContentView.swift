@@ -14,6 +14,9 @@ struct ContentView: View {
   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   @AppStorage("preferredCurrency") private var preferredCurrency =
     Locale.current.currency?.identifier ?? "USD"
+  #if os(iOS)
+    @AppStorage("watchSharingEnabled") private var watchSharingEnabled = false
+  #endif
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
@@ -113,6 +116,9 @@ struct ContentView: View {
       .tint(.accentColor)
       .task { loadBudget() }
       .onChange(of: selectedMonth) { _, _ in income = 0 }
+      #if os(iOS)
+        .onChange(of: watchSharingEnabled) { _, _ in loadBudget() }
+      #endif
       .toolbar {
         #if os(macOS)
           ToolbarItem {
@@ -626,11 +632,43 @@ struct ContentView: View {
         if horizontalSizeClass == .regular {
           columnVisibility = savedMonths.isEmpty ? .detailOnly : .all
         }
+        publishWatchSnapshot(months: savedMonths, entries: entries)
       #endif
     } catch {
       saveError = error.localizedDescription
     }
   }
+
+  #if os(iOS)
+    private func publishWatchSnapshot(months: [BudgetMonth], entries: [LedgerEntry]) {
+      guard watchSharingEnabled else {
+        WatchBudgetSync.shared.publish(nil)
+        return
+      }
+      let current = Calendar.current.dateComponents([.year, .month], from: .now)
+      guard
+        let month = months.first(where: { $0.year == current.year && $0.month == current.month })
+      else {
+        WatchBudgetSync.shared.publish(nil)
+        return
+      }
+      let formatter = NumberFormatter()
+      formatter.numberStyle = .currency
+      formatter.currencyCode = month.currencyCode
+      let monthEntries = entries.filter {
+        $0.dateComponents?.year == month.year && $0.dateComponents?.month == month.month
+      }
+      let report = try? BudgetReporting.make(
+        entries: monthEntries, currencyCode: month.currencyCode,
+        fractionDigits: formatter.maximumFractionDigits,
+        mode: BudgetMode(rawValue: month.mode) ?? .balanced)
+      let transfer = report.flatMap {
+        try? WatchBudgetSnapshot(
+          report: $0, entries: monthEntries, year: month.year, month: month.month)
+      }
+      WatchBudgetSync.shared.publish(transfer)
+    }
+  #endif
 
   private func deletePendingEntry() {
     guard let pendingDelete else { return }

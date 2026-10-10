@@ -17,6 +17,7 @@ struct PennyApp: App {
         UserDefaults.standard.removeObject(forKey: "appearance")
         UserDefaults.standard.removeObject(forKey: "preferredCurrency")
         UserDefaults.standard.removeObject(forKey: "defaultBudgetMode")
+        UserDefaults.standard.removeObject(forKey: "watchSharingEnabled")
         for suffix in ["", "-shm", "-wal"] {
           try? FileManager.default.removeItem(atPath: url.path + suffix)
         }
@@ -35,6 +36,9 @@ struct PennyApp: App {
         fatalError("Penny could not open local storage: \(error)")
       }
     }
+    #if os(iOS)
+      WatchBudgetSync.shared.start()
+    #endif
   }
 
   var body: some Scene {
