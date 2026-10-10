@@ -6,7 +6,8 @@ needs a registered CloudKit container and signed provisioning before live sync
 can be verified. Watch shares a user-enabled budget snapshot through the paired
 iPhone.
 
-Siri budget shortcuts are implemented on iOS/iPadOS, macOS, and watchOS.
+Siri budget shortcuts are implemented on iOS/iPadOS and watchOS. macOS exposes
+Penny App Intents for custom shortcuts, but does not support App Shortcuts.
 Voice execution, paired Watch transfer, and HomePod Personal Requests have not
 been verified on hardware. Apple TV does not support App Shortcuts.
 

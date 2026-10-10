@@ -261,39 +261,41 @@ private enum ContributionProgress {
   }
 }
 
-struct PennyShortcuts: AppShortcutsProvider {
-  static var appShortcuts: [AppShortcut] {
-    AppShortcut(
-      intent: RemainingBudgetIntent(),
-      phrases: ["How much money do I have left in \(.applicationName) this month?"],
-      shortTitle: "Remaining budget", systemImageName: "chart.pie")
-    AppShortcut(
-      intent: SpentBudgetIntent(),
-      phrases: ["How much have I spent in \(.applicationName) this month?"],
-      shortTitle: "Monthly spending", systemImageName: "dollarsign.circle")
-    AppShortcut(
-      intent: CategoryRemainingIntent(),
-      phrases: ["How much is left for \(\.$category) in \(.applicationName) this month?"],
-      shortTitle: "Category remaining", systemImageName: "chart.pie")
-    AppShortcut(
-      intent: CategorySpentIntent(),
-      phrases: ["How much have I spent on \(\.$category) in \(.applicationName) this month?"],
-      shortTitle: "Category spending", systemImageName: "dollarsign.circle")
-    AppShortcut(
-      intent: BudgetStatusIntent(),
-      phrases: ["Am I over budget in \(.applicationName) this month?"],
-      shortTitle: "Budget status", systemImageName: "checkmark.circle")
-    AppShortcut(
-      intent: SavingsProgressIntent(),
-      phrases: ["How much have I saved with \(.applicationName) this month?"],
-      shortTitle: "Savings progress", systemImageName: "banknote")
-    AppShortcut(
-      intent: DebtProgressIntent(),
-      phrases: ["How much have I put toward debt with \(.applicationName) this month?"],
-      shortTitle: "Debt progress", systemImageName: "creditcard")
-    AppShortcut(
-      intent: RecordTransactionIntent(),
-      phrases: ["Record spending in \(.applicationName)"],
-      shortTitle: "Record spending", systemImageName: "plus.circle")
+#if !os(macOS)
+  struct PennyShortcuts: AppShortcutsProvider {
+    static var appShortcuts: [AppShortcut] {
+      AppShortcut(
+        intent: RemainingBudgetIntent(),
+        phrases: ["How much money do I have left in \(.applicationName) this month?"],
+        shortTitle: "Remaining budget", systemImageName: "chart.pie")
+      AppShortcut(
+        intent: SpentBudgetIntent(),
+        phrases: ["How much have I spent in \(.applicationName) this month?"],
+        shortTitle: "Monthly spending", systemImageName: "dollarsign.circle")
+      AppShortcut(
+        intent: CategoryRemainingIntent(),
+        phrases: ["How much is left for \(\.$category) in \(.applicationName) this month?"],
+        shortTitle: "Category remaining", systemImageName: "chart.pie")
+      AppShortcut(
+        intent: CategorySpentIntent(),
+        phrases: ["How much have I spent on \(\.$category) in \(.applicationName) this month?"],
+        shortTitle: "Category spending", systemImageName: "dollarsign.circle")
+      AppShortcut(
+        intent: BudgetStatusIntent(),
+        phrases: ["Am I over budget in \(.applicationName) this month?"],
+        shortTitle: "Budget status", systemImageName: "checkmark.circle")
+      AppShortcut(
+        intent: SavingsProgressIntent(),
+        phrases: ["How much have I saved with \(.applicationName) this month?"],
+        shortTitle: "Savings progress", systemImageName: "banknote")
+      AppShortcut(
+        intent: DebtProgressIntent(),
+        phrases: ["How much have I put toward debt with \(.applicationName) this month?"],
+        shortTitle: "Debt progress", systemImageName: "creditcard")
+      AppShortcut(
+        intent: RecordTransactionIntent(),
+        phrases: ["Record spending in \(.applicationName)"],
+        shortTitle: "Record spending", systemImageName: "plus.circle")
+    }
   }
-}
+#endif
