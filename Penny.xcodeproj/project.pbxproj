@@ -49,6 +49,9 @@
 		A00000000000000000000041 /* CloudRecordCodec.swift in Sources iOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000026 /* CloudRecordCodec.swift */; };
 		A00000000000000000000042 /* CloudRecordCodec.swift in Sources macOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000026 /* CloudRecordCodec.swift */; };
 		A00000000000000000000043 /* CloudRecordCodec.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000026 /* CloudRecordCodec.swift */; };
+		A00000000000000000000044 /* PrivateCloudSync.swift in Sources iOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000027 /* PrivateCloudSync.swift */; };
+		A00000000000000000000045 /* PrivateCloudSync.swift in Sources macOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000027 /* PrivateCloudSync.swift */; };
+		A00000000000000000000046 /* PrivateCloudSync.swift in Sources tvOS */ = {isa = PBXBuildFile; fileRef = B00000000000000000000027 /* PrivateCloudSync.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +81,7 @@
 		B00000000000000000000024 /* TVContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVContentView.swift; sourceTree = "<group>"; };
 		B00000000000000000000025 /* Penny-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Penny-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B00000000000000000000026 /* CloudRecordCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudRecordCodec.swift; sourceTree = "<group>"; };
+		B00000000000000000000027 /* PrivateCloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateCloudSync.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +95,7 @@
 /* Begin PBXGroup section */
 		D00000000000000000000001 = {isa = PBXGroup; children = (D00000000000000000000002 /* Penny */, D00000000000000000000003 /* PennyCore */, D00000000000000000000005 /* PennyUITests */, D00000000000000000000006 /* PennyMacUITests */, D00000000000000000000007 /* PennyWatch */, D00000000000000000000008 /* PennyTV */, D00000000000000000000004 /* Products */, ); sourceTree = "<group>"; };
 		D00000000000000000000002 /* Penny */ = {isa = PBXGroup; children = (B00000000000000000000001 /* PennyApp.swift */, B00000000000000000000002 /* ContentView.swift */, B00000000000000000000008 /* EntryForm.swift */, B00000000000000000000012 /* RemainingBudgetIntent.swift */, B00000000000000000000013 /* SettingsView.swift */, B00000000000000000000019 /* WatchSync.swift */, B00000000000000000000014 /* Assets.xcassets */, ); path = Penny; sourceTree = "<group>"; };
-		D00000000000000000000003 /* PennyCore */ = {isa = PBXGroup; children = (B00000000000000000000003 /* Budget.swift */, B00000000000000000000006 /* Persistence.swift */, B00000000000000000000007 /* Transactions.swift */, B00000000000000000000011 /* Export.swift */, B00000000000000000000018 /* WatchSnapshot.swift */, B00000000000000000000026 /* CloudRecordCodec.swift */, ); path = Sources/PennyCore; sourceTree = "<group>"; };
+		D00000000000000000000003 /* PennyCore */ = {isa = PBXGroup; children = (B00000000000000000000003 /* Budget.swift */, B00000000000000000000006 /* Persistence.swift */, B00000000000000000000007 /* Transactions.swift */, B00000000000000000000011 /* Export.swift */, B00000000000000000000018 /* WatchSnapshot.swift */, B00000000000000000000026 /* CloudRecordCodec.swift */, B00000000000000000000027 /* PrivateCloudSync.swift */, ); path = Sources/PennyCore; sourceTree = "<group>"; };
 		D00000000000000000000004 /* Products */ = {isa = PBXGroup; children = (B00000000000000000000004 /* Penny-iOS.app */, B00000000000000000000005 /* Penny-macOS.app */, B00000000000000000000010 /* PennyUITests.xctest */, B00000000000000000000017 /* PennyMacUITests.xctest */, B00000000000000000000022 /* Penny Watch.app */, B00000000000000000000025 /* Penny-tvOS.app */, ); name = Products; sourceTree = "<group>"; };
 		D00000000000000000000005 /* PennyUITests */ = {isa = PBXGroup; children = (B00000000000000000000009 /* PennyUITests.swift */, ); path = PennyUITests; sourceTree = "<group>"; };
 		D00000000000000000000006 /* PennyMacUITests */ = {isa = PBXGroup; children = (B00000000000000000000016 /* PennyMacUITests.swift */, ); path = PennyMacUITests; sourceTree = "<group>"; };
@@ -113,9 +117,9 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C00000000000000000000003 /* Sources iOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000007, A00000000000000000000009, A00000000000000000000011, A00000000000000000000014, A00000000000000000000016, A00000000000000000000018, A00000000000000000000027, A00000000000000000000033, A00000000000000000000041, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000003 /* Sources iOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001, A00000000000000000000002, A00000000000000000000003, A00000000000000000000007, A00000000000000000000009, A00000000000000000000011, A00000000000000000000014, A00000000000000000000016, A00000000000000000000018, A00000000000000000000027, A00000000000000000000033, A00000000000000000000041, A00000000000000000000044, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000004 /* Resources iOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000020 /* Assets.xcassets in Resources iOS */, ); runOnlyForDeploymentPostprocessing = 0; };
-		C00000000000000000000005 /* Sources macOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000008, A00000000000000000000010, A00000000000000000000012, A00000000000000000000015, A00000000000000000000017, A00000000000000000000019, A00000000000000000000028, A00000000000000000000042, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000005 /* Sources macOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000004, A00000000000000000000005, A00000000000000000000006, A00000000000000000000008, A00000000000000000000010, A00000000000000000000012, A00000000000000000000015, A00000000000000000000017, A00000000000000000000019, A00000000000000000000028, A00000000000000000000042, A00000000000000000000045, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000006 /* Resources macOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000021 /* Assets.xcassets in Resources macOS */, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000008 /* Sources UI tests */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000013, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000009 /* Resources UI tests */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
@@ -125,7 +129,7 @@
 		C00000000000000000000014 /* Sources watchOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000025, A00000000000000000000026, A00000000000000000000029, A00000000000000000000030, A00000000000000000000031, A00000000000000000000032, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000015 /* Resources watchOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000016 /* Embed Watch Content */ = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; dstPath = "$(CONTENTS_FOLDER_PATH)/Watch"; dstSubfolderSpec = 16; files = (A00000000000000000000034, ); name = "Embed Watch Content"; runOnlyForDeploymentPostprocessing = 0; };
-		C00000000000000000000018 /* Sources tvOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000035, A00000000000000000000036, A00000000000000000000037, A00000000000000000000038, A00000000000000000000039, A00000000000000000000040, A00000000000000000000043, ); runOnlyForDeploymentPostprocessing = 0; };
+		C00000000000000000000018 /* Sources tvOS */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000035, A00000000000000000000036, A00000000000000000000037, A00000000000000000000038, A00000000000000000000039, A00000000000000000000040, A00000000000000000000043, A00000000000000000000046, ); runOnlyForDeploymentPostprocessing = 0; };
 		C00000000000000000000019 /* Resources tvOS */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
