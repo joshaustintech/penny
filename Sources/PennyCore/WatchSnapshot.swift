@@ -77,3 +77,13 @@ public struct WatchSpendingRequest: Codable, Equatable, Sendable {
     self.note = note
   }
 }
+
+public struct WatchSpendingReceipt: Codable, Equatable, Sendable {
+  public let id: UUID
+  public let saved: Bool
+
+  public init(id: UUID, saved: Bool) {
+    self.id = id
+    self.saved = saved
+  }
+}

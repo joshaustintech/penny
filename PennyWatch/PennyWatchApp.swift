@@ -5,6 +5,7 @@ import WatchConnectivity
 @Observable @MainActor
 final class WatchBudgetReceiver: NSObject, WCSessionDelegate {
   var snapshot: WatchBudgetSnapshot?
+  var entryStatus: String?
 
   override init() {
     super.init()
@@ -22,10 +23,28 @@ final class WatchBudgetReceiver: NSObject, WCSessionDelegate {
     Task { @MainActor in snapshot = received }
   }
 
+  func send(_ request: WatchSpendingRequest) {
+    guard WCSession.default.activationState == .activated,
+      let data = try? JSONEncoder().encode(request)
+    else {
+      entryStatus = "Connect to iPhone"
+      return
+    }
+    WCSession.default.transferUserInfo(["watchSpendingRequest": data])
+    entryStatus = "Queued for iPhone"
+  }
+
   nonisolated func session(
     _ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
     error: Error?
   ) {}
+
+  nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+    guard let data = userInfo["watchSpendingReceipt"] as? Data,
+      let receipt = try? JSONDecoder().decode(WatchSpendingReceipt.self, from: data)
+    else { return }
+    Task { @MainActor in entryStatus = receipt.saved ? "Saved on iPhone" : "Could not save" }
+  }
 
   nonisolated private static func snapshot(from context: [String: Any]) -> WatchBudgetSnapshot? {
     guard context["sharingEnabled"] as? Bool == true,
@@ -41,7 +60,8 @@ struct PennyWatchApp: App {
 
   var body: some Scene {
     WindowGroup {
-      WatchContentView(snapshot: receiver.snapshot)
+      WatchContentView(
+        snapshot: receiver.snapshot, entryStatus: receiver.entryStatus, onSend: receiver.send)
     }
   }
 }

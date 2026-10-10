@@ -2,11 +2,21 @@ import SwiftUI
 
 struct WatchContentView: View {
   let snapshot: WatchBudgetSnapshot?
+  let entryStatus: String?
+  let onSend: (WatchSpendingRequest) -> Void
+  @State private var showingEntry = false
 
   var body: some View {
     Group {
       if let snapshot {
         dashboard(snapshot)
+          .safeAreaInset(edge: .bottom) {
+            Button("Add spending") { showingEntry = true }
+              .buttonStyle(.borderedProminent)
+          }
+          .sheet(isPresented: $showingEntry) {
+            WatchSpendingForm(snapshot: snapshot, onSend: onSend)
+          }
       } else {
         VStack(spacing: 8) {
           Image(systemName: "iphone.and.arrow.forward")
@@ -24,6 +34,7 @@ struct WatchContentView: View {
     let remaining = snapshot.categories.reduce(Int64.zero) { $0 + $1.remainingMinor }
     return List {
       Section {
+        if let entryStatus { Text(entryStatus).font(.caption).foregroundStyle(.secondary) }
         Text(money(remaining, snapshot))
           .font(.title2.bold().monospacedDigit())
         Text("Left in plan")
@@ -63,6 +74,51 @@ struct WatchContentView: View {
           }
         }
       }
+    }
+  }
+
+  private struct WatchSpendingForm: View {
+    let snapshot: WatchBudgetSnapshot
+    let onSend: (WatchSpendingRequest) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var amount = ""
+    @State private var category = "needs"
+    @State private var note = ""
+
+    private var amountMinor: Int64? {
+      guard let value = Decimal(string: amount, locale: .current) else { return nil }
+      return try? Money.minorUnits(for: value, fractionDigits: snapshot.fractionDigits)
+    }
+
+    var body: some View {
+      NavigationStack {
+        Form {
+          TextField("Amount (\(snapshot.currency))", text: $amount)
+          Picker("Category", selection: $category) {
+            ForEach(
+              snapshot.categories.filter {
+                ["housing", "needs", "wants", "giving"].contains($0.category)
+              }, id: \.category
+            ) { item in
+              Text(item.category.capitalized).tag(item.category)
+            }
+          }
+          TextField("Note", text: $note)
+          Button("Send to iPhone") { send() }
+            .disabled(amountMinor == nil)
+        }
+        .navigationTitle("New spending")
+      }
+    }
+
+    private func send() {
+      guard let amountMinor else { return }
+      onSend(
+        WatchSpendingRequest(
+          year: snapshot.year, month: snapshot.month, amountMinor: amountMinor,
+          fractionDigits: snapshot.fractionDigits, category: category,
+          note: String(note.prefix(120)).trimmingCharacters(in: .whitespacesAndNewlines)))
+      dismiss()
     }
   }
 

@@ -37,7 +37,16 @@ struct PennyApp: App {
       }
     }
     #if os(iOS)
-      WatchBudgetSync.shared.start()
+      let container = self.container
+      WatchBudgetSync.shared.start { request in
+        do {
+          _ = try BudgetStore(context: ModelContext(container)).recordWatchSpending(request)
+          NotificationCenter.default.post(name: .watchBudgetChanged, object: nil)
+          return true
+        } catch {
+          return false
+        }
+      }
     #endif
   }
 
@@ -53,3 +62,9 @@ struct PennyApp: App {
     #endif
   }
 }
+
+#if os(iOS)
+  extension Notification.Name {
+    static let watchBudgetChanged = Notification.Name("Penny.watchBudgetChanged")
+  }
+#endif

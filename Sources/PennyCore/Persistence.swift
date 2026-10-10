@@ -123,13 +123,13 @@ public struct BudgetStore {
     -> Bool
   {
     if try entries().contains(where: { $0.id == request.id }) { return false }
+    let month = try months().first { $0.year == request.year && $0.month == request.month }
     let current = Calendar.current.dateComponents([.year, .month], from: date)
     guard current.year == request.year, current.month == request.month,
       request.amountMinor > 0, (0...4).contains(request.fractionDigits),
       let category = BudgetCategory(rawValue: request.category),
       [.housing, .needs, .wants, .giving].contains(category),
-      (request.note?.count ?? 0) <= 120,
-      let month = try months().first(where: { $0.year == request.year && $0.month == request.month })
+      (request.note?.count ?? 0) <= 120, let month
     else { throw StoreError.invalidEntry }
     let mode = BudgetMode(rawValue: month.mode) ?? .balanced
     guard mode.allocations.contains(where: { $0.category == category.rawValue }) else {
@@ -141,11 +141,12 @@ public struct BudgetStore {
     guard request.fractionDigits == formatter.maximumFractionDigits else {
       throw StoreError.invalidEntry
     }
+    let trimmedNote = request.note?.trimmingCharacters(in: .whitespacesAndNewlines)
     let entry = LedgerEntry(
       amountMinor: request.amountMinor, currencyCode: month.currencyCode,
       fractionDigits: request.fractionDigits, kind: TransactionKind.spending.rawValue,
       category: category.rawValue, occurredAt: date,
-      note: request.note?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty)
+      note: trimmedNote?.isEmpty == false ? trimmedNote : nil)
     entry.id = request.id
     try save(entry)
     return true
@@ -211,10 +212,6 @@ public struct BudgetStore {
     let bytes = code.utf8
     return bytes.count == 3 && bytes.allSatisfy { (65...90).contains($0) }
   }
-}
-
-private extension String {
-  var nilIfEmpty: String? { isEmpty ? nil : self }
 }
 
 public enum StoreError: Error, Equatable {

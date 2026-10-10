@@ -118,6 +118,9 @@ struct ContentView: View {
       .onChange(of: selectedMonth) { _, _ in income = 0 }
       #if os(iOS)
         .onChange(of: watchSharingEnabled) { _, _ in loadBudget() }
+        .onReceive(NotificationCenter.default.publisher(for: .watchBudgetChanged)) { _ in
+          loadBudget()
+        }
       #endif
       .toolbar {
         #if os(macOS)
