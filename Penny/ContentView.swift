@@ -96,7 +96,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .top)
       }
       .navigationTitle("Penny")
-      .tint(Color(red: 0.16, green: 0.43, blue: 0.34))
+      .tint(.accentColor)
       .task { loadBudget() }
       .onChange(of: selectedMonth) { _, _ in income = 0 }
       .toolbar {
