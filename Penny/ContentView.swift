@@ -441,9 +441,38 @@ struct ContentView: View {
         .accessibilityElement(children: .combine)
       }
       Text("Recent activity").font(.title2.bold())
-      ForEach(monthEntries.reversed(), id: \.id) { entry in
-        activityRow(entry)
-      }
+      #if os(macOS)
+        Table(of: LedgerEntry.self) {
+          TableColumn("Date") { entry in activityDate(entry) }
+          TableColumn("Type") { entry in Text(entry.kind.capitalized) }
+          TableColumn("Category") { entry in Text(entry.category.capitalized) }
+          TableColumn("Description") { entry in Text(entry.note ?? entry.kind.capitalized) }
+          TableColumn("Amount") { entry in Text(amount(entry.amountMinor)).monospacedDigit() }
+        } rows: {
+          ForEach(monthEntries.reversed()) { entry in
+            TableRow(entry)
+              .contextMenu {
+                Button {
+                  entryPresentation = .edit(entry)
+                } label: {
+                  Label("Edit", systemImage: "pencil")
+                }
+                Button(role: .destructive) {
+                  pendingDelete = entry
+                  showingDeleteConfirmation = true
+                } label: {
+                  Label("Delete", systemImage: "trash")
+                }
+              }
+          }
+        }
+        .frame(minHeight: 120, maxHeight: 320)
+        .accessibilityIdentifier("transactionTable")
+      #else
+        ForEach(monthEntries.reversed(), id: \.id) { entry in
+          activityRow(entry)
+        }
+      #endif
       if let report {
         spendingTrend(report: report, budget: budget, entries: monthEntries)
       }
