@@ -8,7 +8,9 @@ final class PennyTVUITests: XCTestCase {
     app.launchEnvironment["PENNY_UI_TESTING"] = "1"
     app.launch()
 
-    XCTAssertTrue(app.staticTexts["remainingBudgetValue"].waitForExistence(timeout: 10))
+    let remaining = app.staticTexts["remainingBudgetValue"]
+    XCTAssertTrue(remaining.waitForExistence(timeout: 10))
+    XCTAssertTrue(remaining.label.contains("2,930.00"), remaining.label)
     let needs = app.descendants(matching: .any)["category-needs"]
     let wants = app.descendants(matching: .any)["category-wants"]
     XCTAssertTrue(needs.waitForExistence(timeout: 5))
