@@ -217,3 +217,7 @@ New landscape iPad test exposed editing failure from category detail: hidden das
 ### Category rules — 8b83a62471c01b8bc0effff0a54cc3435914086a
 
 Native Divider inherited horizontal-stack orientation when category rows became navigation links, drawing vertical lines through amounts. Explicit one-point decorative horizontal rule restores consistent separation. Fresh second-phone screenshot inspected: rules below category summaries, no vertical lines crossing values. Balance hierarchy test passed; iOS and Mac builds passed. Result `/private/tmp/penny-divider-check.xcresult`. Remaining compact activity-title wrapping and other platform state evidence remain outstanding.
+
+### Compact activity — 4ea8a3954fadc510d6b80644bd73d486666f70e2
+
+Compact activity uses a full-width title/note/date followed by amount and controls. Fresh second-phone category screenshot confirms Spending · Needs remains on one line and date contrast is stronger. Category detail names the month. Real category edit-refresh and Activity edit/delete tests passed (2 tests), `/private/tmp/penny-compact-activity.xcresult`; iOS and Mac builds passed. Full accessibility audit was not repeated for this increment. Remaining criticisms: detail summary is vertically loose; repeated row actions remain prominent; reports and remaining platform states still require current evidence.
