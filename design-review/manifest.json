@@ -95,6 +95,121 @@
       "store": "isolated --ui-testing store",
       "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
       "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/ios-categories-accessibility-light.png",
+      "sourceRevision": "81260152b37c9aa6fc3dbd419824156db0cacc2b",
+      "configuration": "Debug",
+      "device": "iPhone 18 Pro",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1206,
+        2622
+      ],
+      "windowPoints": [
+        402,
+        874
+      ],
+      "appearance": "light",
+      "dynamicType": "accessibilityExtraExtraExtraLarge",
+      "capturedUTC": "2026-10-13T07:01:00.496000+00:00",
+      "sha256": "ba6ce5e3d3b9bfd10cc180dc421149799b5a38cbbf1c2f09c247066362dc049e",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved",
+      "buildNotes": "Pre-existing staged TV asset metadata preserved; no dashboard source changes outside cited revision."
+    },
+    {
+      "file": "screenshots/ios-categories-dark.png",
+      "sourceRevision": "81260152b37c9aa6fc3dbd419824156db0cacc2b",
+      "configuration": "Debug",
+      "device": "iPhone 18 Pro",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1206,
+        2622
+      ],
+      "windowPoints": [
+        402,
+        874
+      ],
+      "appearance": "dark",
+      "dynamicType": "default",
+      "capturedUTC": "2026-10-13T07:06:09.377621+00:00",
+      "sha256": "c9a1c50af70325a099e1ea75d9f9fac410eb222c93c456a75488d8240bcd6db3",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved",
+      "buildNotes": "Pre-existing staged TV asset metadata preserved; no dashboard source changes outside cited revision."
+    },
+    {
+      "file": "screenshots/ios-categories-light.png",
+      "sourceRevision": "81260152b37c9aa6fc3dbd419824156db0cacc2b",
+      "configuration": "Debug",
+      "device": "iPhone 18 Pro",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1206,
+        2622
+      ],
+      "windowPoints": [
+        402,
+        874
+      ],
+      "appearance": "light",
+      "dynamicType": "default",
+      "capturedUTC": "2026-10-13T07:01:07.982000+00:00",
+      "sha256": "c849d421353750eaae50ca2f0761e897d821be0dc80e4791afe62bd01b7ff1db",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved",
+      "buildNotes": "Pre-existing staged TV asset metadata preserved; no dashboard source changes outside cited revision."
+    },
+    {
+      "file": "screenshots/macos-categories-dark.png",
+      "sourceRevision": "81260152b37c9aa6fc3dbd419824156db0cacc2b",
+      "configuration": "Debug",
+      "device": "native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "windowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "dark",
+      "dynamicType": "default",
+      "capturedUTC": "2026-10-13T07:06:19.972924+00:00",
+      "sha256": "e3a6223581a2189bc2c42e90a74d07f3f8cb511fb149d0681d1fd68937b24b0e",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved",
+      "buildNotes": "Pre-existing staged TV asset metadata preserved; no dashboard source changes outside cited revision."
+    },
+    {
+      "file": "screenshots/macos-categories-light.png",
+      "sourceRevision": "81260152b37c9aa6fc3dbd419824156db0cacc2b",
+      "configuration": "Debug",
+      "device": "native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "windowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "light",
+      "dynamicType": "default",
+      "capturedUTC": "2026-10-13T07:04:15.302340+00:00",
+      "sha256": "88e8493562ec6babebcc9f2e6f49d297ad9f1a7840087e7f3c251968f7a4e168",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved",
+      "buildNotes": "Pre-existing staged TV asset metadata preserved; no dashboard source changes outside cited revision."
     }
   ]
 }

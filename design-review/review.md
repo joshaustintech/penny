@@ -82,3 +82,32 @@ independently verified intermediate change, not design approval. Remaining
 problems: single long scrolling surface; sparse Mac composition; excessive
 category row height. Next: Budget/Activity/Reports navigation and compact,
 adaptive category composition. Screenshots are labeled intermediate in manifest.
+
+## Compact categories: 8126015
+
+Categories now use compact icon/amount/progress rows and an eager two-column
+grid on spacious layouts. Five/six finite categories do not need virtualization.
+Lazy grid rendering caused Dynamic Type audit failures as rows left the visible
+region during scaling; eager rows preserve accessible elements. All three final
+iOS tests passed: balance hierarchy and funded-savings status, actual category
+height growth at largest accessibility text, and full setup/settings/budget
+accessibility audit. No issues were excluded from the audit.
+
+The existing light/dark Penny accent asset is now configured in build settings;
+previous builds fell back to system blue. Full savings/debt contributions show
+“Plan complete”; contributions exceeding the allocation show “Above planned
+contribution” instead of expense-limit language. Mac and TV Debug builds passed.
+Native Mac light/dark windows and iPhone light/dark/large-text captures were
+inspected and recorded in the manifest. Mac UI automation remains blocked as
+described above.
+
+Remaining design criticisms, in priority order:
+
+1. Activity and reports still extend the budget into one long scrolling surface.
+2. Mac header metrics cluster at the left while much of the upper workspace is
+   unused; the category grid improves the lower composition but not the header.
+3. At maximum accessibility text, the persistent full month/year heading takes
+   excessive vertical space. Use a shorter visible date while retaining the full
+   accessible date, and keep all controls reachable.
+
+No final visual approval. Continue the navigation and platform composition work.
