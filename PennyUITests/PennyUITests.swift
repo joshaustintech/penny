@@ -115,6 +115,19 @@ final class PennyUITests: XCTestCase {
     }
   }
 
+  func testReportsPresentActualAndPlannedAmounts() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture",
+      "-screenshotSection", "Reports", "-appearance", "light"]
+    app.launch()
+    let chart = app.descendants(matching: .any)["Planned versus actual"]
+    XCTAssertTrue(chart.waitForExistence(timeout: 5))
+    let shot = XCTAttachment(screenshot: app.screenshot())
+    shot.name = "ios-reports-light"
+    shot.lifetime = .keepAlways
+    add(shot)
+  }
+
   func testZeroIncomeBudgetCanBeCreated() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store", "-appearance", "light"]

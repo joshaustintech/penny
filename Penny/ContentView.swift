@@ -573,7 +573,7 @@ struct ContentView: View {
               AxisGridLine()
               AxisTick()
               if !dynamicTypeSize.isAccessibilitySize {
-                AxisValueLabel(format: .currency(code: currency))
+                AxisValueLabel(format: .currency(code: currency).precision(.fractionLength(0)))
                   .font(.body)
                   .foregroundStyle(.primary)
               }
@@ -682,7 +682,7 @@ struct ContentView: View {
             x: .value("Actual", actual),
             y: .value("Category", item.category.rawValue.capitalized)
           )
-          .foregroundStyle(item.remaining.minorUnits < 0 ? Color.red : Color.green)
+          .foregroundStyle(item.remaining.minorUnits < 0 ? Color.red : Color.accentColor)
           .accessibilityLabel("\(item.category.rawValue.capitalized) actual")
           .accessibilityValue(amount(actualAmount))
           PointMark(
@@ -698,16 +698,16 @@ struct ContentView: View {
           AxisMarks { _ in
             AxisGridLine()
             AxisTick()
-            AxisValueLabel(format: .currency(code: currency))
+            AxisValueLabel(format: .currency(code: currency).precision(.fractionLength(0)))
               .font(.body)
               .foregroundStyle(.primary)
           }
         }
         .chartYAxis {
-          AxisMarks { _ in
+          AxisMarks(preset: .extended, position: .leading) { _ in
             AxisGridLine()
             AxisTick()
-            AxisValueLabel().font(.body).foregroundStyle(.primary)
+            AxisValueLabel(centered: true, anchor: .trailing, offsetsMarks: false).font(.body).foregroundStyle(Color.primary)
           }
         }
         .frame(height: CGFloat(report.categories.count * 34))
