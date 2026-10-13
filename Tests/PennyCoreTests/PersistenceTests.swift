@@ -22,6 +22,31 @@ private final class ChangeCounter: @unchecked Sendable {
 }
 
 struct PersistenceTests {
+  @MainActor @Test func zeroIncomeMonthPersistsAndReconciles() throws {
+    let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
+    let container = try ModelContainer(
+      for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+    let context = ModelContext(container)
+    let store = BudgetStore(context: context)
+    let date = Date.now
+    let parts = Calendar.current.dateComponents([.year, .month], from: date)
+    try store.createBudget(
+      BudgetMonth(year: parts.year!, month: parts.month!, mode: "balanced", currencyCode: "USD"),
+      income: LedgerEntry(amountMinor: 0, currencyCode: "USD", fractionDigits: 2,
+        kind: "income", category: "income", occurredAt: date))
+    let reloaded = BudgetStore(context: ModelContext(container))
+    #expect(try reloaded.months().count == 1)
+    let report = try BudgetReporting.make(entries: reloaded.entries(), currencyCode: "USD",
+      fractionDigits: 2, mode: .balanced)
+    #expect(report.income.minorUnits == 0)
+    #expect(report.categories.allSatisfy { $0.allocated.minorUnits == 0 })
+    #expect(try BudgetReporting.overallRemaining(from: report).minorUnits == 0)
+    #expect(throws: StoreError.invalidEntry) {
+      try store.save(LedgerEntry(amountMinor: 0, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs", occurredAt: date))
+    }
+  }
+
   @MainActor @Test func savedEntryNotifiesActiveSync() throws {
     let schema = Schema([BudgetMonth.self, LedgerEntry.self, CloudTombstone.self])
     let container = try ModelContainer(

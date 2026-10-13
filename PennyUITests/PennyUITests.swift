@@ -92,6 +92,28 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Months"].waitForExistence(timeout: 5))
   }
 
+  func testZeroIncomeBudgetCanBeCreated() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "-appearance", "light"]
+    app.launch()
+    enter("0", in: app.textFields["incomeField"], app: app)
+    app.scrollViews.firstMatch.swipeUp()
+    app.buttons["createBudgetButton"].tap()
+    let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+    XCTAssertTrue(balance.waitForExistence(timeout: 5))
+    XCTAssertTrue(balance.label.contains("$0.00"))
+    XCTAssertTrue(app.buttons["categoryDetailLink-needs"].exists)
+    let shot = XCTAttachment(screenshot: app.screenshot())
+    shot.name = "ios-zero-income-light"
+    shot.lifetime = .keepAlways
+    add(shot)
+    app.terminate()
+    app.launchArguments = ["--ui-testing"]
+    app.launch()
+    XCTAssertTrue(balance.waitForExistence(timeout: 5))
+    XCTAssertTrue(balance.label.contains("$0.00"))
+  }
+
   func testStorageOpenFailureShowsRecoveryMessage() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--ui-testing-storage-error"]

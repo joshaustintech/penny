@@ -945,8 +945,9 @@ struct ContentView: View {
   }
 
   private var minorIncome: Int64? {
-    guard let income = Decimal(string: incomeText, locale: Locale.current), income > 0,
-      let value = try? Money.minorUnits(for: income, fractionDigits: fractionDigits), value > 0
+    guard let income = Decimal(string: incomeText, locale: Locale.current), income >= 0 else { return nil }
+    if income == 0 { return 0 }
+    guard let value = try? Money.minorUnits(for: income, fractionDigits: fractionDigits), value > 0
     else { return nil }
     return value
   }

@@ -213,7 +213,8 @@ public struct BudgetStore {
       let category = BudgetCategory(rawValue: entry.category),
       (0...4).contains(entry.fractionDigits), validCurrency(entry.currencyCode),
       entry.dateComponents != nil,
-      entry.amountMinor > 0 || (kind == .adjustment && entry.amountMinor != 0)
+      entry.amountMinor > 0 || (kind == .income && entry.amountMinor == 0)
+        || (kind == .adjustment && entry.amountMinor != 0)
     else { throw StoreError.invalidEntry }
     switch kind {
     case .income: guard category == .income else { throw StoreError.invalidEntry }
