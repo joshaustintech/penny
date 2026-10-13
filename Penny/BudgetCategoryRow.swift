@@ -70,7 +70,9 @@ struct BudgetCategoryRow: View {
     .foregroundStyle(.primary)
     .padding(.vertical, 12)
     .frame(maxWidth: .infinity, alignment: .leading)
-    .overlay(alignment: .bottom) { Divider() }
+    .overlay(alignment: .bottom) {
+      Rectangle().fill(.primary.opacity(0.15)).frame(height: 1).accessibilityHidden(true)
+    }
     .accessibilityElement(children: .combine)
     .accessibilityIdentifier("budgetCategory-\(item.category.rawValue)")
     .accessibilityLabel("\(item.category.rawValue.capitalized), \(amount(item.remaining)) remaining")
