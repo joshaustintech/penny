@@ -2,6 +2,28 @@ import XCTest
 
 @MainActor
 final class PennyUITests: XCTestCase {
+  func testCategoryTextScalesWithDynamicType() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture"]
+    app.launch()
+    let category = app.descendants(matching: .any)["budgetCategory-needs"]
+    XCTAssertTrue(category.waitForExistence(timeout: 10))
+    let normalHeight = category.frame.height
+    app.terminate()
+    app.launchArguments = [
+      "--ui-testing", "--screenshot-fixture", "-UIPreferredContentSizeCategoryName",
+      "UICTContentSizeCategoryAccessibilityXXXL",
+    ]
+    app.launch()
+    let largeCategory = app.descendants(matching: .any)["budgetCategory-needs"]
+    scrollIntoView(largeCategory, in: app)
+    XCTAssertGreaterThan(largeCategory.frame.height, normalHeight * 1.5)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "ios-category-accessibility-text"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+  }
+
   func testDashboardBalanceHierarchy() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture"]
@@ -12,6 +34,7 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(balance.isHittable)
     let spending = app.descendants(matching: .any)["actualSpendingSummary"]
     XCTAssertTrue(spending.label.contains("$1,370.00"))
+    XCTAssertTrue(app.staticTexts["Plan complete"].exists)
     XCTAssertLessThan(balance.frame.minY, spending.frame.minY)
     XCTAssertFalse(app.staticTexts["Every penny has a purpose."].exists)
     let screenshot = XCTAttachment(screenshot: app.screenshot())

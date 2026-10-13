@@ -103,22 +103,7 @@ struct ContentView: View {
 
   private var dashboard: some View {
     NavigationStack {
-      ScrollView {
-        VStack(alignment: .leading, spacing: 24) {
-          if currentBudget == nil {
-            Text("Every penny has a purpose.")
-              .font(.title.bold())
-              .accessibilityAddTraits(.isHeader)
-          }
-          #if !os(iOS)
-            monthSwitcher
-          #endif
-          if let currentBudget { overview(currentBudget) } else { setup }
-        }
-        .frame(maxWidth: dashboardWidth, alignment: .leading)
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .top)
-      }
+      dashboardPage
       #if os(iOS)
         .safeAreaInset(edge: .top, spacing: 0) {
           monthSwitcher.background(.bar)
@@ -231,11 +216,38 @@ struct ContentView: View {
     }
   }
 
+  private var dashboardPage: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 24) {
+        if currentBudget == nil {
+          Text("Every penny has a purpose.")
+            .font(.title.bold())
+            .accessibilityAddTraits(.isHeader)
+        }
+        #if !os(iOS)
+          monthSwitcher
+        #endif
+        if let currentBudget { overview(currentBudget) } else { setup }
+      }
+      .frame(maxWidth: dashboardWidth, alignment: .leading)
+      .padding()
+      .frame(maxWidth: .infinity, alignment: .top)
+    }
+  }
+
+  private var usesWideCategories: Bool {
+    #if os(macOS)
+      !dynamicTypeSize.isAccessibilitySize
+    #else
+      horizontalSizeClass == .regular && !dynamicTypeSize.isAccessibilitySize
+    #endif
+  }
+
   private var dashboardWidth: CGFloat {
     #if os(macOS)
       1000
     #else
-      620
+      horizontalSizeClass == .regular ? 1000 : 620
     #endif
   }
 
@@ -412,40 +424,22 @@ struct ContentView: View {
       }
       Text("Your monthly budget")
         .font(.title2.bold())
-      ForEach(report?.categories ?? [], id: \.category) { item in
-        VStack(alignment: .leading, spacing: 8) {
-          HStack {
-            Text(item.category.rawValue.capitalized).font(.headline)
-            Spacer()
-            Text(amount(item.remaining.minorUnits)).font(.headline.monospacedDigit())
-          }
-          Text(
-            item.category == .debt || item.category == .savings
-              ? "\(amount(item.contributed.minorUnits)) contributed of \(amount(item.allocated.minorUnits))"
-              : "\(amount(item.spent.minorUnits)) spent of \(amount(item.allocated.minorUnits))"
-          )
-          .foregroundStyle(.primary)
-          if let status = budgetStatus(for: item) {
-            Label(
-              status,
-              systemImage: status == "Over budget" ? "exclamationmark.circle.fill" : "hourglass"
-            )
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(status == "Over budget" ? .red : .orange)
-          }
-          Text("\(item.percent)% of income")
-            .font(.caption)
-          if item.allocated.minorUnits > 0 {
-            ProgressView(
-              value: min(max(
-                1 - Double(item.remaining.minorUnits) / Double(item.allocated.minorUnits), 0), 1))
-              .tint(item.remaining.minorUnits < 0 ? .red : .accentColor)
-              .accessibilityHidden(true)
+      let categories = report?.categories ?? []
+      if usesWideCategories {
+        Grid(alignment: .leading, horizontalSpacing: 32, verticalSpacing: 12) {
+          ForEach(Array(stride(from: 0, to: categories.count, by: 2)), id: \.self) { index in
+            GridRow {
+              BudgetCategoryRow(item: categories[index])
+              if index + 1 < categories.count {
+                BudgetCategoryRow(item: categories[index + 1])
+              }
+            }
           }
         }
-        .padding(.vertical, 12)
-        .overlay(alignment: .bottom) { Divider() }
-        .accessibilityElement(children: .combine)
+      } else {
+        VStack(spacing: 0) {
+          ForEach(categories, id: \.category) { item in BudgetCategoryRow(item: item) }
+        }
       }
       Text("Recent activity").font(.title2.bold())
       #if os(macOS)
