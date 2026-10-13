@@ -105,15 +105,17 @@ struct ContentView: View {
     NavigationStack {
       ScrollView {
         VStack(alignment: .leading, spacing: 24) {
-          Text("Every penny has a purpose.")
-            .font(.largeTitle.bold())
-            .accessibilityAddTraits(.isHeader)
+          if currentBudget == nil {
+            Text("Every penny has a purpose.")
+              .font(.title.bold())
+              .accessibilityAddTraits(.isHeader)
+          }
           #if !os(iOS)
             monthSwitcher
           #endif
           if let currentBudget { overview(currentBudget) } else { setup }
         }
-        .frame(maxWidth: 620, alignment: .leading)
+        .frame(maxWidth: dashboardWidth, alignment: .leading)
         .padding()
         .frame(maxWidth: .infinity, alignment: .top)
       }
@@ -138,6 +140,9 @@ struct ContentView: View {
         }
       #endif
       .navigationTitle("Penny")
+      #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+      #endif
       .tint(.accentColor)
       .task { loadBudget() }
       #if os(macOS)
@@ -224,6 +229,14 @@ struct ContentView: View {
         }
       #endif
     }
+  }
+
+  private var dashboardWidth: CGFloat {
+    #if os(macOS)
+      1000
+    #else
+      620
+    #endif
   }
 
   #if os(iOS)
@@ -372,17 +385,13 @@ struct ContentView: View {
       entries: monthEntries, currencyCode: budget.currencyCode, fractionDigits: fractionDigits,
       mode: mode)
     return VStack(alignment: .leading, spacing: 18) {
-      Text("Monthly take-home")
-        .font(.headline)
-      Text(amount(report?.income.minorUnits ?? 0))
-        .font(.system(.largeTitle, design: .rounded, weight: .semibold).monospacedDigit())
-        .accessibilityLabel("Income")
-        .accessibilityValue(amount(report?.income.minorUnits ?? 0))
       if let report,
         let spent = try? BudgetReporting.overallSpent(from: report),
         let remaining = try? BudgetReporting.overallRemaining(from: report)
       {
-        budgetSummary(spent: spent.minorUnits, remaining: remaining.minorUnits)
+        BudgetOverviewHeader(
+          income: amount(report.income.minorUnits), spent: amount(spent.minorUnits),
+          remaining: amount(remaining.minorUnits), isOverspent: remaining.minorUnits < 0)
       }
       Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
         .foregroundStyle(.primary)
@@ -403,27 +412,6 @@ struct ContentView: View {
       }
       Text("Your monthly budget")
         .font(.title2.bold())
-      if let report, report.income.minorUnits > 0 {
-        Chart(report.categories, id: \.category) { item in
-          SectorMark(
-            angle: .value("Allocation", item.allocated.minorUnits),
-            innerRadius: .ratio(0.68), angularInset: 2
-          )
-          .accessibilityLabel(item.category.rawValue.capitalized)
-          .accessibilityValue("\(item.percent)%")
-          .foregroundStyle(categoryColor(item.category))
-        }
-        .chartLegend(.hidden)
-        .frame(height: 200)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Budget allocation")
-        .accessibilityValue(
-          report.categories.map {
-            "\($0.category.rawValue.capitalized): \($0.percent)% of income, \(amount($0.allocated.minorUnits))"
-          }.joined(separator: ". "))
-        allocationLegend(report.categories)
-        plannedVsActual(report)
-      }
       ForEach(report?.categories ?? [], id: \.category) { item in
         VStack(alignment: .leading, spacing: 8) {
           HStack {
@@ -447,9 +435,16 @@ struct ContentView: View {
           }
           Text("\(item.percent)% of income")
             .font(.caption)
+          if item.allocated.minorUnits > 0 {
+            ProgressView(
+              value: min(max(
+                1 - Double(item.remaining.minorUnits) / Double(item.allocated.minorUnits), 0), 1))
+              .tint(item.remaining.minorUnits < 0 ? .red : .accentColor)
+              .accessibilityHidden(true)
+          }
         }
-        .padding(14)
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.vertical, 12)
+        .overlay(alignment: .bottom) { Divider() }
         .accessibilityElement(children: .combine)
       }
       Text("Recent activity").font(.title2.bold())
@@ -485,6 +480,29 @@ struct ContentView: View {
           activityRow(entry)
         }
       #endif
+      DisclosureGroup("Charts and reports") {
+      if let report, report.income.minorUnits > 0 {
+        Chart(report.categories, id: \.category) { item in
+          SectorMark(
+            angle: .value("Allocation", item.allocated.minorUnits),
+            innerRadius: .ratio(0.68), angularInset: 2
+          )
+          .accessibilityLabel(item.category.rawValue.capitalized)
+          .accessibilityValue("\(item.percent)%")
+          .foregroundStyle(categoryColor(item.category))
+        }
+        .chartLegend(.hidden)
+        .frame(height: 200)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Budget allocation")
+        .accessibilityValue(
+          report.categories.map {
+            "\($0.category.rawValue.capitalized): \($0.percent)% of income, \(amount($0.allocated.minorUnits))"
+          }.joined(separator: ". "))
+        allocationLegend(report.categories)
+      }
+        if let report { plannedVsActual(report) }
+      }
       if let report {
         spendingTrend(report: report, budget: budget, entries: monthEntries)
       }

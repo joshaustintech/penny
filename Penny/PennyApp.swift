@@ -41,6 +41,17 @@ struct PennyApp: App {
         container = nil
       }
     }
+    if arguments.contains("--ui-testing"), arguments.contains("--screenshot-fixture"),
+      let container
+    {
+      do {
+        try BudgetScreenshotFixture.seed(
+          in: container.mainContext,
+          mode: arguments.contains("--housing-first") ? .housingFirst : .balanced)
+      } catch {
+        fatalError("Penny could not create isolated screenshot fixture: \(error)")
+      }
+    }
     #if os(iOS)
       if let container {
         WatchBudgetSync.shared.start { request in
@@ -60,6 +71,9 @@ struct PennyApp: App {
     WindowGroup {
       if let container {
         ContentView()
+          #if os(macOS)
+            .frame(minWidth: 760, minHeight: 640)
+          #endif
           .preferredColorScheme(
             appearance == "light" ? .light : appearance == "dark" ? .dark : nil
           )
@@ -73,6 +87,7 @@ struct PennyApp: App {
         }
     }
     #if os(macOS)
+      .defaultSize(width: 1100, height: 800)
       .commands {
         PennyMenuCommands()
       }

@@ -2,6 +2,21 @@ import XCTest
 
 @MainActor
 final class PennyMacUITests: XCTestCase {
+  func testDashboardBalanceHierarchy() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture"]
+    app.launch()
+    let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+    XCTAssertTrue(balance.waitForExistence(timeout: 5))
+    XCTAssertTrue(balance.label.contains("$2,930.00"))
+    let spending = app.descendants(matching: .any)["actualSpendingSummary"]
+    XCTAssertLessThan(balance.frame.minY, spending.frame.minY)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "macos-dashboard-light"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+  }
+
   func testFileMenuAddsEntry() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]

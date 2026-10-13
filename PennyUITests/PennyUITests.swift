@@ -2,6 +2,24 @@ import XCTest
 
 @MainActor
 final class PennyUITests: XCTestCase {
+  func testDashboardBalanceHierarchy() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture"]
+    app.launch()
+    let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+    XCTAssertTrue(balance.waitForExistence(timeout: 5))
+    XCTAssertTrue(balance.label.contains("$2,930.00"))
+    XCTAssertTrue(balance.isHittable)
+    let spending = app.descendants(matching: .any)["actualSpendingSummary"]
+    XCTAssertTrue(spending.label.contains("$1,370.00"))
+    XCTAssertLessThan(balance.frame.minY, spending.frame.minY)
+    XCTAssertFalse(app.staticTexts["Every penny has a purpose."].exists)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "ios-dashboard-light"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+  }
+
   func testIPadSetupHidesEmptyMonthsSidebar() throws {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
@@ -342,6 +360,7 @@ final class PennyUITests: XCTestCase {
     app.buttons["createBudgetButton"].tap()
     XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["$5,000.00"].exists)
+    app.buttons["Charts and reports"].tap()
     let allocation = app.descendants(matching: .any)["Budget allocation"]
     XCTAssertTrue(allocation.waitForExistence(timeout: 5))
     XCTAssertTrue((allocation.value as? String ?? "").contains("Needs: 50% of income"))
