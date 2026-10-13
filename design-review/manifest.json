@@ -421,6 +421,24 @@
       "store": "isolated --ui-testing snapshot",
       "fixture": "USD 1000 income; no expenses",
       "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/ios-activity-types-light.png",
+      "sourceRevision": "e856efed636912de3c17318c0489c7ea8e64ec93",
+      "configuration": "Debug",
+      "device": "iPhone 18 Pro",
+      "simulatorID": "E7B0E56C-B4B0-43B6-AB4F-E4AE78909233",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1206,
+        2622
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T09:04:41.947948+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "cf49c017f302f609588ea2ba21503b3803b0d0b0d314860213d6acbd04ac8750",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }

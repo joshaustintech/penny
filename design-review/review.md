@@ -197,3 +197,7 @@ and hardware remain unverified. New screenshots are in the manifest.
 Next: category detail navigation; current iPad landscape/second-phone/TV
 coverage; explicit transaction type labels on iPhone; Reports typography;
 remaining functional/spec audit and final skeptical visual assessment.
+
+### Activity labels — e856efed636912de3c17318c0489c7ea8e64ec93
+
+Phone history now identifies transaction type even when notes exist. Savings contributions and debt payments use explicit names; income avoids duplicated category text. Real edit/delete journey passed (1 test, 0 failures), `/private/tmp/penny-activity-label-final.xcresult`; iOS and macOS builds passed. Fresh `ios-activity-types-light.png` inspected: correct fixture amounts, no overlap or clipped controls. Remaining criticisms: contribution heading wraps; repeated notes waste space; permanent edit/delete controls compete with amounts. Category detail navigation remains outstanding.
