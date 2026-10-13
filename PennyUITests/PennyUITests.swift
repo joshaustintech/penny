@@ -128,6 +128,33 @@ final class PennyUITests: XCTestCase {
     add(shot)
   }
 
+  func testInvalidReportExplainsFailureAndAllowsReview() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture",
+      "--screenshot-invalid-entry", "-appearance", "light"]
+    app.launch()
+    XCTAssertTrue(app.staticTexts["Budget report unavailable"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.descendants(matching: .any)["remainingPlanSummary"].exists)
+    let shot = XCTAttachment(screenshot: app.screenshot())
+    shot.name = "ios-invalid-report-light"
+    shot.lifetime = .keepAlways
+    add(shot)
+    app.buttons["Review entries"].tap()
+    let edit = app.buttons["Edit Invalid saved entry"]
+    for _ in 0..<5 where !edit.isHittable { app.scrollViews.firstMatch.swipeUp() }
+    XCTAssertTrue(edit.exists)
+    edit.tap()
+    XCTAssertTrue(app.textFields["entryAmountField"].waitForExistence(timeout: 5))
+    enter("1", in: app.textFields["entryAmountField"], app: app)
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(app.navigationBars["Edit entry"].waitForNonExistence(timeout: 5))
+    app.tabBars.buttons["Budget"].tap()
+    let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+    XCTAssertTrue(balance.waitForExistence(timeout: 5))
+    XCTAssertTrue(balance.label.contains("$2,929.00"))
+    XCTAssertFalse(app.staticTexts["Budget report unavailable"].exists)
+  }
+
   func testZeroIncomeBudgetCanBeCreated() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store", "-appearance", "light"]

@@ -442,6 +442,12 @@ struct ContentView: View {
       entries: monthEntries, currencyCode: budget.currencyCode, fractionDigits: fractionDigits,
       mode: mode)
     return VStack(alignment: .leading, spacing: 18) {
+      if report == nil && destination != .activity {
+        ContentUnavailableView("Budget report unavailable", systemImage: "exclamationmark.triangle",
+          description: Text("One or more saved entries cannot be included in this month's totals. Review the entries to correct their amounts or categories."))
+        Button("Review entries") { section = .activity }
+          .buttonStyle(.borderedProminent)
+      } else {
       if destination == .budget {
         if let report,
           let spent = try? BudgetReporting.overallSpent(from: report),
@@ -591,6 +597,7 @@ struct ContentView: View {
             description: Text("Add another budget month to compare spending.")
           )
         }
+      }
       }
     }
   }

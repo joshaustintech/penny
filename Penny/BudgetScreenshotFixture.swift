@@ -29,5 +29,10 @@ enum BudgetScreenshotFixture {
       try store.save(LedgerEntry(amountMinor: 450_000, currencyCode: "USD", fractionDigits: 2,
         kind: "spending", category: "needs", occurredAt: now, note: "Urgent home repair"))
     }
+    if ProcessInfo.processInfo.arguments.contains("--screenshot-invalid-entry") {
+      context.insert(LedgerEntry(amountMinor: -100, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs", occurredAt: now, note: "Invalid saved entry"))
+      try context.save()
+    }
   }
 }
