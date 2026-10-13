@@ -439,6 +439,24 @@
       "fixture": "5000 USD income; 1370 expenses; 700 contributions",
       "sha256": "cf49c017f302f609588ea2ba21503b3803b0d0b0d314860213d6acbd04ac8750",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-category-detail-light.png",
+      "sourceRevision": "0f98a52d476b9d28c61f7827e9005e2442076c97",
+      "configuration": "Debug",
+      "device": "iPhone 18 Pro",
+      "simulatorID": "E7B0E56C-B4B0-43B6-AB4F-E4AE78909233",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1206,
+        2622
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T09:09:50.401000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; Needs 900 spent, 2500 planned, 1600 remaining",
+      "sha256": "65dad66338e78b41349cba4cfc7a7afafed47eb56fbc6d999952d18c0e6a4933",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
