@@ -481,16 +481,16 @@ struct ContentView: View {
           Grid(alignment: .leading, horizontalSpacing: 32, verticalSpacing: 12) {
             ForEach(Array(stride(from: 0, to: categories.count, by: 2)), id: \.self) { index in
               GridRow {
-                BudgetCategoryRow(item: categories[index])
+                categoryLink(categories[index], entries: monthEntries, mode: mode)
                 if index + 1 < categories.count {
-                  BudgetCategoryRow(item: categories[index + 1])
+                  categoryLink(categories[index + 1], entries: monthEntries, mode: mode)
                 }
               }
             }
           }
         } else {
           VStack(spacing: 0) {
-            ForEach(categories, id: \.category) { item in BudgetCategoryRow(item: item) }
+            ForEach(categories, id: \.category) { item in categoryLink(item, entries: monthEntries, mode: mode) }
           }
         }
       }
@@ -722,6 +722,47 @@ struct ContentView: View {
           }.joined(separator: ". "))
       }
     }
+  }
+
+  private func categoryLink(_ item: CategoryResult, entries: [LedgerEntry], mode: BudgetMode) -> some View {
+    NavigationLink {
+      ScrollView {
+        VStack(alignment: .leading, spacing: 20) {
+          Text("Remaining").font(.headline)
+          Text(amount(item.remaining.minorUnits)).font(.largeTitle.bold()).monospacedDigit()
+          let used = item.category == .debt || item.category == .savings ? item.contributed : item.spent
+          Text("\(amount(used.minorUnits)) used of \(amount(item.allocated.minorUnits)) planned")
+            .font(.body).monospacedDigit()
+          Text("Transactions").font(.title2.bold())
+          let matching = entries.filter {
+            $0.category == item.category.rawValue
+              || (mode == .balanced && item.category == .needs && $0.category == "housing")
+          }
+          if matching.isEmpty {
+            ContentUnavailableView("No transactions", systemImage: "list.bullet.rectangle",
+              description: Text("Entries assigned to this category will appear here."))
+          } else {
+            ForEach(matching.reversed()) { entry in
+              activityRow(entry)
+              Divider()
+            }
+          }
+        }
+        .padding(20)
+        .frame(maxWidth: 900, alignment: .leading)
+        .frame(maxWidth: .infinity)
+      }
+      .navigationTitle(item.category.rawValue.capitalized)
+    } label: {
+      HStack(spacing: 12) {
+        BudgetCategoryRow(item: item)
+        Image(systemName: "chevron.right").font(.footnote.bold()).accessibilityHidden(true)
+      }
+      .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+    .accessibilityHint("View category transactions")
+    .accessibilityIdentifier("categoryDetailLink-\(item.category.rawValue)")
   }
 
   @ViewBuilder private func activityRow(_ entry: LedgerEntry) -> some View {

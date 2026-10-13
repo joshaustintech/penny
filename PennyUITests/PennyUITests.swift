@@ -329,6 +329,29 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(actual.label.contains("$80.00"), actual.debugDescription)
   }
 
+  func testCategoryDetailShowsMatchingTransactions() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture", "-appearance", "light"]
+    app.launch()
+    let needs = app.buttons["categoryDetailLink-needs"]
+    XCTAssertTrue(needs.waitForExistence(timeout: 5))
+    needs.tap()
+    XCTAssertTrue(app.navigationBars["Needs"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Groceries"].exists)
+    XCTAssertFalse(app.staticTexts["Dining"].exists)
+    XCTAssertTrue(app.staticTexts["$1,600.00"].exists)
+    let attachment = XCTAttachment(screenshot: app.screenshot())
+    attachment.name = "ios-category-detail-light"
+    attachment.lifetime = .keepAlways
+    add(attachment)
+    app.buttons["Edit Groceries"].tap()
+    XCTAssertTrue(app.navigationBars["Edit entry"].waitForExistence(timeout: 5))
+    enter("1000", in: app.textFields["entryAmountField"], app: app)
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(app.navigationBars["Edit entry"].waitForNonExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["$1,500.00"].waitForExistence(timeout: 5))
+  }
+
   func testEditAndDeleteSpendingEntry() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
