@@ -406,23 +406,6 @@
       "status": "intermediate; not visually approved"
     },
     {
-      "file": "screenshots/watch-entry-form-dark.png",
-      "sourceRevision": "ee6c42638774cc3122e0400642687863a19c73dc",
-      "configuration": "Debug",
-      "device": "Apple Watch Series 10 42mm",
-      "os": "watchOS 11.0",
-      "viewportPixels": [
-        374,
-        446
-      ],
-      "appearance": "dark",
-      "capturedUTC": "2026-10-13T08:44:02.143000+00:00",
-      "sha256": "d3642f2246313bfac5b3ab5a3deed9f71cab063f040059b9fdbcacac176209ce",
-      "store": "isolated --ui-testing snapshot",
-      "fixture": "USD 1000 income; no expenses",
-      "status": "intermediate; not visually approved"
-    },
-    {
       "file": "screenshots/ios-activity-types-light.png",
       "sourceRevision": "e856efed636912de3c17318c0489c7ea8e64ec93",
       "configuration": "Debug",
@@ -622,6 +605,24 @@
       "store": "isolated --ui-testing store",
       "fixture": "explicit zero income; no spending",
       "sha256": "0086c6a09b7a257e9f1041443dea21a00d9dede9a1e401e9e0f7806c8ff80e17",
+      "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/watch-entry-form-dark.png",
+      "sourceRevision": "992218623578ea6da6dcb8eb39b19e12255beda7",
+      "configuration": "Debug",
+      "device": "Apple Watch Series 10 (42mm)",
+      "simulatorID": "AFB169FD-2A10-4CC2-8397-41F587A82EF7",
+      "os": "watchOS 11.0",
+      "viewportPixels": [
+        374,
+        446
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T14:09:50.345000+00:00",
+      "store": "isolated --ui-testing snapshot",
+      "fixture": "1000 USD income; no spending; empty entry form",
+      "sha256": "e25c514b1e28ccca2ac821fb9177fbb857bbdeacb78a86800c4e86aec2fc95ca",
       "status": "intermediate; inspected; not final visual approval"
     }
   ]
