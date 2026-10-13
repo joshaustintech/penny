@@ -457,6 +457,42 @@
       "fixture": "5000 USD income; Needs 900 spent, 2500 planned, 1600 remaining",
       "sha256": "65dad66338e78b41349cba4cfc7a7afafed47eb56fbc6d999952d18c0e6a4933",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/before-tvos-dashboard-dark.png",
+      "sourceRevision": "0045c3318e28ce75762ce2ea9e23df3d08f75140",
+      "configuration": "Debug",
+      "device": "Apple TV 4K (3rd generation)",
+      "simulatorID": "024B03AF-2DD7-42D9-A2F5-9DCB86AF75EA",
+      "os": "tvOS 27.0",
+      "viewportPixels": [
+        3840,
+        2160
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T09:13:35.772458+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "3bb300a9ab3ab199bec27a137f9e18a765ff33e7cc79cbb600e13d62dd88b789",
+      "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/tvos-dashboard-focused-dark.png",
+      "sourceRevision": "2c34f18b8df6ae1fcd26a1f9b63a61c8bac3794e",
+      "configuration": "Debug",
+      "device": "Apple TV 4K (3rd generation)",
+      "simulatorID": "024B03AF-2DD7-42D9-A2F5-9DCB86AF75EA",
+      "os": "tvOS 27.0",
+      "viewportPixels": [
+        3840,
+        2160
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T09:17:50.445000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "ba138856ae19e36602ac1cd569cf7a1f434634e7c34a0f98ddea210194a4f197",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
