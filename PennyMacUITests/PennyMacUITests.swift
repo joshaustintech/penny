@@ -51,6 +51,7 @@ final class PennyMacUITests: XCTestCase {
     note.typeText("Lunch")
     app.buttons["saveEntryButton"].click()
 
+    app.descendants(matching: .any)["Activity"].firstMatch.click()
     let table = app.descendants(matching: .any)["transactionTable"]
     XCTAssertTrue(table.waitForExistence(timeout: 10))
     let lunch = table.staticTexts["Lunch"]

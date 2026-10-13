@@ -18,6 +18,7 @@ struct ContentView: View {
   #if os(iOS)
     @AppStorage("watchSharingEnabled") private var watchSharingEnabled = false
   #endif
+  @State private var section = DashboardSection.budget
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
@@ -75,18 +76,18 @@ struct ContentView: View {
         NavigationSplitView {
           monthSidebar
         } detail: {
-          dashboard
+          dashboard(section)
         }
       #else
         if horizontalSizeClass == .regular {
           NavigationSplitView(columnVisibility: $columnVisibility) {
             monthSidebar
           } detail: {
-            dashboard
+            tabbedDashboard
           }
           .navigationSplitViewStyle(.balanced)
         } else {
-          dashboard
+          tabbedDashboard
         }
       #endif
     }
@@ -101,14 +102,35 @@ struct ContentView: View {
     }
   }
 
-  private var dashboard: some View {
+  #if os(iOS)
+    private var tabbedDashboard: some View {
+      Group {
+        if currentBudget != nil {
+          if #available(iOS 18.0, *) {
+            TabView(selection: $section) {
+              ForEach(DashboardSection.allCases) { destination in
+                Tab(destination.rawValue, systemImage: destination.systemImage, value: destination) {
+                  dashboard(destination)
+                }
+              }
+            }
+          } else {
+            TabView(selection: $section) {
+              ForEach(DashboardSection.allCases) { destination in
+                dashboard(destination)
+                  .tabItem { Label(destination.rawValue, systemImage: destination.systemImage) }
+                  .tag(destination)
+              }
+            }
+          }
+        } else { dashboard(.budget) }
+      }
+    }
+  #endif
+
+  private func dashboard(_ destination: DashboardSection) -> some View {
     NavigationStack {
-      dashboardPage
-      #if os(iOS)
-        .safeAreaInset(edge: .top, spacing: 0) {
-          monthSwitcher.background(.bar)
-        }
-      #endif
+      dashboardPage(destination)
       #if os(iOS)
         .safeAreaInset(edge: .bottom, spacing: 0) {
           if currentBudget == nil && !incomeFieldFocused {
@@ -152,6 +174,13 @@ struct ContentView: View {
       #endif
       .toolbar {
         #if os(macOS)
+          ToolbarItem(placement: .principal) {
+            if currentBudget != nil {
+              Picker("Section", selection: $section) {
+                ForEach(DashboardSection.allCases) { Text($0.rawValue).tag($0) }
+              }.pickerStyle(.segmented)
+            }
+          }
           ToolbarItem {
             SettingsLink { Label("Settings", systemImage: "gearshape") }
           }
@@ -216,7 +245,7 @@ struct ContentView: View {
     }
   }
 
-  private var dashboardPage: some View {
+  private func dashboardPage(_ destination: DashboardSection) -> some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 24) {
         if currentBudget == nil {
@@ -227,12 +256,15 @@ struct ContentView: View {
         #if !os(iOS)
           monthSwitcher
         #endif
-        if let currentBudget { overview(currentBudget) } else { setup }
+        if let currentBudget { overview(currentBudget, destination: destination) } else { setup }
       }
       .frame(maxWidth: dashboardWidth, alignment: .leading)
       .padding()
       .frame(maxWidth: .infinity, alignment: .top)
     }
+    #if os(iOS)
+      .safeAreaInset(edge: .top, spacing: 0) { monthSwitcher.background(.bar) }
+    #endif
   }
 
   private var usesWideCategories: Bool {
@@ -316,8 +348,10 @@ struct ContentView: View {
         .frame(minWidth: 44, minHeight: 44)
         .contentShape(Rectangle())
       Spacer()
-      Text(selectedMonth.formatted(.dateTime.month(.wide).year()))
-        .font(.title3.weight(.semibold))
+      Text(selectedMonth.formatted(.dateTime.month(.abbreviated).year()))
+        .font(.headline)
+        .accessibilityHint(selectedMonth.formatted(.dateTime.month(.wide).year()))
+        .accessibilityIdentifier("monthHeading")
         .accessibilityAddTraits(.isHeader)
       Spacer()
       Button("Next month", systemImage: "chevron.right") { moveMonth(by: 1) }
@@ -388,7 +422,7 @@ struct ContentView: View {
     }
   }
 
-  private func overview(_ budget: BudgetMonth) -> some View {
+  private func overview(_ budget: BudgetMonth, destination: DashboardSection) -> some View {
     let mode = BudgetMode(rawValue: budget.mode) ?? .balanced
     let monthEntries = entries.filter {
       $0.dateComponents?.year == budget.year && $0.dateComponents?.month == budget.month
@@ -397,162 +431,152 @@ struct ContentView: View {
       entries: monthEntries, currencyCode: budget.currencyCode, fractionDigits: fractionDigits,
       mode: mode)
     return VStack(alignment: .leading, spacing: 18) {
-      if let report,
-        let spent = try? BudgetReporting.overallSpent(from: report),
-        let remaining = try? BudgetReporting.overallRemaining(from: report)
-      {
-        BudgetOverviewHeader(
-          income: amount(report.income.minorUnits), spent: amount(spent.minorUnits),
-          remaining: amount(remaining.minorUnits), isOverspent: remaining.minorUnits < 0)
-      }
-      Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
-        .foregroundStyle(.primary)
-      Button("Change budget style", systemImage: "slider.horizontal.3") {
-        showingModeChange = true
-      }
-      .foregroundStyle(.primary)
-      .confirmationDialog(
-        "Change budget style?", isPresented: $showingModeChange, titleVisibility: .visible
-      ) {
-        if mode != .balanced { Button("Balanced") { changeMode(.balanced) } }
-        if mode != .housingFirst { Button("Housing First") { changeMode(.housingFirst) } }
-        Button("Cancel", role: .cancel) {}
-      } message: {
-        Text(
-          "Category allocations for \(selectedMonth.formatted(.dateTime.month(.wide).year())) will change. Recorded transactions stay the same."
-        )
-      }
-      Text("Your monthly budget")
-        .font(.title2.bold())
-      let categories = report?.categories ?? []
-      if usesWideCategories {
-        Grid(alignment: .leading, horizontalSpacing: 32, verticalSpacing: 12) {
-          ForEach(Array(stride(from: 0, to: categories.count, by: 2)), id: \.self) { index in
-            GridRow {
-              BudgetCategoryRow(item: categories[index])
-              if index + 1 < categories.count {
-                BudgetCategoryRow(item: categories[index + 1])
+      if destination == .budget {
+        if let report,
+          let spent = try? BudgetReporting.overallSpent(from: report),
+          let remaining = try? BudgetReporting.overallRemaining(from: report)
+        {
+          BudgetOverviewHeader(
+            income: amount(report.income.minorUnits), spent: amount(spent.minorUnits),
+            remaining: amount(remaining.minorUnits), isOverspent: remaining.minorUnits < 0)
+        }
+        HStack {
+          Label(mode == .balanced ? "Balanced" : "Housing First", systemImage: "circle.grid.2x2")
+            .foregroundStyle(.primary)
+          Spacer(minLength: 12)
+          Button("Change budget style", systemImage: "slider.horizontal.3") {
+            showingModeChange = true
+          }
+          .labelStyle(.iconOnly)
+          .frame(minWidth: 44, minHeight: 44)
+          .contentShape(Rectangle())
+          .foregroundStyle(.primary)
+          .confirmationDialog(
+            "Change budget style?", isPresented: $showingModeChange, titleVisibility: .visible
+          ) {
+            if mode != .balanced { Button("Balanced") { changeMode(.balanced) } }
+            if mode != .housingFirst { Button("Housing First") { changeMode(.housingFirst) } }
+            Button("Cancel", role: .cancel) {}
+          } message: {
+            Text(
+              "Category allocations for \(selectedMonth.formatted(.dateTime.month(.wide).year())) will change. Recorded transactions stay the same."
+            )
+          }
+        }
+        Text("Your monthly budget")
+          .font(.title2.bold())
+        let categories = report?.categories ?? []
+        if usesWideCategories {
+          Grid(alignment: .leading, horizontalSpacing: 32, verticalSpacing: 12) {
+            ForEach(Array(stride(from: 0, to: categories.count, by: 2)), id: \.self) { index in
+              GridRow {
+                BudgetCategoryRow(item: categories[index])
+                if index + 1 < categories.count {
+                  BudgetCategoryRow(item: categories[index + 1])
+                }
               }
             }
           }
-        }
-      } else {
-        VStack(spacing: 0) {
-          ForEach(categories, id: \.category) { item in BudgetCategoryRow(item: item) }
-        }
-      }
-      Text("Recent activity").font(.title2.bold())
-      #if os(macOS)
-        Table(of: LedgerEntry.self) {
-          TableColumn("Date") { entry in activityDate(entry) }
-          TableColumn("Type") { entry in Text(entry.kind.capitalized) }
-          TableColumn("Category") { entry in Text(entry.category.capitalized) }
-          TableColumn("Description") { entry in Text(entry.note ?? entry.kind.capitalized) }
-          TableColumn("Amount") { entry in Text(amount(entry.amountMinor)).monospacedDigit() }
-        } rows: {
-          ForEach(monthEntries.reversed()) { entry in
-            TableRow(entry)
-              .contextMenu {
-                Button {
-                  entryPresentation = .edit(entry)
-                } label: {
-                  Label("Edit", systemImage: "pencil")
-                }
-                Button(role: .destructive) {
-                  pendingDelete = entry
-                  showingDeleteConfirmation = true
-                } label: {
-                  Label("Delete", systemImage: "trash")
-                }
-              }
+        } else {
+          VStack(spacing: 0) {
+            ForEach(categories, id: \.category) { item in BudgetCategoryRow(item: item) }
           }
         }
-        .frame(minHeight: 120, maxHeight: 320)
-        .accessibilityIdentifier("transactionTable")
-      #else
-        ForEach(monthEntries.reversed(), id: \.id) { entry in
-          activityRow(entry)
-        }
-      #endif
-      DisclosureGroup("Charts and reports") {
-      if let report, report.income.minorUnits > 0 {
-        Chart(report.categories, id: \.category) { item in
-          SectorMark(
-            angle: .value("Allocation", item.allocated.minorUnits),
-            innerRadius: .ratio(0.68), angularInset: 2
-          )
-          .accessibilityLabel(item.category.rawValue.capitalized)
-          .accessibilityValue("\(item.percent)%")
-          .foregroundStyle(categoryColor(item.category))
-        }
-        .chartLegend(.hidden)
-        .frame(height: 200)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Budget allocation")
-        .accessibilityValue(
-          report.categories.map {
-            "\($0.category.rawValue.capitalized): \($0.percent)% of income, \(amount($0.allocated.minorUnits))"
-          }.joined(separator: ". "))
-        allocationLegend(report.categories)
       }
+      if destination == .activity {
+        Text("Recent activity").font(.title2.bold())
+        #if os(macOS)
+          Table(of: LedgerEntry.self) {
+            TableColumn("Date") { entry in activityDate(entry) }
+            TableColumn("Type") { entry in Text(entry.kind.capitalized) }
+            TableColumn("Category") { entry in Text(entry.category.capitalized) }
+            TableColumn("Description") { entry in Text(entry.note ?? entry.kind.capitalized) }
+            TableColumn("Amount") { entry in Text(amount(entry.amountMinor)).monospacedDigit() }
+          } rows: {
+            ForEach(monthEntries.reversed()) { entry in
+              TableRow(entry)
+                .contextMenu {
+                  Button {
+                    entryPresentation = .edit(entry)
+                  } label: {
+                    Label("Edit", systemImage: "pencil")
+                  }
+                  Button(role: .destructive) {
+                    pendingDelete = entry
+                    showingDeleteConfirmation = true
+                  } label: {
+                    Label("Delete", systemImage: "trash")
+                  }
+                }
+            }
+          }
+          .frame(minHeight: 120, maxHeight: 320)
+          .accessibilityIdentifier("transactionTable")
+        #else
+          ForEach(monthEntries.reversed(), id: \.id) { entry in
+            activityRow(entry)
+          }
+        #endif
+      }
+      if destination == .reports {
         if let report { plannedVsActual(report) }
-      }
-      if let report {
-        spendingTrend(report: report, budget: budget, entries: monthEntries)
-      }
-      Text("Monthly spending")
-        .font(.title2.bold())
-      let history = spendingHistory(currencyCode: budget.currencyCode)
-      if history.count > 1 {
-        if dynamicTypeSize.isAccessibilitySize {
-          Text(
-            history.map {
-              "\($0.date.formatted(.dateTime.month(.wide).year())): \($0.spent.formatted(.currency(code: currency)))"
-            }.joined(separator: "\n"))
+        if let report {
+          spendingTrend(report: report, budget: budget, entries: monthEntries)
         }
-        Chart(history) { point in
-          LineMark(
-            x: .value("Month", point.date), y: .value("Spent", point.spent)
+        Text("Monthly spending")
+          .font(.title2.bold())
+        let history = spendingHistory(currencyCode: budget.currencyCode)
+        if history.count > 1 {
+          if dynamicTypeSize.isAccessibilitySize {
+            Text(
+              history.map {
+                "\($0.date.formatted(.dateTime.month(.wide).year())): \($0.spent.formatted(.currency(code: currency)))"
+              }.joined(separator: "\n"))
+          }
+          Chart(history) { point in
+            LineMark(
+              x: .value("Month", point.date), y: .value("Spent", point.spent)
+            )
+            .symbol(.circle)
+            PointMark(x: .value("Month", point.date), y: .value("Spent", point.spent))
+          }
+          .chartXScale(
+            domain: history[0].date...history[history.count - 1].date.addingTimeInterval(1_209_600)
           )
-          .symbol(.circle)
-          PointMark(x: .value("Month", point.date), y: .value("Spent", point.spent))
-        }
-        .chartXScale(
-          domain: history[0].date...history[history.count - 1].date.addingTimeInterval(1_209_600)
-        )
-        .chartXAxis {
-          AxisMarks(values: history.map(\.date)) {
-            AxisGridLine()
-            AxisTick()
-            if !dynamicTypeSize.isAccessibilitySize {
-              AxisValueLabel(format: .dateTime.month(.abbreviated))
-                .font(.body)
-                .foregroundStyle(.primary)
+          .chartXAxis {
+            AxisMarks(values: history.map(\.date)) {
+              AxisGridLine()
+              AxisTick()
+              if !dynamicTypeSize.isAccessibilitySize {
+                AxisValueLabel(format: .dateTime.month(.abbreviated))
+                  .font(.body)
+                  .foregroundStyle(.primary)
+              }
             }
           }
-        }
-        .chartYAxis {
-          AxisMarks { _ in
-            AxisGridLine()
-            AxisTick()
-            if !dynamicTypeSize.isAccessibilitySize {
-              AxisValueLabel(format: .currency(code: currency))
-                .font(.body)
-                .foregroundStyle(.primary)
+          .chartYAxis {
+            AxisMarks { _ in
+              AxisGridLine()
+              AxisTick()
+              if !dynamicTypeSize.isAccessibilitySize {
+                AxisValueLabel(format: .currency(code: currency))
+                  .font(.body)
+                  .foregroundStyle(.primary)
+              }
             }
           }
+          .frame(height: 200)
+          .accessibilityLabel("Monthly spending history")
+          .accessibilityValue(
+            history.map {
+              "\($0.date.formatted(.dateTime.month(.wide))): \($0.spent.formatted(.currency(code: currency)))"
+            }.joined(separator: ", "))
+        } else {
+          ContentUnavailableView(
+            "History starts next month", systemImage: "chart.xyaxis.line",
+            description: Text("Add another budget month to compare spending.")
+          )
         }
-        .frame(height: 200)
-        .accessibilityLabel("Monthly spending history")
-        .accessibilityValue(
-          history.map {
-            "\($0.date.formatted(.dateTime.month(.wide))): \($0.spent.formatted(.currency(code: currency)))"
-          }.joined(separator: ", "))
-      } else {
-        ContentUnavailableView(
-          "History starts next month", systemImage: "chart.xyaxis.line",
-          description: Text("Add another budget month to compare spending.")
-        )
       }
     }
   }
@@ -690,10 +714,10 @@ struct ContentView: View {
     if dynamicTypeSize.isAccessibilitySize {
       VStack(alignment: .leading, spacing: 4) {
         Text(entry.category.capitalized).font(.headline)
-        Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+        Text(entry.note ?? entry.kind.capitalized).font(.subheadline).foregroundStyle(.primary)
         activityDate(entry)
         HStack(spacing: 12) {
-          Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
+          Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: false, vertical: true)
           Spacer()
           activityButtons(entry)
         }
@@ -703,11 +727,11 @@ struct ContentView: View {
       HStack(spacing: 12) {
         VStack(alignment: .leading) {
           Text(entry.category.capitalized)
-          Text(entry.note ?? entry.kind.capitalized).font(.caption).foregroundStyle(.secondary)
+          Text(entry.note ?? entry.kind.capitalized).font(.subheadline).foregroundStyle(.primary)
           activityDate(entry)
         }
         Spacer()
-        Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: true, vertical: false)
+        Text(amount(entry.amountMinor)).monospacedDigit().fixedSize(horizontal: false, vertical: true)
         activityButtons(entry)
       }
       .padding(.vertical, 8)
@@ -887,6 +911,7 @@ struct ContentView: View {
       kind: "income", category: "income", occurredAt: selectedMonth)
     do {
       try BudgetStore(context: context).createBudget(budget, income: initialIncome)
+      section = .budget
       loadBudget()
     } catch {
       saveError = error.localizedDescription

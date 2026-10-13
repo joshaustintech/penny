@@ -45,7 +45,6 @@ struct BudgetOverviewHeader: View {
         .accessibilityIdentifier("actualSpendingSummary")
       }
     }
-    .padding(.vertical, 12)
     .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
