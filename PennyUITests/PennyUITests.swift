@@ -349,6 +349,7 @@ final class PennyUITests: XCTestCase {
 
     app.tabBars.buttons["Activity"].tap()
     XCTAssertTrue(app.staticTexts["Lunch"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Spending · Needs"].exists)
     XCTAssertFalse(
       app.staticTexts.matching(identifier: "activityEntryDate").firstMatch.label.isEmpty)
     app.buttons["Edit Lunch"].tap()

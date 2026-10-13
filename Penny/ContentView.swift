@@ -727,7 +727,7 @@ struct ContentView: View {
   @ViewBuilder private func activityRow(_ entry: LedgerEntry) -> some View {
     if dynamicTypeSize.isAccessibilitySize {
       VStack(alignment: .leading, spacing: 4) {
-        Text(entry.category.capitalized).font(.headline)
+        Text(activityTitle(entry)).font(.headline)
         Text(entry.note ?? entry.kind.capitalized).font(.subheadline).foregroundStyle(.primary)
         activityDate(entry)
         HStack(spacing: 12) {
@@ -740,7 +740,7 @@ struct ContentView: View {
     } else {
       HStack(spacing: 12) {
         VStack(alignment: .leading) {
-          Text(entry.category.capitalized)
+          Text(activityTitle(entry)).font(.headline)
           Text(entry.note ?? entry.kind.capitalized).font(.subheadline).foregroundStyle(.primary)
           activityDate(entry)
         }
@@ -749,6 +749,15 @@ struct ContentView: View {
         activityButtons(entry)
       }
       .padding(.vertical, 8)
+    }
+  }
+
+  private func activityTitle(_ entry: LedgerEntry) -> String {
+    switch entry.kind {
+    case "income": return "Income"
+    case "savings": return "Savings contribution"
+    case "debt": return "Debt payment"
+    default: return "\(entry.kind.capitalized) · \(entry.category.capitalized)"
     }
   }
 
