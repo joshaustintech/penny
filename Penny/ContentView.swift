@@ -94,6 +94,16 @@ struct ContentView: View {
         }
       #endif
     }
+    .sheet(item: $entryPresentation) { presentation in
+        if let currentBudget {
+          EntryForm(
+            mode: BudgetMode(rawValue: currentBudget.mode) ?? .balanced,
+            currency: currentBudget.currencyCode,
+            monthDate: selectedMonth,
+            existingEntry: presentation.entry,
+            onSave: loadBudget)
+        }
+      }
     .alert(
       "Penny couldn't complete the action",
       isPresented: Binding(
@@ -206,16 +216,6 @@ struct ContentView: View {
               }
             }
           #endif
-        }
-      }
-      .sheet(item: $entryPresentation) { presentation in
-        if let currentBudget {
-          EntryForm(
-            mode: BudgetMode(rawValue: currentBudget.mode) ?? .balanced,
-            currency: currentBudget.currencyCode,
-            monthDate: selectedMonth,
-            existingEntry: presentation.entry,
-            onSave: loadBudget)
         }
       }
       #if os(iOS)

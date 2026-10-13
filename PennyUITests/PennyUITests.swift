@@ -44,6 +44,36 @@ final class PennyUITests: XCTestCase {
     add(screenshot)
   }
 
+  func testIPadLandscapeCategoryJourney() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture", "-appearance", "light"]
+    app.launch()
+    guard app.windows.firstMatch.frame.width > 700 else {
+      throw XCTSkip("Landscape split view requires iPad.")
+    }
+    XCUIDevice.shared.orientation = .landscapeLeft
+    defer { XCUIDevice.shared.orientation = .portrait }
+    let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+    XCTAssertTrue(balance.waitForExistence(timeout: 5))
+    XCTAssertTrue(balance.label.contains("$2,930.00"))
+    XCTAssertTrue(balance.isHittable)
+    XCTAssertGreaterThan(app.windows.firstMatch.frame.width, app.windows.firstMatch.frame.height)
+    let dashboard = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+    dashboard.name = "ipados-dashboard-landscape-light"
+    dashboard.lifetime = .keepAlways
+    add(dashboard)
+    app.buttons["categoryDetailLink-needs"].tap()
+    XCTAssertTrue(app.navigationBars["Needs"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Groceries"].exists)
+    XCTAssertFalse(app.staticTexts["Dining"].exists)
+    let detail = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+    detail.name = "ipados-category-landscape-light"
+    detail.lifetime = .keepAlways
+    add(detail)
+    app.buttons["Edit Groceries"].tap()
+    XCTAssertTrue(app.textFields["entryAmountField"].waitForExistence(timeout: 5))
+  }
+
   func testIPadSetupHidesEmptyMonthsSidebar() throws {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
