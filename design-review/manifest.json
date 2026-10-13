@@ -660,6 +660,24 @@
       "fixture": "5000 USD income; 5870 expenses; 700 contributions; 1570 deficit",
       "sha256": "6ea579dd662b1de04127ef40c2c3a8b2ab7d81ddd73adc62cc312cacf70c94f4",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-reports-readable-axis-light-17e.png",
+      "sourceRevision": "a24417908db40626064f5f3ccc0cece482d93d15",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T14:31:05.013000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "b30bff9037a6be288d170782df9fb92406b11de02971abde301f2460669aac1f",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
