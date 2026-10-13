@@ -210,6 +210,57 @@
       "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
       "status": "intermediate; not visually approved",
       "buildNotes": "Pre-existing staged TV asset metadata preserved; no dashboard source changes outside cited revision."
+    },
+    {
+      "file": "screenshots/ios-navigation-dark.png",
+      "sourceRevision": "ade8232e453555f9d3e44aff142ddb08d83565d7",
+      "configuration": "Debug",
+      "device": "iPhone 18 Pro",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1206,
+        2622
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:18:58.158736+00:00",
+      "sha256": "7a26fd8abf2a59e30dd545e22c22e891d7dbfaa8b9e357198b2c0524b35c6508",
+      "store": "isolated --ui-testing store/snapshot",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/macos-navigation-dark.png",
+      "sourceRevision": "ade8232e453555f9d3e44aff142ddb08d83565d7",
+      "configuration": "Debug",
+      "device": "native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:13:38.938832+00:00",
+      "sha256": "1d9eddca92c607ab50402b6e177b950be24758d10341f07b2747718160ce0de0",
+      "store": "isolated --ui-testing store/snapshot",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/before-watch-dashboard.png",
+      "sourceRevision": "5040a8a4930f324fe368d4f24300eeb3d6c2a117",
+      "configuration": "Debug",
+      "device": "Apple Watch Series 10 42mm",
+      "os": "watchOS 11.0",
+      "viewportPixels": [
+        374,
+        446
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:11:28.001283+00:00",
+      "sha256": "7e235bfa09a02f8095c7050d2cbe45c3d457b8af1074b96928a54ef2216d2157",
+      "store": "isolated --ui-testing store/snapshot",
+      "fixture": "USD 1000 income, no expenses",
+      "status": "intermediate; not visually approved"
     }
   ]
 }

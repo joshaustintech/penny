@@ -111,3 +111,45 @@ Remaining design criticisms, in priority order:
    accessible date, and keep all controls reachable.
 
 No final visual approval. Continue the navigation and platform composition work.
+
+## Native navigation: ade8232
+
+Budget, Activity and Reports are separate native pages. iOS/iPadOS use modern
+typed tabs with an iOS 17 fallback; Mac uses a native section control. Each iOS
+tab owns its navigation stack. Reports retain planned-versus-actual and spending
+trends; the duplicated allocation donut was removed. Budget style is one compact
+row with a full touch target. The visible month is abbreviated consistently,
+with its full date available as an accessibility hint.
+
+The final complete iPhone suite passed: 15 executed, 13 passed, two iPad-specific
+tests skipped, zero failures. Actual journeys cover entry/edit/delete, negative
+adjustments, mode changes, preserved history/relaunch, settings and accessibility.
+CSV/Markdown formats were verified separately by the 33 baseline core tests;
+native Mac save-panel interaction remains unverified in this run.
+
+Audit-driven repairs moved the month inset onto each page, corrected the style
+button's hit shape, and removed excess financial-header padding. Intermediate
+scroll-edge treatments did not fix the issue and were removed. The final full
+audit passes without exclusions. Mac Debug build passed; native dark window and
+iPhone dark dashboard were inspected. Source increment added/modified 199
+production lines, within the 200-line limit.
+
+Watch baseline now has a genuine watchOS 11/42mm capture. It reveals separated
+balance/label list rows and an overlapping bottom spending button. This is a
+failed companion candidate, not approval. Watch source is unchanged from the
+original baseline; its current executable was built by the iOS scheme.
+
+Next work, in priority order:
+
+1. Compose Mac header across the workspace, replace section control with proper
+   sidebar navigation, and verify narrow layouts. Add gated initial screenshot
+   routes so Mac Activity/Reports can be captured despite automation blockage.
+2. Fix Watch balance grouping and move the spending action into scroll content.
+3. Add missing category detail navigation with accurate matching transactions.
+4. Capture current iPad/second-iPhone/TV states and required light/dark, entry,
+   history, settings, overspending and larger-text journeys.
+5. Finish the skeptical audit and functional gaps; live iCloud/Siri/HomePod and
+   physical Watch receipts remain external verification limitations.
+
+Goal remains active. Pre-existing staged TV assets and untracked `.swiftpm/`
+are preserved. No final release or design excellence is claimed.
