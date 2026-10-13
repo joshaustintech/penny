@@ -443,10 +443,15 @@ struct ContentView: View {
       mode: mode)
     return VStack(alignment: .leading, spacing: 18) {
       if report == nil && destination != .activity {
-        ContentUnavailableView("Budget report unavailable", systemImage: "exclamationmark.triangle",
-          description: Text("One or more saved entries cannot be included in this month's totals. Review the entries to correct their amounts or categories."))
-        Button("Review entries") { section = .activity }
-          .buttonStyle(.borderedProminent)
+        ContentUnavailableView {
+          Label("Budget report unavailable", systemImage: "exclamationmark.triangle")
+        } description: {
+          Text("One or more saved entries cannot be included in this month's totals. Review the entries to correct their amounts or categories.")
+            .foregroundStyle(.primary)
+        } actions: {
+          Button("Review entries") { section = .activity }
+            .buttonStyle(.borderedProminent)
+        }
       } else {
       if destination == .budget {
         if let report,

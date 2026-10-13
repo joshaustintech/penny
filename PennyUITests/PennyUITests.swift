@@ -128,13 +128,14 @@ final class PennyUITests: XCTestCase {
     add(shot)
   }
 
-  func testInvalidReportExplainsFailureAndAllowsReview() {
+  func testInvalidReportExplainsFailureAndAllowsReview() throws {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture",
       "--screenshot-invalid-entry", "-appearance", "light"]
     app.launch()
     XCTAssertTrue(app.staticTexts["Budget report unavailable"].waitForExistence(timeout: 5))
     XCTAssertFalse(app.descendants(matching: .any)["remainingPlanSummary"].exists)
+    try app.performAccessibilityAudit()
     let shot = XCTAttachment(screenshot: app.screenshot())
     shot.name = "ios-invalid-report-light"
     shot.lifetime = .keepAlways
