@@ -87,7 +87,9 @@ struct PennyApp: App {
         }
     }
     #if os(macOS)
-      .defaultSize(width: 1100, height: 800)
+      .defaultSize(
+        width: ProcessInfo.processInfo.arguments.contains("--ui-testing")
+          && UserDefaults.standard.bool(forKey: "screenshotNarrow") ? 800 : 1100, height: 800)
       .commands {
         PennyMenuCommands()
       }

@@ -18,7 +18,10 @@ struct ContentView: View {
   #if os(iOS)
     @AppStorage("watchSharingEnabled") private var watchSharingEnabled = false
   #endif
-  @State private var section = DashboardSection.budget
+  @State private var section: DashboardSection = {
+    guard ProcessInfo.processInfo.arguments.contains("--ui-testing") else { return .budget }
+    return DashboardSection(rawValue: UserDefaults.standard.string(forKey: "screenshotSection") ?? "Budget") ?? .budget
+  }()
   @State private var months: [BudgetMonth] = []
   @State private var entries: [LedgerEntry] = []
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
@@ -174,13 +177,6 @@ struct ContentView: View {
       #endif
       .toolbar {
         #if os(macOS)
-          ToolbarItem(placement: .principal) {
-            if currentBudget != nil {
-              Picker("Section", selection: $section) {
-                ForEach(DashboardSection.allCases) { Text($0.rawValue).tag($0) }
-              }.pickerStyle(.segmented)
-            }
-          }
           ToolbarItem {
             SettingsLink { Label("Settings", systemImage: "gearshape") }
           }
@@ -323,6 +319,20 @@ struct ContentView: View {
       }, set: { month in
         if let month { selectedMonth = month }
       })) {
+      #if os(macOS)
+        Section("Penny") {
+          ForEach(DashboardSection.allCases) { destination in
+            Button(destination.rawValue, systemImage: destination.systemImage) {
+              section = destination
+            }
+            .buttonStyle(.plain)
+            .padding(.vertical, 6)
+            .accessibilityValue(section == destination ? "Selected" : "")
+            .listRowBackground(section == destination ? Color.accentColor.opacity(0.15) : Color.clear)
+          }
+        }
+      #endif
+      Section("Months") {
       ForEach(months.reversed(), id: \.id) { month in
         if let date = Calendar.current.date(
           from: DateComponents(year: month.year, month: month.month, day: 1))
@@ -335,10 +345,11 @@ struct ContentView: View {
           }
         }
       }
+      }
     }
     .listStyle(.sidebar)
-    .tint(Color(red: 0, green: 0.34, blue: 0.68))
-    .navigationTitle("Months")
+    .tint(.accentColor)
+    .navigationTitle("Penny")
   }
 
   private var monthSwitcher: some View {
@@ -491,7 +502,10 @@ struct ContentView: View {
             TableColumn("Type") { entry in Text(entry.kind.capitalized) }
             TableColumn("Category") { entry in Text(entry.category.capitalized) }
             TableColumn("Description") { entry in Text(entry.note ?? entry.kind.capitalized) }
-            TableColumn("Amount") { entry in Text(amount(entry.amountMinor)).monospacedDigit() }
+            TableColumn("Amount") { entry in
+              Text(amount(entry.amountMinor)).monospacedDigit()
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
           } rows: {
             ForEach(monthEntries.reversed()) { entry in
               TableRow(entry)
@@ -510,7 +524,7 @@ struct ContentView: View {
                 }
             }
           }
-          .frame(minHeight: 120, maxHeight: 320)
+          .frame(minHeight: 360, idealHeight: 520, maxHeight: 640)
           .accessibilityIdentifier("transactionTable")
         #else
           ForEach(monthEntries.reversed(), id: \.id) { entry in
