@@ -569,6 +569,24 @@
       "fixture": "5000 USD income; 1370 expenses; 700 contributions",
       "sha256": "8408e54c45aa9f5ad82a77fdf4e817effc9e99b121023e783d2c080ac2c61473",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-dashboard-horizontal-rules-light-17e.png",
+      "sourceRevision": "8b83a62471c01b8bc0effff0a54cc3435914086a",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T13:55:54.337000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "df9b1e939e2bf0e32d0ecc565fb814ca51005a0ad3695477e07644a37c24981c",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
