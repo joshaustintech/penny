@@ -25,6 +25,10 @@ final class PennyTVUITests: XCTestCase {
     XCUIRemote.shared.press(.right)
     XCTAssertTrue(wants.waitForExistence(timeout: 5))
     XCTAssertTrue(wants.hasFocus)
+    let attachment = XCTAttachment(screenshot: app.screenshot())
+    attachment.name = "tvos-dashboard-focused"
+    attachment.lifetime = .keepAlways
+    add(attachment)
   }
 
   func testStorageOpenFailureShowsRecoveryMessage() {

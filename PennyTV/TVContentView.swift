@@ -144,8 +144,8 @@ struct TVContentView: View {
             HStack(spacing: 20) {
               ForEach(report.categories, id: \.category) { category in
                 categoryCard(category, month, report.income.fractionDigits)
-                  .focused($focusedCategory, equals: category.category.rawValue)
                   .focusable()
+                  .focused($focusedCategory, equals: category.category.rawValue)
               }
             }
             .padding(12)
@@ -162,11 +162,25 @@ struct TVContentView: View {
     Chart(report.categories, id: \.category) { category in
       BarMark(
         x: .value("Category", category.category.rawValue.capitalized),
-        y: .value("Used", used(category).minorUnits)
+        y: .value("Used", majorUnits(used(category).minorUnits, month.currencyCode))
       )
-      .foregroundStyle(.orange.gradient)
+      .foregroundStyle(by: .value("Measure", "Used"))
+      PointMark(
+        x: .value("Category", category.category.rawValue.capitalized),
+        y: .value("Planned", majorUnits(category.allocated.minorUnits, month.currencyCode))
+      )
+      .symbol(.square).symbolSize(120)
+      .foregroundStyle(by: .value("Measure", "Planned"))
     }
-    .chartYAxisLabel("Used")
+    .chartForegroundStyleScale(["Used": Color.accentColor, "Planned": Color.primary])
+    .chartLegend(position: .bottom)
+    .chartYAxis {
+      AxisMarks { _ in
+        AxisGridLine()
+        AxisValueLabel(format: .currency(code: month.currencyCode).precision(.fractionLength(0)))
+      }
+    }
+    .chartYAxisLabel("Used and planned")
     .frame(height: 260)
     .accessibilityLabel("Current category spending")
   }
@@ -182,9 +196,11 @@ struct TVContentView: View {
       ProgressView(
         value: min(max(Double(value) / Double(max(category.allocated.minorUnits, 1)), 0), 1))
       Text("\(money(value, month.currencyCode, fractionDigits)) used")
-        .font(.callout).foregroundStyle(.secondary)
+        .font(.callout).foregroundStyle(.primary)
+      Text("\(money(category.allocated.minorUnits, month.currencyCode, fractionDigits)) planned")
+        .font(.callout).foregroundStyle(.primary)
     }
-    .frame(width: 280, height: 160, alignment: .leading)
+    .frame(width: 310, height: 220, alignment: .leading)
     .padding(24)
     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
     .scaleEffect(!reduceMotion && focusedCategory == category.category.rawValue ? 1.06 : 1)
@@ -209,13 +225,19 @@ struct TVContentView: View {
       Text("Monthly comparison").font(.title2.bold())
       Chart {
         ForEach(Array(history.enumerated()), id: \.offset) { _, point in
-          BarMark(x: .value("Month", point.label), y: .value("Income", point.income))
+          BarMark(x: .value("Month", point.label), y: .value("Income", majorUnits(point.income, currencyCode)))
             .position(by: .value("Series", "Income"))
-          BarMark(x: .value("Month", point.label), y: .value("Spending", point.spending))
+          BarMark(x: .value("Month", point.label), y: .value("Spending", majorUnits(point.spending, currencyCode)))
             .position(by: .value("Series", "Spending"))
         }
       }
-      .chartForegroundStyleScale(["Income": .blue, "Spending": .orange])
+      .chartForegroundStyleScale(["Income": Color.accentColor, "Spending": .orange])
+      .chartYAxis {
+        AxisMarks { _ in
+          AxisGridLine()
+          AxisValueLabel(format: .currency(code: currencyCode).precision(.fractionLength(0)))
+        }
+      }
       .frame(height: 250)
       .accessibilityLabel("Income and spending across recent months")
     }
@@ -241,6 +263,13 @@ struct TVContentView: View {
 
   private func monthLabel(_ month: BudgetMonth) -> String {
     "\(month.month)/\(month.year)"
+  }
+
+  private func majorUnits(_ minor: Int64, _ currency: String) -> Double {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
+    formatter.currencyCode = currency
+    return Double(minor) / pow(10, Double(formatter.maximumFractionDigits))
   }
 
   private func money(_ minor: Int64, _ currency: String, _ fractionDigits: Int) -> String {
