@@ -25,5 +25,9 @@ enum BudgetScreenshotFixture {
           amountMinor: Int64(amount), currencyCode: "USD", fractionDigits: 2,
           kind: kind, category: category, occurredAt: now, note: note))
     }
+    if ProcessInfo.processInfo.arguments.contains("--screenshot-overspent") {
+      try store.save(LedgerEntry(amountMinor: 450_000, currencyCode: "USD", fractionDigits: 2,
+        kind: "spending", category: "needs", occurredAt: now, note: "Urgent home repair"))
+    }
   }
 }

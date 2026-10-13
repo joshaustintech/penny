@@ -92,6 +92,29 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Months"].waitForExistence(timeout: 5))
   }
 
+  func testOverspendingInBothBudgetModes() {
+    let app = XCUIApplication()
+    for housing in [false, true] {
+      app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture",
+        "--screenshot-overspent", "-appearance", housing ? "dark" : "light"]
+      if housing { app.launchArguments.append("--housing-first") }
+      app.launch()
+      let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+      XCTAssertTrue(balance.waitForExistence(timeout: 5))
+      XCTAssertTrue(balance.label.contains("1,570.00"))
+      XCTAssertTrue(app.staticTexts["Over budget"].exists)
+      let shot = XCTAttachment(screenshot: app.screenshot())
+      shot.name = housing ? "ios-overspent-housing-dark" : "ios-overspent-balanced-light"
+      shot.lifetime = .keepAlways
+      add(shot)
+      let needs = app.buttons["categoryDetailLink-needs"]
+      scrollIntoView(needs, in: app)
+      needs.tap()
+      XCTAssertTrue(app.staticTexts[housing ? "-$4,650.00" : "-$2,900.00"].waitForExistence(timeout: 5))
+      app.terminate()
+    }
+  }
+
   func testZeroIncomeBudgetCanBeCreated() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store", "-appearance", "light"]
