@@ -678,6 +678,24 @@
       "fixture": "5000 USD income; 1370 expenses; 700 contributions",
       "sha256": "b30bff9037a6be288d170782df9fb92406b11de02971abde301f2460669aac1f",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-invalid-report-light-17e.png",
+      "sourceRevision": "69f0e87a7f87cfa9bc8a3807a9976539837328a3",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T14:36:06.821000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; normal entries plus invalid negative spending inserted only in test store",
+      "sha256": "6c954547dd3eccf61eb3880bb0370e05589c33e1ac8fe736aa891904b6dcb63d",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
