@@ -728,6 +728,7 @@ struct ContentView: View {
     NavigationLink {
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
+          Text(selectedMonth.formatted(.dateTime.month(.wide).year())).font(.headline)
           Text("Remaining").font(.headline)
           Text(amount(item.remaining.minorUnits)).font(.largeTitle.bold()).monospacedDigit()
           let used = item.category == .debt || item.category == .savings ? item.contributed : item.spent
@@ -766,8 +767,8 @@ struct ContentView: View {
   }
 
   @ViewBuilder private func activityRow(_ entry: LedgerEntry) -> some View {
-    if dynamicTypeSize.isAccessibilitySize {
-      VStack(alignment: .leading, spacing: 4) {
+    if dynamicTypeSize.isAccessibilitySize || horizontalSizeClass != .regular {
+      VStack(alignment: .leading, spacing: 6) {
         Text(activityTitle(entry)).font(.headline)
         Text(entry.note ?? entry.kind.capitalized).font(.subheadline).foregroundStyle(.primary)
         activityDate(entry)
@@ -804,8 +805,8 @@ struct ContentView: View {
 
   private func activityDate(_ entry: LedgerEntry) -> some View {
     Text(entry.transactionDate.formatted(date: .abbreviated, time: .omitted))
-      .font(.caption)
-      .foregroundStyle(.secondary)
+      .font(.footnote)
+      .foregroundStyle(.primary)
       .accessibilityIdentifier("activityEntryDate")
   }
 
