@@ -7,7 +7,7 @@ struct EntryForm: View {
   @FocusState private var fieldFocused: Bool
   @State private var kind = TransactionKind.spending
   @State private var category = BudgetCategory.needs
-  @State private var amount: Decimal = 0
+  @State private var amount = ""
   @State private var subtractAdjustment = false
   @State private var date = Date.now
   @State private var note = ""
@@ -17,6 +17,7 @@ struct EntryForm: View {
   let currency: String
   let monthDate: Date
   let existingEntry: LedgerEntry?
+  let usesSpaciousKeyboard: Bool
   let onSave: () -> Void
 
   private var monthRange: ClosedRange<Date> {
@@ -29,13 +30,14 @@ struct EntryForm: View {
 
   init(
     mode: BudgetMode, currency: String, monthDate: Date = .now,
-    existingEntry: LedgerEntry? = nil,
+    existingEntry: LedgerEntry? = nil, usesSpaciousKeyboard: Bool = false,
     onSave: @escaping () -> Void
   ) {
     self.mode = mode
     self.currency = currency
     self.monthDate = monthDate
     self.existingEntry = existingEntry
+    self.usesSpaciousKeyboard = usesSpaciousKeyboard
     self.onSave = onSave
     _date = State(initialValue: monthDate)
     _subtractAdjustment = State(initialValue: (existingEntry?.amountMinor ?? 0) < 0)
@@ -43,8 +45,9 @@ struct EntryForm: View {
       let scale = Decimal(sign: .plus, exponent: existingEntry.fractionDigits, significand: 1)
       _kind = State(initialValue: TransactionKind(rawValue: existingEntry.kind) ?? .spending)
       _category = State(initialValue: BudgetCategory(rawValue: existingEntry.category) ?? .needs)
-      _amount = State(
-        initialValue: NSDecimalNumber(value: existingEntry.amountMinor).decimalValue / scale)
+      let value = NSDecimalNumber(value: existingEntry.amountMinor).decimalValue / scale
+      _amount = State(initialValue: value.formatted(.number.grouping(.never)
+        .precision(.fractionLength(0...existingEntry.fractionDigits))))
       _date = State(initialValue: existingEntry.transactionDate)
       _note = State(initialValue: existingEntry.note ?? "")
     }
@@ -74,7 +77,12 @@ struct EntryForm: View {
   }
 
   private var minorAmount: Int64? {
-    let enteredAmount = amount < 0 ? -amount : amount
+    let input = amount.trimmingCharacters(in: .whitespacesAndNewlines)
+    let separator = NSRegularExpression.escapedPattern(for: Locale.current.decimalSeparator ?? ".")
+    let pattern = "^[+-]?(?:[0-9]+(?:\(separator)[0-9]*)?|\(separator)[0-9]+)$"
+    guard input.range(of: pattern, options: .regularExpression) != nil,
+      let value = Decimal(string: input, locale: .current) else { return nil }
+    let enteredAmount = value < 0 ? -value : value
     let signedAmount = kind == .adjustment && subtractAdjustment ? -enteredAmount : enteredAmount
     return try? Money.minorUnits(
       for: signedAmount, fractionDigits: fractionDigits, allowNegative: kind == .adjustment)
@@ -95,12 +103,9 @@ struct EntryForm: View {
         Picker("Category", selection: $category) {
           ForEach(categories, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
         }
-        TextField(
-          "Amount (\(currency))", value: $amount,
-          format: .number.precision(.fractionLength(0...fractionDigits))
-        )
+        TextField("Amount (\(currency))", text: $amount)
         #if os(iOS)
-          .keyboardType(.decimalPad)
+          .keyboardType(usesSpaciousKeyboard ? .numbersAndPunctuation : .decimalPad)
         #endif
         .focused($fieldFocused)
         .accessibilityIdentifier("entryAmountField")

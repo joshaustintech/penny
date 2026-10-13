@@ -87,6 +87,19 @@ struct ContentView: View {
             monthSidebar
           } detail: {
             tabbedDashboard
+              .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                  Button("Settings", systemImage: "gearshape") { showingSettings = true }
+                    .accessibilityIdentifier("settingsButton")
+                }
+                if currentBudget != nil {
+                  ToolbarItem(placement: .topBarTrailing) {
+                    Button("Add entry", systemImage: "plus") { entryPresentation = .new }
+                      .keyboardShortcut("n", modifiers: .command)
+                      .accessibilityIdentifier("addEntryButton")
+                  }
+                }
+              }
           }
           .navigationSplitViewStyle(.balanced)
         } else {
@@ -101,6 +114,7 @@ struct ContentView: View {
             currency: currentBudget.currencyCode,
             monthDate: selectedMonth,
             existingEntry: presentation.entry,
+            usesSpaciousKeyboard: horizontalSizeClass == .regular,
             onSave: loadBudget)
         }
       }
@@ -191,12 +205,14 @@ struct ContentView: View {
             SettingsLink { Label("Settings", systemImage: "gearshape") }
           }
         #else
-          ToolbarItem(placement: .topBarTrailing) {
-            Button("Settings", systemImage: "gearshape") { showingSettings = true }
-              .accessibilityIdentifier("settingsButton")
+          if horizontalSizeClass != .regular {
+            ToolbarItem(placement: .topBarTrailing) {
+              Button("Settings", systemImage: "gearshape") { showingSettings = true }
+                .accessibilityIdentifier("settingsButton")
+            }
           }
         #endif
-        if currentBudget != nil {
+        if pageHasEntryAction {
           ToolbarItem(placement: addEntryToolbarPlacement) {
             Button("Add entry", systemImage: "plus") {
               entryPresentation = .new
@@ -405,7 +421,7 @@ struct ContentView: View {
         TextField("Income (\(currency))", text: $incomeText)
         .focused($incomeFieldFocused)
         #if os(iOS)
-          .keyboardType(.decimalPad)
+          .keyboardType(horizontalSizeClass == .regular ? .numbersAndPunctuation : .decimalPad)
           .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
               Spacer()
@@ -939,6 +955,14 @@ struct ContentView: View {
         date: date, spent: Double(total) / pow(10, Double(fractionDigits)))
     }
     .sorted { $0.date < $1.date }
+  }
+
+  private var pageHasEntryAction: Bool {
+    #if os(macOS)
+      currentBudget != nil
+    #else
+      currentBudget != nil && horizontalSizeClass != .regular
+    #endif
   }
 
   private var addEntryToolbarPlacement: ToolbarItemPlacement {

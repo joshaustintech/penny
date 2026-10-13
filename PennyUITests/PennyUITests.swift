@@ -169,6 +169,23 @@ final class PennyUITests: XCTestCase {
     XCTAssertFalse(app.staticTexts["Budget report unavailable"].exists)
   }
 
+  func testEntryRejectsMalformedAmountAndSavesCents() {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture"]
+    app.launch()
+    app.buttons["addEntryButton"].tap()
+    let amount = app.textFields["entryAmountField"]
+    XCTAssertTrue(amount.waitForExistence(timeout: 5))
+    enter("12..3", in: amount, app: app)
+    XCTAssertFalse(app.buttons["saveEntryButton"].isEnabled)
+    enter("12.34", in: amount, app: app)
+    XCTAssertTrue(app.buttons["saveEntryButton"].isEnabled)
+    app.buttons["saveEntryButton"].tap()
+    XCTAssertTrue(app.navigationBars["Add entry"].waitForNonExistence(timeout: 5))
+    let balance = app.descendants(matching: .any)["remainingPlanSummary"]
+    XCTAssertTrue(balance.label.contains("$2,917.66"))
+  }
+
   func testZeroIncomeBudgetCanBeCreated() {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store", "-appearance", "light"]
@@ -476,7 +493,15 @@ final class PennyUITests: XCTestCase {
     app.buttons["Edit Groceries"].tap()
     XCTAssertTrue(app.navigationBars["Edit entry"].waitForExistence(timeout: 5))
     enter("1000", in: app.textFields["entryAmountField"], app: app)
+    let before = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+    before.name = "category-edit-before-update"
+    before.lifetime = .keepAlways
+    add(before)
     app.buttons["saveEntryButton"].tap()
+    let after = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+    after.name = "category-edit-after-update"
+    after.lifetime = .keepAlways
+    add(after)
     XCTAssertTrue(app.navigationBars["Edit entry"].waitForNonExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["$1,500.00"].waitForExistence(timeout: 5))
   }
