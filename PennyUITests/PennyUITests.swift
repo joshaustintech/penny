@@ -74,6 +74,19 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue(app.textFields["entryAmountField"].waitForExistence(timeout: 5))
   }
 
+  func testIPadSectionNavigation() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["--ui-testing", "--reset-store", "--screenshot-fixture"]
+    app.launch()
+    guard app.windows.firstMatch.frame.width > 700 else { throw XCTSkip("Requires iPad tabs.") }
+    selectSection("Activity", in: app)
+    XCTAssertTrue(app.staticTexts["Recent activity"].waitForExistence(timeout: 5))
+    selectSection("Reports", in: app)
+    XCTAssertTrue(app.descendants(matching: .any)["Planned versus actual"].waitForExistence(timeout: 5))
+    selectSection("Budget", in: app)
+    XCTAssertTrue(app.staticTexts["Your monthly budget"].waitForExistence(timeout: 5))
+  }
+
   func testIPadSetupHidesEmptyMonthsSidebar() throws {
     let app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "--reset-store"]
@@ -149,7 +162,7 @@ final class PennyUITests: XCTestCase {
     enter("1", in: app.textFields["entryAmountField"], app: app)
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.navigationBars["Edit entry"].waitForNonExistence(timeout: 5))
-    app.tabBars.buttons["Budget"].tap()
+    selectSection("Budget", in: app)
     let balance = app.descendants(matching: .any)["remainingPlanSummary"]
     XCTAssertTrue(balance.waitForExistence(timeout: 5))
     XCTAssertTrue(balance.label.contains("$2,929.00"))
@@ -435,13 +448,13 @@ final class PennyUITests: XCTestCase {
 
     let actual = app.descendants(matching: .any)["actualSpendingSummary"]
     XCTAssertTrue(actual.label.contains("$80.00"), actual.debugDescription)
-    app.tabBars.buttons["Activity"].tap()
+    selectSection("Activity", in: app)
     let edit = app.buttons["Edit Correction"]
     for _ in 0..<4 where !edit.isHittable { app.scrollViews.firstMatch.swipeUp() }
     edit.tap()
     XCTAssertEqual(app.switches["subtractAdjustmentToggle"].value as? String, "1")
     app.buttons["saveEntryButton"].tap()
-    app.tabBars.buttons["Budget"].tap()
+    selectSection("Budget", in: app)
     XCTAssertTrue(actual.label.contains("$80.00"), actual.debugDescription)
   }
 
@@ -486,7 +499,7 @@ final class PennyUITests: XCTestCase {
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.navigationBars["Add entry"].waitForNonExistence(timeout: 5))
 
-    app.tabBars.buttons["Activity"].tap()
+    selectSection("Activity", in: app)
     XCTAssertTrue(app.staticTexts["Lunch"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.staticTexts["Spending · Needs"].exists)
     XCTAssertFalse(
@@ -532,7 +545,7 @@ final class PennyUITests: XCTestCase {
     XCTAssertTrue((allocation.value as? String ?? "").contains("50% of income"))
     let actualSpending = app.descendants(matching: .any)["actualSpendingSummary"]
     XCTAssertTrue(actualSpending.label.contains("$0.00"))
-    app.tabBars.buttons["Reports"].tap()
+    selectSection("Reports", in: app)
     let plannedChart = app.staticTexts["Planned versus actual"]
     for _ in 0..<3 where !plannedChart.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(plannedChart.isHittable)
@@ -548,9 +561,9 @@ final class PennyUITests: XCTestCase {
     app.textFields["Note (optional)"].tap()
     app.textFields["Note (optional)"].typeText("Groceries")
     app.buttons["saveEntryButton"].tap()
-    app.tabBars.buttons["Activity"].tap()
+    selectSection("Activity", in: app)
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
-    app.tabBars.buttons["Budget"].tap()
+    selectSection("Budget", in: app)
     XCTAssertTrue(actualSpending.label.contains("$100.00"))
     app.buttons["addEntryButton"].tap()
     let overspendAmount = app.textFields["entryAmountField"]
@@ -560,7 +573,7 @@ final class PennyUITests: XCTestCase {
     app.buttons["saveEntryButton"].tap()
     XCTAssertTrue(app.staticTexts["Over budget"].waitForExistence(timeout: 5))
     XCTAssertTrue(actualSpending.label.contains("$2,600.00"))
-    app.tabBars.buttons["Reports"].tap()
+    selectSection("Reports", in: app)
     let trendHeading = app.staticTexts["Spending through month"]
     for _ in 0..<16 where !trendHeading.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(trendHeading.isHittable)
@@ -575,9 +588,9 @@ final class PennyUITests: XCTestCase {
     previousMonth.tap()
     XCTAssertFalse(app.staticTexts["Groceries"].exists)
     app.buttons["Next month"].tap()
-    app.tabBars.buttons["Activity"].tap()
+    selectSection("Activity", in: app)
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 5))
-    app.tabBars.buttons["Budget"].tap()
+    selectSection("Budget", in: app)
     app.buttons["Change budget style"].tap()
     XCTAssertTrue(
       app.staticTexts[
@@ -585,9 +598,9 @@ final class PennyUITests: XCTestCase {
       ].waitForExistence(timeout: 5))
     app.buttons["Housing First"].tap()
     XCTAssertTrue(app.staticTexts["Housing"].waitForExistence(timeout: 5))
-    app.tabBars.buttons["Activity"].tap()
+    selectSection("Activity", in: app)
     XCTAssertTrue(app.staticTexts["Groceries"].exists)
-    app.tabBars.buttons["Budget"].tap()
+    selectSection("Budget", in: app)
     app.buttons["Change budget style"].tap()
     app.buttons["Balanced"].tap()
     app.buttons["Next month"].tap()
@@ -600,7 +613,7 @@ final class PennyUITests: XCTestCase {
       app.buttons["createBudgetButton"].tap()
     }
     XCTAssertTrue(savedBudgetTitle.waitForExistence(timeout: 5))
-    app.tabBars.buttons["Reports"].tap()
+    selectSection("Reports", in: app)
     XCTAssertTrue(
       app.descendants(matching: .any)["Monthly spending history"].waitForExistence(timeout: 5))
 
@@ -608,11 +621,11 @@ final class PennyUITests: XCTestCase {
     app.launchArguments = ["--ui-testing"]
     app.launch()
     app.buttons["Previous month"].tap()
-    app.tabBars.buttons["Activity"].tap()
+    selectSection("Activity", in: app)
     XCTAssertTrue(app.staticTexts["Groceries"].waitForExistence(timeout: 10))
-    app.tabBars.buttons["Budget"].tap()
+    selectSection("Budget", in: app)
     XCTAssertTrue(app.staticTexts["$2,400.00"].exists)
-    app.tabBars.buttons["Reports"].tap()
+    selectSection("Reports", in: app)
     let history = app.descendants(matching: .any)["Monthly spending history"]
     for _ in 0..<20 where !history.isHittable { app.scrollViews.firstMatch.swipeUp() }
     XCTAssertTrue(history.isHittable)
@@ -620,6 +633,13 @@ final class PennyUITests: XCTestCase {
     screenshot.name = "Penny budget overview"
     screenshot.lifetime = .keepAlways
     add(screenshot)
+  }
+
+  private func selectSection(_ title: String, in app: XCUIApplication) {
+    let bottomTab = app.tabBars.buttons[title]
+    let control = bottomTab.exists ? bottomTab : app.buttons[title].firstMatch
+    XCTAssertTrue(control.waitForExistence(timeout: 5))
+    control.tap()
   }
 
   private func enter(_ value: String, in field: XCUIElement, app: XCUIApplication) {
