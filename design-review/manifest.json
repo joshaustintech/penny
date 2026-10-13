@@ -605,6 +605,24 @@
       "fixture": "5000 USD income; Needs 900 spent, 2500 planned",
       "sha256": "4e96c5e0e2443234eed797b9400f1b6109e5d45fa15a6fe72ddba03f3533fffd",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-zero-income-light-17e.png",
+      "sourceRevision": "42b15c127cbbe073609e900626246a0ab00dfda1",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T14:06:58.151000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "explicit zero income; no spending",
+      "sha256": "0086c6a09b7a257e9f1041443dea21a00d9dede9a1e401e9e0f7806c8ff80e17",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
