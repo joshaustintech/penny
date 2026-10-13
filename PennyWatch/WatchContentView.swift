@@ -10,10 +10,6 @@ struct WatchContentView: View {
     Group {
       if let snapshot {
         dashboard(snapshot)
-          .safeAreaInset(edge: .bottom) {
-            Button("Add spending") { showingEntry = true }
-              .buttonStyle(.borderedProminent)
-          }
           .sheet(isPresented: $showingEntry) {
             WatchSpendingForm(snapshot: snapshot, onSend: onSend)
           }
@@ -22,6 +18,7 @@ struct WatchContentView: View {
           Image(systemName: "iphone.and.arrow.forward")
             .font(.title2)
             .foregroundStyle(.tint)
+            .accessibilityHidden(true)
           Text("Share a budget from Penny on iPhone.")
             .multilineTextAlignment(.center)
         }
@@ -33,15 +30,19 @@ struct WatchContentView: View {
   private func dashboard(_ snapshot: WatchBudgetSnapshot) -> some View {
     return List {
       Section {
-        if let entryStatus { Text(entryStatus).font(.caption).foregroundStyle(.secondary) }
-        if let remaining = snapshot.overallRemainingMinor {
-          Text(money(remaining, snapshot)).font(.title2.bold().monospacedDigit())
-        } else {
-          Text("Remaining amount unavailable")
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Left in plan").font(.subheadline)
+          if let remaining = snapshot.overallRemainingMinor {
+            Text(money(remaining, snapshot)).font(.title2.bold().monospacedDigit())
+          } else {
+            Text("Remaining amount unavailable")
+          }
+          if let entryStatus { Text(entryStatus).font(.footnote) }
         }
-        Text("Left in plan")
-          .font(.caption)
-          .foregroundStyle(.secondary)
+        .foregroundStyle(.primary)
+        .accessibilityElement(children: .combine)
+        Button("Add spending") { showingEntry = true }
+          .buttonStyle(.borderedProminent)
       }
       Section("Categories") {
         ForEach(snapshot.categories, id: \.category) { category in
@@ -57,8 +58,8 @@ struct WatchContentView: View {
               Text(
                 "\(money(category.usedMinor, snapshot)) of \(money(category.allocatedMinor, snapshot))"
               )
-              .font(.caption2)
-              .foregroundStyle(.secondary)
+              .font(.footnote)
+              .foregroundStyle(.primary)
             }
           }
         }
@@ -70,8 +71,8 @@ struct WatchContentView: View {
               Text(transaction.note ?? transaction.category.capitalized)
                 .lineLimit(1)
               Text("\(transaction.category.capitalized) · \(transaction.day)")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                .font(.footnote)
+                .foregroundStyle(.primary)
             }
           }
         }

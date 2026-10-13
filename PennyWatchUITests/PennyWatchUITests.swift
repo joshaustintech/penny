@@ -13,8 +13,13 @@ final class PennyWatchUITests: XCTestCase {
 
     let amount = app.textFields["Amount (USD)"]
     XCTAssertTrue(amount.waitForExistence(timeout: 5))
+    for _ in 0..<4 where !app.buttons["Send to iPhone"].exists { app.swipeUp() }
     XCTAssertTrue(app.buttons["Send to iPhone"].exists)
     XCTAssertFalse(app.buttons["Send to iPhone"].isEnabled)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "watch-entry-form"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
   }
 
   func testQueuesSpendingToPairedIPhone() {
@@ -25,6 +30,7 @@ final class PennyWatchUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Left in plan"].waitForExistence(timeout: 10))
     app.buttons["Add spending"].tap()
     let send = app.buttons["Send to iPhone"]
+    for _ in 0..<4 where !send.exists { app.swipeUp() }
     XCTAssertTrue(send.waitForExistence(timeout: 5))
     XCTAssertTrue(send.isEnabled)
     send.tap()
