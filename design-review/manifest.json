@@ -493,6 +493,82 @@
       "fixture": "5000 USD income; 1370 expenses; 700 contributions",
       "sha256": "ba138856ae19e36602ac1cd569cf7a1f434634e7c34a0f98ddea210194a4f197",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ipados-category-landscape-light.png",
+      "sourceRevision": "75e1cd8cb198110ee4245f5add8c7c8e37435e47",
+      "configuration": "Debug",
+      "device": "iPad Pro 11-inch (M5)",
+      "simulatorID": "FC8B6474-8EAB-495E-A496-A79B5A768705",
+      "os": "iPadOS 27.0",
+      "viewportPixels": [
+        1668,
+        2420
+      ],
+      "orientation": "landscape",
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T13:53:11.273000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "ef30b8ca4a9ac65ddda4268c48dd7d3e1b0c1ef7fd9b1fcfb1207d7b86a22e38",
+      "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ipados-dashboard-landscape-light.png",
+      "sourceRevision": "75e1cd8cb198110ee4245f5add8c7c8e37435e47",
+      "configuration": "Debug",
+      "device": "iPad Pro 11-inch (M5)",
+      "simulatorID": "FC8B6474-8EAB-495E-A496-A79B5A768705",
+      "os": "iPadOS 27.0",
+      "viewportPixels": [
+        1668,
+        2420
+      ],
+      "orientation": "landscape",
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T13:53:08.901000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "d6145541d9c2726e0a3b70d502d603b36d531baa19dda0bc684ba3fec94ea7f5",
+      "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-category-detail-light-17e.png",
+      "sourceRevision": "75e1cd8cb198110ee4245f5add8c7c8e37435e47",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "orientation": "portrait",
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T13:51:51.357000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "8ed0717f33d4fa4568e0fb2ba861f173ea5e1a162399e9f63948a289e1419f85",
+      "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-dashboard-light-17e.png",
+      "sourceRevision": "75e1cd8cb198110ee4245f5add8c7c8e37435e47",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "orientation": "portrait",
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T13:52:10.616000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 1370 expenses; 700 contributions",
+      "sha256": "8408e54c45aa9f5ad82a77fdf4e817effc9e99b121023e783d2c080ac2c61473",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
