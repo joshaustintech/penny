@@ -261,6 +261,166 @@
       "store": "isolated --ui-testing store/snapshot",
       "fixture": "USD 1000 income, no expenses",
       "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/ipados-budget-portrait-light.png",
+      "sourceRevision": "65c3fc936eec98ffc69319da780335db25e95181",
+      "configuration": "Debug",
+      "device": "iPad Pro 11-inch M5",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1668,
+        2420
+      ],
+      "windowPoints": [
+        834,
+        1210
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T08:30:30.715000+00:00",
+      "sha256": "4cea1c0912e128a0e5288a0e7efd92e3090e59cb38096136baed5d33bd5d62f1",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/macos-activity-workspace-light.png",
+      "sourceRevision": "65c3fc936eec98ffc69319da780335db25e95181",
+      "configuration": "Debug",
+      "device": "active native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "windowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T08:30:57.750888+00:00",
+      "sha256": "5d2a899817cd5cf48bf5dacdfcf9c0523371ee1622456f7a760c909255e38898",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/macos-budget-workspace-dark.png",
+      "sourceRevision": "65c3fc936eec98ffc69319da780335db25e95181",
+      "configuration": "Debug",
+      "device": "active native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "windowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:30:51.493273+00:00",
+      "sha256": "4aecb66b771c92c25ff987c0ca4232facc6d4a8c298c2392eb33167ea0f05d3c",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/macos-budget-workspace-light-narrow.png",
+      "sourceRevision": "65c3fc936eec98ffc69319da780335db25e95181",
+      "configuration": "Debug",
+      "device": "active native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        912,
+        912
+      ],
+      "windowPoints": [
+        800,
+        800
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T08:30:54.628617+00:00",
+      "sha256": "967213b08af958e4f97f48eeba476f2fdebaf021d8f9619f0bc8f87444d9ef2b",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/macos-budget-workspace-light.png",
+      "sourceRevision": "65c3fc936eec98ffc69319da780335db25e95181",
+      "configuration": "Debug",
+      "device": "active native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "windowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T08:30:48.355506+00:00",
+      "sha256": "dc1a3bcd3e577b883b62f6b6e49dad3eb694a771b111ebf664028ef625afa85e",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/macos-reports-workspace-dark.png",
+      "sourceRevision": "65c3fc936eec98ffc69319da780335db25e95181",
+      "configuration": "Debug",
+      "device": "active native Mac window",
+      "os": "macOS 27.0",
+      "viewportPixels": [
+        1212,
+        912
+      ],
+      "windowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:31:00.943338+00:00",
+      "sha256": "138ec01a10ca234fd1764e9f9086eaa281cf9730ceb5ec8f9195d4e70fb58219",
+      "store": "isolated --ui-testing store",
+      "fixture": "USD 5000 income, 1370 expenses, 200 debt, 500 savings, 2930 remaining",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/watch-dashboard-redesign-dark.png",
+      "sourceRevision": "ee6c42638774cc3122e0400642687863a19c73dc",
+      "configuration": "Debug",
+      "device": "Apple Watch Series 10 42mm",
+      "os": "watchOS 11.0",
+      "viewportPixels": [
+        374,
+        446
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:40:52.344939+00:00",
+      "sha256": "034b9b4be0794a2f4752a2f8a70ddf550edb117e69233e4196e6e363b04ea975",
+      "store": "isolated --ui-testing snapshot",
+      "fixture": "USD 1000 income; no expenses",
+      "status": "intermediate; not visually approved"
+    },
+    {
+      "file": "screenshots/watch-entry-form-dark.png",
+      "sourceRevision": "ee6c42638774cc3122e0400642687863a19c73dc",
+      "configuration": "Debug",
+      "device": "Apple Watch Series 10 42mm",
+      "os": "watchOS 11.0",
+      "viewportPixels": [
+        374,
+        446
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T08:44:02.143000+00:00",
+      "sha256": "d3642f2246313bfac5b3ab5a3deed9f71cab063f040059b9fdbcacac176209ce",
+      "store": "isolated --ui-testing snapshot",
+      "fixture": "USD 1000 income; no expenses",
+      "status": "intermediate; not visually approved"
     }
   ]
 }

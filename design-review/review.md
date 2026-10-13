@@ -153,3 +153,47 @@ Next work, in priority order:
 
 Goal remains active. Pre-existing staged TV assets and untracked `.swiftpm/`
 are preserved. No final release or design excellence is claimed.
+
+## Desktop composition: 65c3fc9
+
+Mac has Budget/Activity/Reports sidebar navigation and a larger, text-scaled
+remaining amount. Header orientation uses measured content width, not device
+class: wide workspace aligns secondary metrics horizontally; narrow Mac and
+portrait iPad use a vertical summary. Initial iPad capture exposed wrapped
+metric labels, which prompted this correction. The native transaction table
+no longer collapses to 120 points; it uses a usable flexible height and aligned
+currency amounts. Empty alternating stripes are native table background, not
+fabricated transaction rows.
+
+Mac light/dark, 800-point narrow, Activity and Reports windows were captured
+from the real active executable using an isolated fixture. Gated initial section
+arguments allow capture despite blocked Mac UI automation. These demonstrate
+rendering, not successful pointer/keyboard interaction. Mac build passed. Three
+iPad tests passed: balance hierarchy, reveal sidebar after setup, and real
+Command-N entry opening. Corrected iPad portrait screenshot inspected. iPhone
+full accessibility audit and largest-text category scaling passed after the
+measured-width header change.
+
+Remaining criticisms: Reports retain dense chart captions; some iPad portrait
+category descriptions wrap awkwardly; Mac settings/entry/export interactions
+still need current runtime evidence or a documented automation limitation.
+No final visual approval yet.
+
+## Watch overlap correction: ee6c426
+
+Balance and its label share one native list row. Add spending now belongs to
+scroll content; it no longer overlays the balance or category heading. Smaller
+caption2 labels were replaced with footnotes and primary contrast. Decorative
+empty-state image is hidden from VoiceOver.
+
+Real 42mm/watchOS 11 dashboard capture inspected. The spending form opens,
+scrolls to its send control, and prevents empty submission. Initial test failed
+because it assumed the below-viewport send button already existed; adding a
+real swipe journey fixed that assumption. Final runtime test passed and its
+form screenshot was inspected. The scroll capture intentionally shows the
+lower form; amount input was verified before scrolling. Paired save receipt
+and hardware remain unverified. New screenshots are in the manifest.
+
+Next: category detail navigation; current iPad landscape/second-phone/TV
+coverage; explicit transaction type labels on iPhone; Reports typography;
+remaining functional/spec audit and final skeptical visual assessment.
