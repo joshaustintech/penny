@@ -229,3 +229,7 @@ Setup and storage rejected explicit zero income. Budget setup now accepts zero; 
 ### Watch queue verification — 992218623578ea6da6dcb8eb39b19e12255beda7
 
 Full available Watch UI suite passed (2 tests, 0 failures), `/private/tmp/penny-watch-queue-current.xcresult`. Actual form opens, empty send remains disabled, valid 1.23 USD request invokes activated WCSession.transferUserInfo and shows Queued for iPhone. Test flag prefills amount only; queue path is real. This does not prove receiver delivery, persisted iPhone entry, or acknowledgement. Fresh scrolled form screenshot inspected: native toolbar scroll-under behavior, visible Note and disabled send, no overlapping fixed footer. watchOS 11 is available runtime; current watchOS 26/27 unavailable. Existing dashboard remains intermediate.
+
+### Overspent modes — 87986d5237ce59fb4a98fa1cd00e36e8f5f0e5f5
+
+Added isolated fixture with 4500 USD urgent repair spending. Real phone journey passed both modes: overall deficit 1570, Needs deficit 2900 Balanced / 4650 Housing First, correct detail navigation. Fresh light Balanced and dark Housing First screenshots inspected: negative sign, warning icon/text, saturated progress, correctly different allocations. Result `/private/tmp/penny-overspent-modes.xcresult`; shared iOS and Mac builds passed. No production-store seeding enabled. Remaining criticisms: red balance in light appearance needs audit; summary omits contributions beside actual spending; six-category Housing First view requires more scrolling. Screenshots remain intermediate.

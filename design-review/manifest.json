@@ -624,6 +624,42 @@
       "fixture": "1000 USD income; no spending; empty entry form",
       "sha256": "e25c514b1e28ccca2ac821fb9177fbb857bbdeacb78a86800c4e86aec2fc95ca",
       "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-overspent-housing-dark-17e.png",
+      "sourceRevision": "87986d5237ce59fb4a98fa1cd00e36e8f5f0e5f5",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "appearance": "dark",
+      "capturedUTC": "2026-10-13T14:13:04.400000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 5870 expenses; 700 contributions; 1570 deficit",
+      "sha256": "df257fe27e577a3fb4987b5bfe189bf9ffb97387fa1f74ff9369af955d52b203",
+      "status": "intermediate; inspected; not final visual approval"
+    },
+    {
+      "file": "screenshots/ios-overspent-balanced-light-17e.png",
+      "sourceRevision": "87986d5237ce59fb4a98fa1cd00e36e8f5f0e5f5",
+      "configuration": "Debug",
+      "device": "iPhone 17e",
+      "simulatorID": "59BE41A9-7733-4BF6-999C-92B451FA6930",
+      "os": "iOS 27.0",
+      "viewportPixels": [
+        1170,
+        2532
+      ],
+      "appearance": "light",
+      "capturedUTC": "2026-10-13T14:12:53.467000+00:00",
+      "store": "isolated --ui-testing store",
+      "fixture": "5000 USD income; 5870 expenses; 700 contributions; 1570 deficit",
+      "sha256": "6ea579dd662b1de04127ef40c2c3a8b2ab7d81ddd73adc62cc312cacf70c94f4",
+      "status": "intermediate; inspected; not final visual approval"
     }
   ]
 }
